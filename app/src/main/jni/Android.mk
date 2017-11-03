@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_PATH := $(MY_PATH)
 
 PROJECT_ROOT := $(LOCAL_PATH)
+APP_MAIN_ROOT := $(LOCAL_PATH)/..
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := c_SDDRRadio
@@ -17,9 +18,9 @@ LOCAL_C_INCLUDES += $(PROJECT_ROOT)/include/jerasure
 LOCAL_C_INCLUDES += $(PROJECT_ROOT)/include/openssl
 LOCAL_C_INCLUDES += $(PROJECT_ROOT)/source/protobuf/src
 
-LOCAL_LDLIBS += $(PROJECT_ROOT)/libs/libcrypto.so
-LOCAL_LDLIBS += $(PROJECT_ROOT)/libs/libcutils.so
-LOCAL_LDLIBS += $(PROJECT_ROOT)/libs/libprotobuf.a
+LOCAL_LDLIBS += $(APP_MAIN_ROOT)/jniLibs/armeabi-v7a/libcrypto.so
+LOCAL_LDLIBS += $(APP_MAIN_ROOT)/jniLibs/armeabi-v7a/libcutils.so
+LOCAL_LDLIBS += $(APP_MAIN_ROOT)/jniLibs/armeabi-v7a/libprotobuf.a
 LOCAL_LDLIBS += -lc -ldl -llog -landroid
 
 LOCAL_SHARED_LIBRARIES := libprotobuf
