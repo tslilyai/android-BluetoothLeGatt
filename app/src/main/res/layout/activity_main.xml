@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="org.mpi_sws.sddr_userspace.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/linkID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text|textPersonName"
+            android:textColor="@android:color/black"
+            tools:layout_editor_absoluteX="71dp"
+            tools:layout_editor_absoluteY="141dp" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/AddLink"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            app:srcCompat="@android:drawable/ic_input_add"
+            tools:layout_editor_absoluteX="280dp"
+            tools:layout_editor_absoluteY="160dp" />
+
+        <Button
+            android:id="@+id/buttonRM"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Check Retroactive Matches"
+            android:textAlignment="center"
+            tools:layout_editor_absoluteX="76dp"
+            tools:layout_editor_absoluteY="311dp" />
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>
