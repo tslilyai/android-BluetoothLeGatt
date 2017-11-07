@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.mpi_sws.sddr_service">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.bluetooth_le" />
+
+    <application>
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+
+        <service android:name="org.mpi_sws.sddr_service.SDDR_Core_Service" />
+
+        <receiver android:name="org.mpi_sws.sddr_service.encounterhistory.EncounterEventReceiver">
+        </receiver>
+
+        <provider android:name="org.mpi_sws.sddr_service.encounterhistory.EncounterHistoryContentProvider"
+            android:authorities="org.mpi_sws.sddr_service.encounterhistory"
+            android:exported="true"
+            android:enabled="true"
+            android:readPermission="@string/encounter_app_read"
+            android:writePermission="@string/encounter_app_write"/>
+
+        <provider android:name="org.mpi_sws.sddr_service.linkability.LinkabilityContentProvider"
+            android:authorities="org.mpi_sws.sddr_service.linkability"
+            android:exported="true"
+            android:enabled="true"
+            android:readPermission="@string/link_app_read"
+            android:writePermission="@string/link_app_write"/>
+
+        <receiver android:name="org.mpi_sws.sddr_service.bluetooth.Sleeper"/>
+    </application>
+</manifest>

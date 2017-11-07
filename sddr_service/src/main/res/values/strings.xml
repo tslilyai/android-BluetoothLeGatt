@@ -1,0 +1,12 @@
+<resources>
+    <string name="start_sddr_service">Start</string>
+    <string name="register">Register</string>
+    <string name="get_encounters">Get Encounters</string>
+    <string name="send_msg">Send Message</string>
+    <string name="send_group_msg">Send Group Message</string>
+    <string name="add_linkid">Add Link ID</string>
+    <string name="encounter_app_read">org.mpi_sws.sddr_service.encounter_history.EncounterHistoryContentProvider.READ_DATABASE</string>
+    <string name="encounter_app_write">org.mpi_sws.sddr_service.encounter_history.EncounterHistoryContentProvider.WRITE_DATABASE</string>
+    <string name="link_app_read">org.mpi_sws.sddr_service.linkability.LinkabilityContentProvider.READ_DATABASE</string>
+    <string name="link_app_write">org.mpi_sws.sddr_service.linkability.LinkabilityContentProvider.WRITE_DATABASE</string>
+</resources>
