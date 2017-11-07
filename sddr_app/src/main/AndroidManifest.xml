@@ -9,13 +9,10 @@
         <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
         <uses-permission android:name="android.permission.WAKE_LOCK" />
         <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
         <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-        <uses-permission android:name="org.mpi_sws.sddr_service.encounterhistory.EncounterHistoryContentProvider.READ_DATABASE"/>
-        <uses-permission android:name="org.mpi_sws.sddr_service.encounterhistory.EncounterHistoryContentProvider.WRITE_DATABASE"/>
-        <uses-permission android:name="org.mpi_sws.sddr_service.linkability.LinkabilityContentProvider.READ_DATABASE"/>
-        <uses-permission android:name="org.mpi_sws.sddr_service.linkability.LinkabilityContentProvider.WRITE_DATABASE"/>
+        <uses-permission android:name="org.mpi_sws.sddr_service.WRITE_DATABASE"/>
+        <uses-permission android:name="org.mpi_sws.sddr_service.READ_DATABASE"/>
 
         <uses-feature android:name="android.hardware.bluetooth_le" />
 

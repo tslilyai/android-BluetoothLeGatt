@@ -27,15 +27,15 @@
             android:authorities="org.mpi_sws.sddr_service.encounterhistory"
             android:exported="true"
             android:enabled="true"
-            android:readPermission="@string/encounter_app_read"
-            android:writePermission="@string/encounter_app_write"/>
+            android:readPermission="@string/read_perm"
+            android:writePermission="@string/write_perm"/>
 
         <provider android:name="org.mpi_sws.sddr_service.linkability.LinkabilityContentProvider"
             android:authorities="org.mpi_sws.sddr_service.linkability"
             android:exported="true"
             android:enabled="true"
-            android:readPermission="@string/link_app_read"
-            android:writePermission="@string/link_app_write"/>
+            android:readPermission="@string/read_perm"
+            android:writePermission="@string/write_perm"/>
 
         <receiver android:name="org.mpi_sws.sddr_service.bluetooth.Sleeper"/>
     </application>
