@@ -54,14 +54,16 @@ public class Scanner {
     private SDDR_Core_Service mService;
     private BluetoothGatt mGatt;
 
-    public void initialize(BluetoothAdapter btAdapter, SDDR_Core_Service service) {
+    public Scanner(SDDR_Core_Service service) {
+        mService = service;
+    }
+
+    public void initialize(BluetoothAdapter btAdapter) {
         this.mBluetoothAdapter = btAdapter;
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mHandler = new Handler();
-        this.mService = service;
         Log.d(TAG, "Initialized Scanner");
     }
-
 
     private class RunPostDiscovery implements Runnable {
         public boolean done = false;

@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.location.Location;
 import android.util.Log;
 
 import org.mpisws.sddrservice.SDDR_API;
@@ -95,9 +96,12 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
         final long confirmationTime = PEncounters.extractConfirmationTime(cursor);
         final FacebookEventStatus facebookEventStatus = PEncounters.extractFacebookEventStatus(cursor);
         final long conduitID = PEncounters.extractConduitID(cursor);
+        final double latitude = PEncounters.extractLatitude(cursor);
+        final double longitude = PEncounters.extractLongitude(cursor);
 
-        return new MEncounter(pkID, commonIDsList, encounterTimeInterval, lastSeen, confirmationTime, facebookEventStatus,
-                conduitID);
+        return new MEncounter(pkID, commonIDsList, encounterTimeInterval,
+                lastSeen, confirmationTime, facebookEventStatus,
+                latitude, longitude, conduitID);
     }
     /**
      * Gets all encounters that overlap with the requested filtered results. Not efficient since it's filtering the results after
@@ -108,14 +112,18 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
             return getAllItems();
         }
         final JavaItemFilter<MEncounter> dbfilter = new JavaItemFilter<MEncounter>() {
-
             @Override
             public boolean isNeeded(MEncounter encounter) {
+                float[] results = new float[1];
+                Location.distanceBetween(
+                        encounter.getLatitude(), encounter.getLongitude(),
+                        filter.location.getLatitude(), filter.location.getLongitude(),
+                        results);
+                float distance = results[0];
                 return encounter.getTimeInterval().overlapsWith(new TimeInterval(filter.start_date, filter.end_date))
-                        && encounter.getCommonIDs().containsAll(filter.matches);
-                // TODO location
+                        && encounter.getCommonIDs().containsAll(filter.matches)
+                        &&  distance < filter.distance;
             }
-
         };
         return getFilteredItems(dbfilter);
     }
@@ -158,6 +166,11 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
 
     public void updateConduitID(long encPkid, long apkid) {
         updateLongColumn(encPkid, PEncounters.Columns.conduitID, apkid);
+    }
+
+    public void updateLocation(long encPkid, double latitude, double longitude) {
+        updateDoubleColumn(encPkid, PEncounters.Columns.latitude, latitude);
+        updateDoubleColumn(encPkid, PEncounters.Columns.longitude, longitude);
     }
 
     @Override

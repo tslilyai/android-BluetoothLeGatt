@@ -3,7 +3,10 @@ package org.mpisws.sddrservice.encounterhistory;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.util.Log;
+
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.mpisws.sddrservice.lib.Utils;
 

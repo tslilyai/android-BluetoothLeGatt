@@ -2,6 +2,7 @@ package org.mpisws.sddrservice.encounterhistory;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.location.Location;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
@@ -35,16 +36,21 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
     private final long lastTimeSeen;
     private final long confirmationTime;
     private final FacebookEventStatus facebookEventStatus;
+    private final double latitude;
+    private final double longitude;
     private final long conduitID;
 
     public MEncounter(final long pkid, final List<Identifier> commonIDs, final TimeInterval timeInterval,
-            final long lastTimeSeen, final long confirmationTime, final FacebookEventStatus facebookEventStatus, final long conduitID) {
+            final long lastTimeSeen, final long confirmationTime, final FacebookEventStatus facebookEventStatus,
+                      final double latitude, final double longitude, final long conduitID) {
         super(pkid);
         this.commonIDs = commonIDs;
         this.timeInterval = timeInterval;
         this.lastTimeSeen = lastTimeSeen;
         this.confirmationTime = confirmationTime;
         this.facebookEventStatus = facebookEventStatus;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.conduitID = conduitID;
     }
 
@@ -108,6 +114,10 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
     public long getLastTimeSeen() {
         return lastTimeSeen;
     }
+
+    public double getLatitude() { return latitude; }
+
+    public double getLongitude() { return longitude; }
 
     public FacebookEventStatus getFacebookEventStatus() {
         return facebookEventStatus;

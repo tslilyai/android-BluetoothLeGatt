@@ -1,11 +1,14 @@
 package org.mpisws.sddrservice.encounters;
 
+import android.Manifest;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,29 +27,34 @@ import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
 public class SDDR_Core_Service extends Service {
     private static final String TAG = SDDR_Core_Service.class.getSimpleName();
 
-    private SDDR_Core core;
-    private Thread thread;
+    private static SDDR_Core core;
+    private static Thread thread;
 
     private void check_and_start_core() {
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter bta = bluetoothManager.getAdapter();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Location permissions required", Toast.LENGTH_SHORT);
+            Log.d(TAG, "Location permissions not enabled");
+            this.stopSelf();
+        }
 
         if (bta == null || !bta.isEnabled()) {
             Toast.makeText(this, "Bluetooth required", Toast.LENGTH_SHORT);
             Log.d(TAG, "Bluetooth not enabled");
             this.stopSelf();
-        } else {
-            Log.d(TAG, "Bluetooth enabled");
-            if (core == null) {
-                Log.d(TAG, "Starting SDDR_API Core");
-                core = new SDDR_Core(this);
-                Log.d(TAG, "Starting SDDR_API Core thread");
-                thread = new Thread(core);
-                thread.start();
-            } else {
-                Log.d(TAG, "SDDR_API already running");
-            };
         }
+        Log.d(TAG, "Bluetooth and location permissions enabled");
+        if (core == null) {
+            Log.d(TAG, "Starting SDDR_API Core");
+            core = new SDDR_Core(this);
+            Log.d(TAG, "Starting SDDR_API Core thread");
+            thread = new Thread(core);
+            thread.start();
+        } else {
+            Log.d(TAG, "SDDR_API already running");
+        };
     }
 
     @Override
@@ -76,13 +84,6 @@ public class SDDR_Core_Service extends Service {
         else if (intent.getExtras().containsKey("@string.send_msg"))
         {
             Log.d(TAG, "Got Send_Msg Intent");
-            check_and_start_core();
-            // TODO
-            return START_STICKY;
-        }
-        else if (intent.getExtras().containsKey("@string.send_group_msg"))
-        {
-            Log.d(TAG, "Got Send_Group_Msg Intent");
             check_and_start_core();
             // TODO
             return START_STICKY;

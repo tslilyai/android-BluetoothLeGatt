@@ -29,6 +29,8 @@ public class PEncounters extends PersistenceModel {
         public static final String lastTimeSeen = "lastseen";
         public static final String confirmationTime = "conftime";
         public static final String currentWirelessAddress = "mac";
+        public static final String latitude = "latitude";
+        public static final String longitude = "longitude";
         public static final String facebookEventStatus = "facebookEventStatus";
         public static final String conduitID = "conduitID";
     }
@@ -44,6 +46,8 @@ public class PEncounters extends PersistenceModel {
         columns.add(new DBColumn(Columns.currentWirelessAddress, "TEXT"));
         columns.add(new DBColumn(Columns.facebookEventStatus, "INTEGER"));
         columns.add(new DBColumn(Columns.conduitID, "INTEGER"));
+        columns.add(new DBColumn(Columns.latitude, "REAL"));
+        columns.add(new DBColumn(Columns.longitude, "REAL"));
         return columns;
     }
 
@@ -69,6 +73,14 @@ public class PEncounters extends PersistenceModel {
 
     public static String extractCurrentWirelessAddress(final Cursor cursor) {
         return cursor.getString(cursor.getColumnIndexOrThrow(Columns.currentWirelessAddress));
+    }
+
+    public static double extractLatitude(final Cursor cursor) {
+        return cursor.getDouble(cursor.getColumnIndexOrThrow(Columns.latitude));
+    }
+
+    public static double extractLongitude(final Cursor cursor) {
+        return cursor.getDouble(cursor.getColumnIndexOrThrow(Columns.longitude));
     }
 
     public static FacebookEventStatus extractFacebookEventStatus(final Cursor cursor) {

@@ -114,6 +114,13 @@ public abstract class AbstractBridge<T extends AbstractMemoryObject> {
         updateFromContentValues(pkid, values);
     }
 
+    public void updateDoubleColumn(final long pkid, final String column, final Double value) {
+        Log.d(getTag(), "UpdateColumn: pkid " + pkid + ", col " + column + ", val " + value);
+        final ContentValues values = new ContentValues();
+        values.put(column, value);
+        updateFromContentValues(pkid, values);
+    }
+
     public void removeAllItems() {
         context.getContentResolver().delete(getPersistenceModel().getContentURI(), null, null);
     }

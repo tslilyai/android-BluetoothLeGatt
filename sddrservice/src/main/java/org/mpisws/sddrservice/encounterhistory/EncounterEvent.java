@@ -1,8 +1,16 @@
 package org.mpisws.sddrservice.encounterhistory;
 
+import android.Manifest;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.mpisws.sddrservice.embedded_social.Tasks;
 import org.mpisws.sddrservice.encounters.SDDR_Proto;
@@ -33,7 +41,8 @@ public abstract class EncounterEvent implements Serializable {
     protected final Long confirmationTime;
 
     public EncounterEvent(long pkid, Long startTime, Long lastTimeSeen, Long endTime, List<RSSIEntry> newRSSIEntries,
-                          List<Identifier> sharedSecrets, List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms, List<Identifier> commonIDs, String currentWirelessAddress, Long confirmationTime) {
+                          List<Identifier> sharedSecrets, List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms,
+                          List<Identifier> commonIDs, String currentWirelessAddress, Long confirmationTime) {
         this.pkid = pkid;
         this.startTime = startTime;
         this.lastTimeSeen = lastTimeSeen;
@@ -90,6 +99,30 @@ public abstract class EncounterEvent implements Serializable {
         if (blooms != null) {
             insertBloomFilters(context, blooms);
         }
+    }
+
+    protected void insertLocation(final Context context) {
+        Log.d(TAG, "Inserting location");
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            double lat = location.getLatitude();
+                            double longi = location.getLongitude();
+                            new EncounterBridge(context).updateLocation(pkid, lat, longi);
+                            Log.d(TAG, "Updated location with lat " + lat + " and long " + longi);
+                        } else {
+                            Log.d(TAG, "Location null");
+                        }
+                    }
+                });
     }
 
     // TODO this means that all common identifiers must be of size Constants.HANDSHAKE_DH_SIZE

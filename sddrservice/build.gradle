@@ -49,6 +49,7 @@ dependencies {
     compile 'com.acrowntest.test:autorest:0.0.6'
     compile 'net.openid:appauth:0.3.0'
     compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.google.android.gms:play-services-location:11.6.0'
 
     testCompile 'junit:junit:4.12'
     compile files('libs/protobuf-java-3.4.1.jar')

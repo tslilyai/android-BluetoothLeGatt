@@ -36,5 +36,6 @@ public class EncounterStartedEvent extends EncounterEvent {
         final ContentValues values = toContentValues(context, true);
         context.getContentResolver().insert(EncounterHistoryAPM.encounters.getContentURI(), values);
         insertSharedSecretsAndRSSIEntriesAndBlooms(context);
+        insertLocation(context);
     }
 }

@@ -11,11 +11,8 @@ import android.util.Log;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.microsoft.embeddedsocial.autorest.EmbeddedSocialClient;
-import com.microsoft.embeddedsocial.autorest.EmbeddedSocialClientImpl;
 
 import org.mpisws.sddrservice.embedded_social.Tasks;
-import org.mpisws.sddrservice.lib.Sleeper;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
@@ -23,11 +20,12 @@ import org.mpisws.sddrservice.encounterhistory.EncounterStartedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterUpdatedEvent;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounterhistory.RSSIEntry;
+import org.mpisws.sddrservice.lib.Identifier;
+import org.mpisws.sddrservice.lib.NotFoundException;
+import org.mpisws.sddrservice.lib.Sleeper;
 import org.mpisws.sddrservice.linkability.LinkabilityBridge;
 import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
 import org.mpisws.sddrservice.linkability.MLinkabilityEntry;
-import org.mpisws.sddrservice.lib.Identifier;
-import org.mpisws.sddrservice.lib.NotFoundException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -60,6 +58,7 @@ public class SDDR_Core implements Runnable {
             ChangeEpoch,
             Discover
         }
+
         long duration;
         actionType type;
 
@@ -68,6 +67,7 @@ public class SDDR_Core implements Runnable {
             duration = dur;
         }
     }
+
     private RadioAction mRA;
 
     SDDR_Core(SDDR_Core_Service service) {
@@ -90,7 +90,7 @@ public class SDDR_Core implements Runnable {
         final BluetoothManager bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
-        mScanner = new Scanner();
+        mScanner = new Scanner(mService);
         mSleeper = new Sleeper(mService);
         mLinkBridge = new LinkabilityBridge(mService);
         mEncounterBridge = new EncounterBridge(mService);
@@ -98,10 +98,10 @@ public class SDDR_Core implements Runnable {
         Tasks.setContext(mService);
 
         // initialize the C radio class
-         Log.d(TAG, "Initializing radio");
-         SDDR_Native.c_mallocRadio();
-         mAdvertiser.initialize(mBluetoothAdapter);
-         mScanner.initialize(mBluetoothAdapter, mService);
+        Log.d(TAG, "Initializing radio");
+        SDDR_Native.c_mallocRadio();
+        mAdvertiser.initialize(mBluetoothAdapter);
+        mScanner.initialize(mBluetoothAdapter);
 
         // initialize the databases for encounters and links
         mEncounterBridge.finalizeAbandonedEncounters();
@@ -216,7 +216,7 @@ public class SDDR_Core implements Runnable {
                 return;
             }
 
-            assert(event.hasEncounterEvent());
+            assert (event.hasEncounterEvent());
             final SDDR_Proto.Event.EncounterEvent subEvent = event.getEncounterEvent();
             final SDDR_Proto.Event.EncounterEvent.EventType type = subEvent.getType();
             final long time = subEvent.getTime();

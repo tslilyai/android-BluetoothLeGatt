@@ -31,6 +31,7 @@ public class SDDR_API {
         public Date end_date;
         public Location location;
         public List<String> matches;
+        public float distance;
     }
 
     public SDDR_API(Context context) {
