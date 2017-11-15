@@ -1,1 +1,1 @@
-include ':sddr_service', ':sddr_app'
+include ':sddrservice', ':sddrapp'

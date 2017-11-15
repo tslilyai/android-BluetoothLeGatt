@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.mpisws.sddrservice">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.bluetooth_le" />
+
+    <application>
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+
+        <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="org.mpisws.sddrservice"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="org.mpisws.sddrservice.embedded_social.GoogleAuthActivity"/>
+
+        <service android:name="org.mpisws.sddrservice.encounters.SDDR_Core_Service" />
+        <receiver android:name="org.mpisws.sddrservice.encounterhistory.EncounterEventReceiver" />
+
+        <provider android:name="org.mpisws.sddrservice.encounterhistory.EncounterHistoryContentProvider"
+            android:authorities="org.mpisws.sddrservice.encounterhistory"
+            android:exported="true"
+            android:enabled="true"
+            android:readPermission="@string/read_perm"
+            android:writePermission="@string/write_perm"/>
+
+        <provider android:name="org.mpisws.sddrservice.linkability.LinkabilityContentProvider"
+            android:authorities="org.mpisws.sddrservice.linkability"
+            android:exported="true"
+            android:enabled="true"
+            android:readPermission="@string/read_perm"
+            android:writePermission="@string/write_perm"/>
+
+        <receiver android:name="org.mpisws.sddrservice.lib.Sleeper"/>
+    </application>
+</manifest>

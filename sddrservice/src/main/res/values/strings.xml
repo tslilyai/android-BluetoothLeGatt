@@ -1,0 +1,6 @@
+<resources>
+    <string name="read_perm">org.mpisws.sddrservice.READ_DATABASE</string>
+    <string name="write_perm">org.mpisws.sddrservice.WRITE_DATABASE</string>
+    <string name="esapikey">2e5a1cc8-5eab-4dbd-8d6d-6a84eab23374</string>
+    <string name="esurl">https://ppe.embeddedsocial.microsoft.com/</string>
+</resources>

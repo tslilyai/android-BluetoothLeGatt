@@ -8,12 +8,17 @@ buildscript {
         classpath 'com.android.tools.build:gradle:2.3.3'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
+        classpath 'com.google.gms:google-services:3.1.0'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url "http://dl.bintray.com/acrowntest/test"
+            }
+        maven { url "https://maven.google.com" }
     }
 }
 

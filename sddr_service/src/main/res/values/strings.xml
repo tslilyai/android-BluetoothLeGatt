@@ -1,4 +1,0 @@
-<resources>
-    <string name="read_perm">org.mpi_sws.sddr_service.READ_DATABASE</string>
-    <string name="write_perm">org.mpi_sws.sddr_service.WRITE_DATABASE</string>
-</resources>
