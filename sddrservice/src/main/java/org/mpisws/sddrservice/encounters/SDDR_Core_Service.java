@@ -26,7 +26,6 @@ import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
  */
 public class SDDR_Core_Service extends Service {
     private static final String TAG = SDDR_Core_Service.class.getSimpleName();
-
     private static SDDR_Core core;
     private static Thread thread;
 
@@ -60,6 +59,7 @@ public class SDDR_Core_Service extends Service {
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
+        check_and_start_core();
     }
 
     @Override

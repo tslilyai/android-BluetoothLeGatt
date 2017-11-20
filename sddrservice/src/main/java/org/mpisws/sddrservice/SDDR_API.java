@@ -25,6 +25,7 @@ import static org.mpisws.sddrservice.embedded_social.Tasks.TaskTyp.SIGNOUT_USER;
 public class SDDR_API {
     private static final String TAG = SDDR_API.class.getSimpleName();
     private static Context context;
+    private static int msging_enabled = 0;
 
     public static class Filter {
         public Date start_date;
@@ -42,22 +43,13 @@ public class SDDR_API {
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.start_sddr_service", 0);
         context.startService(serviceIntent);
-
-        // Thread to handle all ES tasks requested of SDDR_API
-        new Thread(new Runnable() {
-            public void run() {
-                while (true) {
-                    Tasks.TaskTyp t = Tasks.getTask();
-                    Tasks.exec_task(t);
-                }
-            }
-        }).start();
     }
 
     public void add_linkid(String linkID) {
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.add_linkid", linkID);
-        serviceIntent.putExtra("Mode", LinkabilityEntryMode.AdvertiseAndListen); // TODO
+        // TODO if we change the mode to listen-only, this is the same as retroactive linking
+        serviceIntent.putExtra("Mode", LinkabilityEntryMode.AdvertiseAndListen);
         Log.d(TAG, "Adding linkID " + linkID);
         context.startService(serviceIntent);
     }
@@ -84,5 +76,20 @@ public class SDDR_API {
         newTaskTyp.msg = msg;
         newTaskTyp.encounter = encounter;
         Tasks.addTask(newTaskTyp);
+    }
+
+    public void enable_msging() {
+        if (msging_enabled > 0) {
+            msging_enabled++;
+            return;
+        }
+        Tasks.setAddTopics(true);
+    }
+
+    public void disable_msging() {
+        msging_enabled--;
+        if (msging_enabled == 0) {
+            Tasks.setAddTopics(false);
+        }
     }
 }

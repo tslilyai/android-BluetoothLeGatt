@@ -15,7 +15,7 @@ import static android.app.AlarmManager.RTC_WAKEUP;
 public class Sleeper extends BroadcastReceiver {
 
     private static final String ACTION_WAKE_UP = "ACTION_WAKE_UP";
-    private static final String TAG = "SDDR_API: " + Sleeper.class.getSimpleName();
+    private static final String TAG = Sleeper.class.getSimpleName();
     private static final Semaphore semaphore = new Semaphore(0);
     private static PowerManager.WakeLock wakeLock;
     private static AlarmManager alarmMgr;

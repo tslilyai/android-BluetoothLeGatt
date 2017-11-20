@@ -31,7 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * SDDR_Core implements the core functionality of the SDDR_API service. It is started and called by the
+ * SDDR_Core implements the core functionality of the SDDR protocol. It is started and called by the
  * SDDR_Core_Service. The functionalities it provides are:
  * - running discovery
  * - setting advert information
@@ -40,7 +40,7 @@ import java.util.List;
  * - updating (retroactively) matches with encounters in the database
  */
 public class SDDR_Core implements Runnable {
-    private static final String TAG = "SDDR_API: " + SDDR_Core.class.getSimpleName();
+    private static final String TAG = SDDR_Core.class.getSimpleName();
     private SDDR_Core_Service mService;
     private BluetoothAdapter mBluetoothAdapter;
     private Advertiser mAdvertiser;
@@ -126,7 +126,6 @@ public class SDDR_Core implements Runnable {
             } else {
                 Log.d(TAG, "executing action immediately");
             }
-
             switch (mRA.type) {
                 case ChangeEpoch:
                     Log.d(TAG, "Changing Epoch");
@@ -141,6 +140,20 @@ public class SDDR_Core implements Runnable {
                         TODO Deal with active/hybrid schemes
                         TODO Deal with different levels of connectivity due to hybrid/active
                     */
+
+                    // handle all ES tasks requested of SDDR_API
+                    new Thread(new Runnable() {
+                        public void run() {
+                            while (true) {
+                                Tasks.TaskTyp t = Tasks.getTask();
+                                Log.d(TAG, "Got new task to execute, retries " + t.retries);
+                                if (t == null) {
+                                    return;
+                                }
+                                Tasks.exec_task(t);
+                            }
+                        }
+                    }).start();
                     break;
                 default:
                     throw new RuntimeException("Unknown Action Type");
@@ -153,19 +166,19 @@ public class SDDR_Core implements Runnable {
         mScanner.stopScanning();
     }
 
+    protected void addNewLink(Identifier id, LinkabilityEntryMode mode) {
+        addNewLinkabilityEntryIfAbsent(new MLinkabilityEntry(null, id, id.toString(), mode, 0));
+        mLinks = mLinkBridge.getAllItems();
+        updateBTListenAdvertiseSets(mLinks);
+        updateEncounterMatchings();
+    }
+
     protected void updateEncounterMatchings() {
         List<MEncounter> encounters = mEncounterBridge.getAllItems();
         for (MEncounter e : encounters) {
             Log.d(TAG, "Retroactive matching for encounter " + e.getPKID());
             e.updateEncounterMatchings(mService);
         }
-    }
-
-    protected void addNewLink(Identifier id, LinkabilityEntryMode mode) {
-        addNewLinkabilityEntryIfAbsent(new MLinkabilityEntry(null, id, id.toString(), mode, 0));
-        mLinks = mLinkBridge.getAllItems();
-        updateBTListenAdvertiseSets(mLinks);
-        updateEncounterMatchings();
     }
 
     private void updateBTListenAdvertiseSets(final List<MLinkabilityEntry> entries) {

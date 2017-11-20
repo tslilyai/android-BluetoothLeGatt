@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 public class Advertiser {
 
-    private static final String TAG = "SDDR_API: " + Advertiser.class.getSimpleName();
+    private static final String TAG = Advertiser.class.getSimpleName();
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private AdvertiseCallback mAdvertiseCallback;
     private AdvertiseSettings mAdvertiseSettings;
