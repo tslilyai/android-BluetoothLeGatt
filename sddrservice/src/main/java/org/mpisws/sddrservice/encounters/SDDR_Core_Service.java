@@ -68,15 +68,15 @@ public class SDDR_Core_Service extends Service {
             return START_STICKY;
         }
 
+        check_and_start_core();
+
         if (intent.getExtras().containsKey("@string.start_sddr_service"))
         {
-            check_and_start_core();
             return START_STICKY;
         }
 
         if (intent.getExtras().containsKey("@string.add_linkid"))
         {
-            check_and_start_core();
             String ID = intent.getExtras().getString("@string.add_linkid");
             core.addNewLink(new Identifier(ID.getBytes()), LinkabilityEntryMode.AdvertiseAndListen);
             return START_STICKY;
@@ -84,7 +84,6 @@ public class SDDR_Core_Service extends Service {
         else if (intent.getExtras().containsKey("@string.send_msg"))
         {
             Log.d(TAG, "Got Send_Msg Intent");
-            check_and_start_core();
             // TODO
             return START_STICKY;
         }
@@ -100,10 +99,6 @@ public class SDDR_Core_Service extends Service {
             core.should_run = false;
             core = null;
         }
-    }
-
-    public SDDR_Core getCore() {
-        return core;
     }
 
     /**

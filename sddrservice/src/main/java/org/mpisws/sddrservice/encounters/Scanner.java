@@ -46,7 +46,7 @@ import java.util.Map;
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
  */
 public class Scanner {
-    private static final String TAG = Scanner.class.getSimpleName();
+    private static final String TAG = "SDDR_API: " + Scanner.class.getSimpleName();
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
@@ -74,8 +74,6 @@ public class Scanner {
 
             /* sets the c_EncounterMsgs list in SDDR_Core */
             SDDR_Native.c_postDiscovery();
-            mService.getCore().processEncounters();
-
             done = true;
             synchronized (this) {
                 notifyAll();
@@ -84,7 +82,7 @@ public class Scanner {
         }
     }
     private final RunPostDiscovery RunPD = new RunPostDiscovery();
-    public void discoverAndProcessEncounters() {
+    public void discoverEncounters() {
         Log.d(TAG, "Prediscovery");
         SDDR_Native.c_preDiscovery();
         startScanning();
@@ -134,11 +132,10 @@ public class Scanner {
     }
 
     /**
-     * Return a {@link ScanSettings} object
+     * Return a {@link ScanSettings} object (default settings for now)
      */
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_POWER);
         return builder.build();
     }
 

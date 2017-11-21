@@ -7,12 +7,14 @@ package org.mpisws.sddrservice.encounters;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import org.mpisws.sddrservice.embedded_social.Tasks;
+import org.mpisws.sddrservice.embedded_social.ESTask;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
@@ -27,6 +29,7 @@ import org.mpisws.sddrservice.linkability.LinkabilityBridge;
 import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
 import org.mpisws.sddrservice.linkability.MLinkabilityEntry;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -95,7 +98,7 @@ public class SDDR_Core implements Runnable {
         mLinkBridge = new LinkabilityBridge(mService);
         mEncounterBridge = new EncounterBridge(mService);
 
-        Tasks.setContext(mService);
+        ESTask.setContext(mService);
 
         // initialize the C radio class
         Log.d(TAG, "Initializing radio");
@@ -135,25 +138,25 @@ public class SDDR_Core implements Runnable {
                 case Discover:
                     Log.d(TAG, "Performing Discovery");
                     updateAdvert();
-                    mScanner.discoverAndProcessEncounters();
+                    mScanner.discoverEncounters();
+                    // this may miss some encounters from this discovery cycle, but that's ok
+                    processEncounters();
                     /*
                         TODO Deal with active/hybrid schemes
                         TODO Deal with different levels of connectivity due to hybrid/active
                     */
 
                     // handle all ES tasks requested of SDDR_API
-                    new Thread(new Runnable() {
-                        public void run() {
-                            while (true) {
-                                Tasks.TaskTyp t = Tasks.getTask();
-                                Log.d(TAG, "Got new task to execute, retries " + t.retries);
-                                if (t == null) {
-                                    return;
-                                }
-                                Tasks.exec_task(t);
+                    if (hasConnectivity()) {
+                        while (true) {
+                            ESTask t = ESTask.getTask();
+                            if (t == null) {
+                                return;
                             }
+                            Log.d(TAG, "Got new task to execute, retries " + t.retries);
+                            ESTask.exec_task(t);
                         }
-                    }).start();
+                    }
                     break;
                 default:
                     throw new RuntimeException("Unknown Action Type");
@@ -164,6 +167,14 @@ public class SDDR_Core implements Runnable {
         SDDR_Native.c_freeRadio();
         mAdvertiser.stopAdvertising();
         mScanner.stopScanning();
+    }
+
+    private boolean hasConnectivity() {
+        ConnectivityManager cm =
+                (ConnectivityManager)mService.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
     }
 
     protected void addNewLink(Identifier id, LinkabilityEntryMode mode) {
@@ -218,8 +229,10 @@ public class SDDR_Core implements Runnable {
     }
 
     public void processEncounters() {
-        Log.d(TAG, "Processing encounters");
-        for (byte[] msg : SDDR_Native.c_EncounterMsgs) {
+        Log.d(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
+
+        for (Iterator<byte[]> iterator = SDDR_Native.c_EncounterMsgs.iterator(); iterator.hasNext();) {
+            byte[] msg = iterator.next();
             final SDDR_Proto.Event event;
 
             try {
@@ -321,9 +334,7 @@ public class SDDR_Core implements Runnable {
             }
 
             encEvent.broadcast(mService);
+            iterator.remove();
         }
-
-        // reset so we don't broadcast encounters more than once
-        SDDR_Native.c_EncounterMsgs.clear();
     }
 }

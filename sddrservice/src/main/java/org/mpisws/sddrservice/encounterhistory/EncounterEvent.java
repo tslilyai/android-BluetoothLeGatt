@@ -12,7 +12,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import org.mpisws.sddrservice.embedded_social.Tasks;
+import org.mpisws.sddrservice.embedded_social.ESTask;
 import org.mpisws.sddrservice.encounters.SDDR_Proto;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.FacebookEventStatus;
@@ -24,7 +24,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import static org.mpisws.sddrservice.embedded_social.Tasks.TaskTyp.CREATE_TOPIC;
+import static org.mpisws.sddrservice.embedded_social.ESTask.Typ.CREATE_TOPIC;
 
 public abstract class EncounterEvent implements Serializable {
     private static final String TAG = EncounterEvent.class.getSimpleName();
@@ -164,6 +164,7 @@ public abstract class EncounterEvent implements Serializable {
     }
 
     private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
+        Log.d(TAG, "Inserting shared secrets " + sharedSecrets.size());
         for (Identifier sharedSecret : sharedSecrets) {
             byte[] encounterID = MEncounter.convertSharedSecretToEncounterID(sharedSecret).getBytes();
             final ContentValues values = new ContentValues();
@@ -173,9 +174,10 @@ public abstract class EncounterEvent implements Serializable {
             values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
 
-            Tasks.TaskTyp newTaskTyp = CREATE_TOPIC;
-            newTaskTyp.encounterID = encounterID.toString();
-            Tasks.addTask(newTaskTyp);
+            Log.d(TAG, "Inserting create topic task for " + encounterID.toString());
+            ESTask newTask = new ESTask(CREATE_TOPIC);
+            newTask.encounterID = encounterID.toString();
+            ESTask.addTask(newTask);
         }
     }
 

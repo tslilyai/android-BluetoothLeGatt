@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
-import org.mpisws.sddrservice.embedded_social.Tasks;
+import org.mpisws.sddrservice.embedded_social.ESTask;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
@@ -14,9 +14,7 @@ import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
 import java.util.Date;
 import java.util.List;
 
-import static org.mpisws.sddrservice.embedded_social.Tasks.TaskTyp.REGISTER_USER;
-import static org.mpisws.sddrservice.embedded_social.Tasks.TaskTyp.SEND_MSG;
-import static org.mpisws.sddrservice.embedded_social.Tasks.TaskTyp.SIGNOUT_USER;
+import static org.mpisws.sddrservice.embedded_social.ESTask.Typ.*;
 
 /**
  * Created by tslilyai on 11/6/17.
@@ -60,22 +58,22 @@ public class SDDR_API {
     }
 
     public void register_user(String firstname, String lastname) {
-        Tasks.TaskTyp newTaskTyp = REGISTER_USER;
-        newTaskTyp.firstname = firstname;
-        newTaskTyp.lastname = lastname;
-        Tasks.addTask(newTaskTyp);
+        ESTask newTask = new ESTask(REGISTER_USER);
+        newTask.firstname = firstname;
+        newTask.lastname = lastname;
+        ESTask.addTask(newTask);
     }
 
     public void signout_user() {
-        Tasks.TaskTyp newTaskTyp = SIGNOUT_USER;
-        Tasks.addTask(newTaskTyp);
+        ESTask newTask = new ESTask(SIGNOUT_USER);
+        ESTask.addTask(newTask);
     }
 
     public void send_msg(MEncounter encounter, String msg) {
-        Tasks.TaskTyp newTaskTyp = SEND_MSG;
-        newTaskTyp.msg = msg;
-        newTaskTyp.encounter = encounter;
-        Tasks.addTask(newTaskTyp);
+        ESTask newTask = new ESTask(SEND_MSG);
+        newTask.msg = msg;
+        newTask.encounter = encounter;
+        ESTask.addTask(newTask);
     }
 
     public void enable_msging() {
@@ -83,13 +81,19 @@ public class SDDR_API {
             msging_enabled++;
             return;
         }
-        Tasks.setAddTopics(true);
+        ESTask.setAddTopics(true);
     }
 
     public void disable_msging() {
         msging_enabled--;
         if (msging_enabled == 0) {
-            Tasks.setAddTopics(false);
+            ESTask.setAddTopics(false);
         }
+    }
+
+    public void get_msgs(ESTask.NotificationCallback callback) {
+        ESTask newTask = new ESTask(GET_NOTIFICATIONS);
+        newTask.notificationCallback = callback;
+        ESTask.addTask(newTask);
     }
 }
