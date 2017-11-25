@@ -146,7 +146,7 @@ public class SDDR_Core implements Runnable {
                         TODO Deal with different levels of connectivity due to hybrid/active
                     */
 
-                    // handle all ES tasks requested of SDDR_API
+                    /*// handle all ES tasks requested of SDDR_API
                     if (hasConnectivity()) {
                         while (true) {
                             ESTask t = ESTask.getTask();
@@ -156,7 +156,7 @@ public class SDDR_Core implements Runnable {
                             Log.d(TAG, "Got new task to execute, retries " + t.retries);
                             ESTask.exec_task(t);
                         }
-                    }
+                    }*/
                     break;
                 default:
                     throw new RuntimeException("Unknown Action Type");

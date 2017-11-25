@@ -26,8 +26,8 @@ import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
  */
 public class SDDR_Core_Service extends Service {
     private static final String TAG = SDDR_Core_Service.class.getSimpleName();
-    private static SDDR_Core core;
-    private static Thread thread;
+    private SDDR_Core core;
+    private Thread thread;
 
     private void check_and_start_core() {
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -68,10 +68,9 @@ public class SDDR_Core_Service extends Service {
             return START_STICKY;
         }
 
-        check_and_start_core();
-
         if (intent.getExtras().containsKey("@string.start_sddr_service"))
         {
+            check_and_start_core();
             return START_STICKY;
         }
 

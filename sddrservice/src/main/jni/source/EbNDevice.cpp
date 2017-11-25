@@ -162,6 +162,7 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
 
   if(expired)
   {
+    LOG_D(TAG, "getEncounterInfo -- expired");
     dest.type = EncounterEvent::Ended;
     dest.id = id_;
     dest.address = address_.toString();
@@ -190,6 +191,12 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
     const bool reportRSSI = !rssiToReport_.empty() && ((getTimeMS() - lastReportTime_) > rssiReportingInterval);
 
     const bool isUpdated = confirmed_ && shakenHands_ && (reportSecrets || reportMatching || reportRSSI || reportBlooms);
+    LOG_D(TAG, "getEncounterInfo -- reportSecrets ? %d", reportSecrets);
+    LOG_D(TAG, "getEncounterInfo -- Updated ? %d", isUpdated);
+    LOG_D(TAG, "getEncounterInfo -- confirmed ? %d", confirmed_);
+    LOG_D(TAG, "getEncounterInfo -- shakenHands? %d", shakenHands_);
+    LOG_D(TAG, "getEncounterInfo -- reportMatching? %d", reportMatching);
+    LOG_D(TAG, "getEncounterInfo -- reportBlooms? %d", reportBlooms);
     if(isUpdated)
     {
       dest.type = (reported_ ? EncounterEvent::Updated : EncounterEvent::Started);

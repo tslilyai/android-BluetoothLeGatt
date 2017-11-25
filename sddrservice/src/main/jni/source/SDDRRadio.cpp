@@ -484,7 +484,7 @@ bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *d
 
   if(advertNum < (RS_K + RS_M))
   {
-      LOG_D(TAG, "-- advertnum < RS_K + RS_M");
+    LOG_D(TAG, "-- advertnum < RS_K + RS_M");
     EbNDevice::Epoch *curEpoch = NULL;
     EbNDevice::Epoch *prevEpoch = NULL;
     bool isDuplicate = false;
@@ -580,6 +580,7 @@ bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *d
       // Copying the segment over into the Bloom filter
       bloom->setSegment(advertNum % BF_B, advert.toByteArray(), advertOffset);
 
+      LOG_D(TAG, "-- new bloom filter segment");
       return true;
     }
   }
