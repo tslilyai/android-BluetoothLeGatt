@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "78223818115",
+    "project_id": "firebase-sddr"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:78223818115:android:16444c4ac1e4ed73",
+        "android_client_info": {
+          "package_name": "org.mpisws.sddrapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "78223818115-5ekbgghoeqhcilusn6j43r80c19bmkmj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.mpisws.sddrapp",
+            "certificate_hash": "120fc2e0baba17cd022d8ed50842620f96948501"
+          }
+        },
+        {
+          "client_id": "78223818115-pldac0evbg54166bueph6u232a0ho8e0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-9KRP7nxfoeH3RFBXG7uNhVcZAsWnRD8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
