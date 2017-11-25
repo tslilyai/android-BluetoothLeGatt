@@ -74,7 +74,6 @@ public class ESTask {
 
     private static final String ESAPI_KEY = "2e5a1cc8-5eab-4dbd-8d6d-6a84eab23374";
     private static final String SDDR_ID = "0.0.0";
-    private static final UUID mUUID = UUID.randomUUID();
 
     private static final int QUEUE_CAP = 1000;
     private static final int RETRIES = 3;
@@ -114,7 +113,7 @@ public class ESTask {
     public String lastname;
     public String msg;
     public MEncounter encounter;
-    public String encounterID;
+    public Identifier encounterID;
     public NotificationCallback notificationCallback;
     public int retries = 0;
 
@@ -337,15 +336,15 @@ public class ESTask {
         Log.d(TAG, "User signed out");
     }
 
-    private static ResponseTyp create_topic(String title) {
+    private static ResponseTyp create_topic(Identifier title) {
         Log.d(TAG, "Creating topic " + title);
         ResponseTyp resp = checkLoginStatus();
         if (resp != OK) return resp;
 
         PostTopicRequest topicReq = new PostTopicRequest();
         topicReq.setPublisherType(PublisherType.USER);
-        topicReq.setTitle(title);
-        topicReq.setText(mUUID.toString());
+        topicReq.setTitle(title.toString());
+        topicReq.setText(USER_HANDLE);
         ServiceResponse<PostTopicResponse> sResp;
         try {
             sResp = ES_TOPICS.postTopic(topicReq, String.format(SESSION_TEMPLATE, SESSION));
@@ -380,21 +379,23 @@ public class ESTask {
 
                 List<TopicView> topics = sResp.getBody().getData();
                 if (topics.size() == 0) {
-                    Log.d(TAG, "Too few topics with this EID, need to create" + eid.toString());
-                    create_topic(eid.toString());
+                    Log.d(TAG, "Too few topics with this EID, need to create " + eid.toString());
+                    create_topic(eid);
                     return Unknown;
                 } else if (topics.size() == 1) {
-                    if (UUID.fromString(topics.get(0).getText()).compareTo(mUUID) == 0) {
+                    if (topics.get(0).getText().compareTo(USER_HANDLE) == 0) {
                         return Unknown;
                     } else {
-                        Log.d(TAG, "We don't have a topic for this EID, need to create" + eid.toString());
-                        create_topic(eid.toString());
+                        Log.d(TAG, "We don't have a topic for this EID, need to create " + eid.toString());
+                        create_topic(eid);
                         return Unknown;
                     }
                 }
 
                 // send to the topic with text not equal to our own UUID
-                String topicHandle = (UUID.fromString(topics.get(0).getText()).compareTo(mUUID) == 0) ?
+                Log.d(TAG, "USER 0: " + ((topics.get(0).getText()) + " " + USER_HANDLE));
+                Log.d(TAG, "USER 1: " + ((topics.get(1).getText()) + " " + USER_HANDLE));
+                String topicHandle = ((topics.get(0).getText()).compareTo(USER_HANDLE) == 0) ?
                         topics.get(1).getTopicHandle() : topics.get(0).getTopicHandle();
                 ServiceResponse<PostCommentResponse> sRespTH = ES_TOPIC_COMMENTS.postComment(topicHandle, req, String.format(SESSION_TEMPLATE, SESSION));
                 if (!sRespTH.getResponse().isSuccess()) {
@@ -428,6 +429,7 @@ public class ESTask {
 
             String commentHandle, topicHandle, msg, encounterID;
             for (ActivityView view : sResp.getBody().getData()) {
+                Log.d(TAG, "New unread notification!");
                 // we've seen all the unread messages by now
                 if (!view.getUnread()) {
                     break;

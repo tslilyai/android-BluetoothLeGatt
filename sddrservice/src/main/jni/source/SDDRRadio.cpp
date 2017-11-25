@@ -193,6 +193,7 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
 
     device->addRSSIMeasurement(scanTime, rssi);
     discovered_.push_back(DiscoverEvent(scanTime, device->getID(), rssi));
+    LOG_D(TAG, "-- Discovered device %d", device->getID());
     addRecentDevice(device);
 
     processAdvert(device, scanTime, data);
@@ -847,6 +848,7 @@ void SDDRRadio::removeRecentDevice(DeviceID id)
 bool SDDRRadio::getDeviceEvent(EncounterEvent &event, DeviceID id, uint64_t rssiReportInterval)
 {
   IDToRecentDeviceMap::iterator it = idToRecentDevices_.find(id);
+  LOG_D(TAG, "-- getDeviceEvent device %d", id);
   if(it != idToRecentDevices_.end())
   {
     EbNDevice *device = *it->second;

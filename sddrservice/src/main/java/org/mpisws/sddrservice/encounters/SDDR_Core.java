@@ -113,6 +113,7 @@ public class SDDR_Core implements Runnable {
     }
 
     public void run() {
+        Log.d(TAG, "Running core");
         // set the initial UUIDs and advert data
         updateAddr();
         updateAdvert();
@@ -139,24 +140,28 @@ public class SDDR_Core implements Runnable {
                     Log.d(TAG, "Performing Discovery");
                     updateAdvert();
                     mScanner.discoverEncounters();
-                    // this may miss some encounters from this discovery cycle, but that's ok
-                    processEncounters();
+                    processEncounters(mService);
                     /*
                         TODO Deal with active/hybrid schemes
                         TODO Deal with different levels of connectivity due to hybrid/active
                     */
 
-                    /*// handle all ES tasks requested of SDDR_API
+                    // handle all ES tasks requested of SDDR_API
                     if (hasConnectivity()) {
-                        while (true) {
-                            ESTask t = ESTask.getTask();
-                            if (t == null) {
-                                return;
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                while (true) {
+                                    ESTask t = ESTask.getTask();
+                                    if (t == null) {
+                                        return;
+                                    }
+                                    Log.d(TAG, "Got new task to execute, retries " + t.retries);
+                                    ESTask.exec_task(t);
+                                }
                             }
-                            Log.d(TAG, "Got new task to execute, retries " + t.retries);
-                            ESTask.exec_task(t);
-                        }
-                    }*/
+                        }.start();
+                    }
                     break;
                 default:
                     throw new RuntimeException("Unknown Action Type");
@@ -228,9 +233,10 @@ public class SDDR_Core implements Runnable {
         }
     }
 
-    public void processEncounters() {
+    public static void processEncounters(Context context) {
         Log.d(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
 
+        //for (byte[] msg : SDDR_Native.c_EncounterMsgs) {
         for (Iterator<byte[]> iterator = SDDR_Native.c_EncounterMsgs.iterator(); iterator.hasNext();) {
             byte[] msg = iterator.next();
             final SDDR_Proto.Event event;
@@ -290,7 +296,7 @@ public class SDDR_Core implements Runnable {
                     Log.v(TAG, "[EncounterEvent] Tentative encounter started at " + time);
                     break;
                 case Start:
-                    if (mEncounterBridge.getItemByPKID(pkid) == null) {
+                    if (new EncounterBridge(context).getItemByPKID(pkid) == null) {
                         // brand new confirmed from incoming connection, TODO get from native instead of DB
                         Log.v(TAG, "[EncounterEvent] Already confirmed encounter started at " + time);
                         encEvent = new EncounterStartedEvent(pkid, time, rssiEvents, sharedSecrets, blooms, matchingSet, address,
@@ -333,8 +339,9 @@ public class SDDR_Core implements Runnable {
                 Log.v(TAG, "\t\t" + e.getRssi() + " at time " + e.getTimestamp());
             }
 
-            encEvent.broadcast(mService);
+            encEvent.broadcast(context);
             iterator.remove();
         }
+        //SDDR_Native.c_EncounterMsgs.clear();
     }
 }

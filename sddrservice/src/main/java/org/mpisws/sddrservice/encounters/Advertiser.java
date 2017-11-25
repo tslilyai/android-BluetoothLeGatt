@@ -41,6 +41,7 @@ public class Advertiser {
         Log.d(TAG, "Setting Addr " + Utils.getHexString(addr));
         System.arraycopy(addr, 0, mAddr, 0, Constants.ADDR_LENGTH);
     }
+
     public void setAdData(byte[] newData) {
         Utils.myAssert(newData.length==Constants.ADVERT_LENGTH + Constants.PUUID_LENGTH - Constants.ADDR_LENGTH);
         // copy what data can fit into the puuid slot

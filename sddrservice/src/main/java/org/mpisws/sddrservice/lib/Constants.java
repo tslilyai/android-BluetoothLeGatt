@@ -16,9 +16,6 @@ public class Constants {
     public static final int REQUEST_ENABLE_BT = 1;
     public static final int REQUEST_ACCESS_FINE_LOCATION = 2;
 
-    public static final int SDDR_START_FLAG = 0;
-    public static final int SDDR_LINK_FLAG = 1;
-
     /**
      * Advertising-related constants
      */
@@ -30,7 +27,7 @@ public class Constants {
     /**
      * Scanning-related constants
      */
-    public static final long SCAN_PERIOD = 2400;
+    public static final long SCAN_PERIOD = 12000;
 
     /**
      * Other Constants

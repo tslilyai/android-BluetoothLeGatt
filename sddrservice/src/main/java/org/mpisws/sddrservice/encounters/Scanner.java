@@ -158,9 +158,10 @@ public class Scanner {
                 Log.d(TAG, "No scan record");
                 return;
             } else {
+                Log.d(TAG, "Scan Result Device: " + result.getDevice().getAddress());
                 Map<ParcelUuid, byte[]> datamap = record.getServiceData();
                 if (datamap.size() != 1) {
-                    Log.d(TAG, "Not SDDR_API: More than one service");
+                    Log.d(TAG, "Not SDDR_API: Not one service");
                     return;
                 }
 
