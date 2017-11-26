@@ -156,7 +156,6 @@ public class SDDR_Core implements Runnable {
                                     if (t == null) {
                                         return;
                                     }
-                                    Log.d(TAG, "Got new task to execute, retries " + t.retries);
                                     ESTask.exec_task(t);
                                 }
                             }

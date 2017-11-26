@@ -33,17 +33,14 @@ public class SDDR_API {
         public float distance;
     }
 
-    public SDDR_API(Context context) {
-        this.context = context;
-    }
-
-    public void start_service() {
+    public static void start_service(Context context) {
+        SDDR_API.context = context;
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.start_sddr_service", 0);
         context.startService(serviceIntent);
     }
 
-    public void add_linkid(String linkID) {
+    public static void add_linkid(String linkID) {
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.add_linkid", linkID);
         // TODO if we change the mode to listen-only, this is the same as retroactive linking
@@ -52,31 +49,30 @@ public class SDDR_API {
         context.startService(serviceIntent);
     }
 
-    public List<MEncounter> get_encounters(Filter filter) {
+    public static List<MEncounter> get_encounters(Filter filter) {
         /* TODO efficiency? + location */
         return new EncounterBridge(context).getEncountersFiltered(filter);
     }
 
-    public void register_user(String firstname, String lastname) {
-        ESTask newTask = new ESTask(REGISTER_USER);
-        newTask.firstname = firstname;
-        newTask.lastname = lastname;
+    public static void register_user(String googletoken, String firstname, String lastname) {
+        ESTask newTask = new ESTask(LOGIN_GOOGLE);
+        newTask.googletoken = googletoken;
+        ESTask newTask2 = new ESTask(REGISTER_USER);
+        newTask2.firstname = firstname;
+        newTask2.lastname = lastname;
+
         ESTask.addTask(newTask);
+        ESTask.addTask(newTask2);
     }
 
-    public void signout_user() {
-        ESTask newTask = new ESTask(SIGNOUT_USER);
-        ESTask.addTask(newTask);
-    }
-
-    public void send_msg(MEncounter encounter, String msg) {
+    public static void send_msg(MEncounter encounter, String msg) {
         ESTask newTask = new ESTask(SEND_MSG);
         newTask.msg = msg;
         newTask.encounter = encounter;
         ESTask.addTask(newTask);
     }
 
-    public void enable_msging() {
+    public static void enable_msging() {
         if (msging_enabled > 0) {
             msging_enabled++;
             return;
@@ -84,14 +80,14 @@ public class SDDR_API {
         ESTask.setAddTopics(true);
     }
 
-    public void disable_msging() {
+    public static void disable_msging() {
         msging_enabled--;
         if (msging_enabled == 0) {
             ESTask.setAddTopics(false);
         }
     }
 
-    public void get_msgs(ESTask.NotificationCallback callback) {
+    public static void get_msgs(ESTask.NotificationCallback callback) {
         ESTask newTask = new ESTask(GET_NOTIFICATIONS);
         newTask.notificationCallback = callback;
         ESTask.addTask(newTask);

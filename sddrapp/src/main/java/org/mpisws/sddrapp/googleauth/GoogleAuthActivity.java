@@ -39,15 +39,15 @@ public class GoogleAuthActivity extends AppCompatActivity {
                                     Log.d(TAG, ex.getStackTrace().toString());
                                     Log.d(TAG, "Auth failed");
                                 }
+                                Log.d(TAG, "Finishing activity");
+                                finish();
                             }
                         });
                 service.dispose();
             } else {
                 Log.d(TAG, "Auth failed");
             }
-            Log.d(TAG, "Finishing activity");
-            finish();
-        }
+       }
     }
 
     @Override

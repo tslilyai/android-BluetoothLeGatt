@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -59,6 +58,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static org.mpisws.sddrservice.embedded_social.ESTask.ResponseTyp.*;
+import static org.mpisws.sddrservice.embedded_social.ESTask.Typ.LOGIN_GOOGLE;
 
 /**
  * Created by tslilyai on 11/14/17.
@@ -67,21 +67,28 @@ import static org.mpisws.sddrservice.embedded_social.ESTask.ResponseTyp.*;
 public class ESTask {
     private static final String TAG = ESTask.class.getSimpleName();
     private static Context context;
+    public static void setContext(Context newcontext) {
+        context = newcontext;
+    }
+
+    /* Task queue that is queried and emptied every waking cycle */
+    private static final int QUEUE_CAP = 1000;
+    private static final int RETRIES = 3;
+    private static BlockingQueue<ESTask> taskList = new ArrayBlockingQueue<>(QUEUE_CAP);
 
     /* ES specific objects and constants */
     public static final String OAUTH_TEMPLATE = "Google AK=%s|TK=%s";
     public static final String SESSION_TEMPLATE = "SocialPlus TK=%s";
-
     private static final String ESAPI_KEY = "2e5a1cc8-5eab-4dbd-8d6d-6a84eab23374";
     private static final String SDDR_ID = "0.0.0";
 
-    private static final int QUEUE_CAP = 1000;
-    private static final int RETRIES = 3;
-
+    /* User-specific login and authentication information */
     private static String USER_HANDLE;
     private static String SESSION;
     private static Date SESSION_DATE;
+    private static String GOOGLETOKEN;
 
+    /* Static objects to perform HTTP requests */
     private static final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     private static Retrofit RETROFIT = new Retrofit.Builder()
             .baseUrl("https://ppe.embeddedsocial.microsoft.com/")
@@ -97,25 +104,23 @@ public class ESTask {
     private static MyNotificationsOperations ES_NOTIFS = new MyNotificationsOperationsImpl(RETROFIT, ESCLIENT);
     private static CommentsOperations ES_COMMENTS = new CommentsOperationsImpl(RETROFIT, ESCLIENT);
 
-    private static BlockingQueue<ESTask> taskList = new ArrayBlockingQueue<>(QUEUE_CAP);
-    private static boolean addTopics;
 
+    /* Flag that indicates whether topics (message-channels) should be created for each encounter formed */
+    private static boolean addTopics;
     public static void setAddTopics(boolean bool) {
         addTopics = bool;
-    }
-    public static void setContext(Context newcontext) {
-        context = newcontext;
     }
 
     /* Instance variables */
     public Typ typ;
     public String firstname;
     public String lastname;
+    public String googletoken;
     public String msg;
     public MEncounter encounter;
     public Identifier encounterID;
     public NotificationCallback notificationCallback;
-    public int retries = 0;
+    private int retries = 0;
 
     public ESTask(Typ typ) {
         this.typ = typ;
@@ -132,12 +137,19 @@ public class ESTask {
     }
 
     public enum Typ {
-        GET_NOTIFICATIONS,
+        /* Must be called first to register a permanent "Google" identity with each user */
+        LOGIN_GOOGLE,
+        /* Registers the user with the SDDR service */
         REGISTER_USER,
-        SEND_MSG,
-        SIGNIN_USER,
+        /* Creates a topic (used to communicate between encounters) */
         CREATE_TOPIC,
-        SIGNOUT_USER;
+        /* Gets the notifications (comments posted on topics, i.e., messages between
+        encounter participants) and returns them as a list of encounter IDs mapping to
+        messages from that ID
+         */
+        GET_NOTIFICATIONS,
+        /* Sends a message to a particular encounter */
+        SEND_MSG
     }
 
     public interface NotificationCallback {
@@ -159,16 +171,31 @@ public class ESTask {
     }
 
     public static void exec_task(ESTask task) {
-        if (task == null) {
+        ResponseTyp resp;
+        if (task == null || context == null) {
             return;
         }
-        ResponseTyp resp;
+        // return if we can't possible authenticate this request
+        if (task.typ != LOGIN_GOOGLE && GOOGLETOKEN == null) {
+            return;
+        }
+
         switch(task.typ) {
+            case LOGIN_GOOGLE: {
+                if (task.retries >= RETRIES)
+                    return;
+
+                if (task.googletoken == null)
+                    return;
+
+                loginGoogle(task.googletoken);
+                break;
+            }
             case REGISTER_USER: {
                 if (task.retries >= RETRIES)
                     return;
 
-                if (task.firstname == null || task.lastname == null)
+                if (task.googletoken == null || task.firstname == null || task.lastname == null)
                     return;
 
                 resp = registerUser(task.firstname, task.lastname);
@@ -179,24 +206,6 @@ public class ESTask {
                 Log.d(TAG, "Failed to register");
                 task.retries++;
                 ESTask.addTask(task);
-                break;
-            }
-            case SIGNIN_USER: {
-                if (task.retries >= RETRIES)
-                    return;
-
-                resp = getnewsession();
-                if (resp == OK || resp == DuplicateFailure || resp == NotFoundFailure) {
-                    return;
-                }
-
-                Log.d(TAG, "Failed to sign in");
-                task.retries++;
-                ESTask.addTask(task);
-                break;
-            }
-            case SIGNOUT_USER: {
-                signout_user();
                 break;
             }
             case SEND_MSG: {
@@ -252,15 +261,17 @@ public class ESTask {
         }
     }
 
-    private static ResponseTyp registerUser(String firstname, String lastname) {
-        if (GoogleToken.getToken() == null) {
+    private static ResponseTyp loginGoogle(String googletoken) {
+        if (googletoken == null) {
             Log.d(TAG, "Not registered with Google yet");
-            GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, context);
-            GNA.makeAuthRequest();
             return AuthFailure;
         }
+        GOOGLETOKEN = googletoken;
+        return OK;
+    }
 
-        final String esAuth = String.format(OAUTH_TEMPLATE, ESAPI_KEY, GoogleToken.getToken());
+    private static ResponseTyp registerUser(String firstname, String lastname) {
+        final String esAuth = String.format(OAUTH_TEMPLATE, ESAPI_KEY, GOOGLETOKEN);
         Log.d(TAG, "esAuth is " + esAuth);
 
         final PostUserRequest req = new PostUserRequest();
@@ -288,14 +299,7 @@ public class ESTask {
     }
 
     private static ResponseTyp getnewsession() {
-        if (GoogleToken.getToken() == null) {
-            Log.d(TAG, "Not registered with Google yet");
-            GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, context);
-            GNA.makeAuthRequest();
-            return AuthFailure;
-        }
-
-        final String esAuth = String.format(OAUTH_TEMPLATE, ESAPI_KEY, GoogleToken.getToken());
+        final String esAuth = String.format(OAUTH_TEMPLATE, ESAPI_KEY, GOOGLETOKEN);
         Log.d(TAG, "esAuth is " + esAuth);
 
         try {
@@ -331,16 +335,11 @@ public class ESTask {
         }
     }
 
-    private static void signout_user() {
-        SESSION = null;
-        Log.d(TAG, "User signed out");
-    }
-
     private static ResponseTyp create_topic(Identifier title) {
-        Log.d(TAG, "Creating topic " + title);
         ResponseTyp resp = checkLoginStatus();
         if (resp != OK) return resp;
 
+        Log.d(TAG, "Creating topic " + title);
         PostTopicRequest topicReq = new PostTopicRequest();
         topicReq.setPublisherType(PublisherType.USER);
         topicReq.setTitle(title.toString());
@@ -416,11 +415,11 @@ public class ESTask {
         ResponseTyp resp = checkLoginStatus();
         if (resp != OK) return resp;
 
+        Log.d(TAG, "Getting notifications");
         String auth = String.format(SESSION_TEMPLATE, SESSION);
         Map<String, List<String>> messages = new HashMap<>();
         String readActivityHandle = null;
         try {
-            Log.d(TAG, "Getting notifications");
             ServiceResponse<FeedResponseActivityView> sResp = ES_NOTIFS.getNotifications(auth);
             if (!sResp.getResponse().isSuccess()) {
                 Log.d(TAG, "Notif Error " + sResp.getResponse().code());
@@ -429,11 +428,11 @@ public class ESTask {
 
             String commentHandle, topicHandle, msg, encounterID;
             for (ActivityView view : sResp.getBody().getData()) {
-                Log.d(TAG, "New unread notification!");
                 // we've seen all the unread messages by now
                 if (!view.getUnread()) {
                     break;
                 }
+                Log.d(TAG, "New unread notification!");
                 if (view.getActivityType() != ActivityType.COMMENT) {
                     Log.d(TAG, "Not a Comment");
                     continue; // ignore anything that isn't a comment for now
@@ -484,6 +483,7 @@ public class ESTask {
                 ServiceResponse<Object> sResp4 = ES_NOTIFS.putNotificationsStatus(req, auth);
                 if (!sResp4.getResponse().isSuccess())
                     return handleFailures(sResp4.getResponse());
+                Log.d(TAG, "Setting read activity to latest notification");
                 return OK;
             }
             Log.d(TAG, "Finished handling all notifications");
@@ -495,13 +495,7 @@ public class ESTask {
     }
 
     private static ResponseTyp checkLoginStatus() {
-        if (GoogleToken.getToken() == null) {
-            Log.d(TAG, "Not registered with Google yet");
-            GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, context);
-            GNA.makeAuthRequest();
-            return AuthFailure;
-        }
-        if (SESSION == null) {
+       if (SESSION == null) {
             Log.d(TAG, "User not logged in");
             getnewsession();
             return AuthFailure;

@@ -32,7 +32,6 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "SDDR_API: " + MainActivity.class.getSimpleName();
-    private static SDDR_API sddrAPI;
     private static Handler handler;
 
     @Override
@@ -44,11 +43,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-        if (sddrAPI == null) {
-            sddrAPI = new SDDR_API(this);
-            sddrAPI.start_service();
-            sddrAPI.enable_msging();
-        }
+        SDDR_API.start_service(this);
+        SDDR_API.enable_msging();
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
@@ -63,33 +59,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.AddLink:
-                if (sddrAPI != null) {
-                    EditText linkID = (EditText) MainActivity.this.findViewById(R.id.linkID);
-                    sddrAPI.add_linkid(linkID.getText().toString());
-                }
+                EditText linkID = (EditText) MainActivity.this.findViewById(R.id.linkID);
+                SDDR_API.add_linkid(linkID.getText().toString());
                 break;
             case R.id.SendMsg:
-                if (sddrAPI != null) {
-                    final EditText msg = (EditText) MainActivity.this.findViewById(R.id.Msg);
-                    Log.d(TAG, "SENDING MESSAGE " + msg.getText().toString());
-                    final List<MEncounter> encounters = sddrAPI.get_encounters(null);
-                    if (encounters.size() > 0)
-                        sddrAPI.send_msg(encounters.get(0), msg.getText().toString());
-                }
+                final EditText msg = (EditText) MainActivity.this.findViewById(R.id.Msg);
+                Log.d(TAG, "SENDING MESSAGE " + msg.getText().toString());
+                final List<MEncounter> encounters = SDDR_API.get_encounters(null);
+                if (encounters.size() > 0)
+                    SDDR_API.send_msg(encounters.get(0), msg.getText().toString());
                 break;
             case R.id.sign_in_button:
                 if (GoogleToken.getToken() == null) {
                     Log.d(TAG, "Not registered with Google yet");
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();
-                    break;
                 }
-
-                sddrAPI.register_user("Lily", "Tsai");
-                break;
-            case R.id.sign_out_button:
-                Log.d(TAG, "Signing out");
-                if (sddrAPI != null) sddrAPI.signout_user();
                 break;
             case R.id.get_messages:
                 Log.d(TAG, "Getting messages");
@@ -109,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         });
                     }
                 };
-                if (sddrAPI != null) sddrAPI.get_msgs(callback);
+                SDDR_API.get_msgs(callback);
                 break;
             default:
                 // Unknown id.
@@ -184,5 +169,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return true;
     }
-
 }

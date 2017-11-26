@@ -28,8 +28,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="org.mpisws.sddrservice.embedded_social.GoogleAuthActivity"/>
-
         <service android:name="org.mpisws.sddrservice.encounters.SDDR_Core_Service" />
         <receiver android:name="org.mpisws.sddrservice.encounterhistory.EncounterEventReceiver" />
 
