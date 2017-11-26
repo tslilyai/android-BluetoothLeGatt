@@ -1,5 +1,6 @@
 package org.mpisws.sddrservice.embedded_social;
 
+import android.app.Service;
 import android.content.Context;
 import android.util.Log;
 
@@ -37,6 +38,8 @@ import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.autorest.models.PutNotificationsStatusRequest;
 import com.microsoft.embeddedsocial.autorest.models.TopicView;
 import com.microsoft.embeddedsocial.autorest.models.UserProfileView;
+import com.microsoft.rest.ServiceCall;
+import com.microsoft.rest.ServiceCallback;
 import com.microsoft.rest.ServiceException;
 import com.microsoft.rest.ServiceResponse;
 
@@ -57,7 +60,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static org.mpisws.sddrservice.embedded_social.ESTask.ResponseTyp.*;
 import static org.mpisws.sddrservice.embedded_social.ESTask.Typ.LOGIN_GOOGLE;
 
 /**
@@ -120,20 +122,9 @@ public class ESTask {
     public MEncounter encounter;
     public Identifier encounterID;
     public NotificationCallback notificationCallback;
-    private int retries = 0;
 
     public ESTask(Typ typ) {
         this.typ = typ;
-    }
-
-    public enum ResponseTyp {
-        DuplicateFailure,
-        ServerFailure,
-        AuthFailure,
-        NotFoundFailure,
-        ExceptionFailure,
-        Unknown,
-        OK
     }
 
     public enum Typ {
@@ -171,7 +162,6 @@ public class ESTask {
     }
 
     public static void exec_task(ESTask task) {
-        ResponseTyp resp;
         if (task == null || context == null) {
             return;
         }
@@ -182,78 +172,37 @@ public class ESTask {
 
         switch(task.typ) {
             case LOGIN_GOOGLE: {
-                if (task.retries >= RETRIES)
-                    return;
-
                 if (task.googletoken == null)
                     return;
-
                 loginGoogle(task.googletoken);
                 break;
             }
             case REGISTER_USER: {
-                if (task.retries >= RETRIES)
+                if (task.firstname == null || task.lastname == null)
                     return;
-
-                if (task.googletoken == null || task.firstname == null || task.lastname == null)
-                    return;
-
-                resp = registerUser(task.firstname, task.lastname);
-                if (resp == OK || resp == DuplicateFailure || resp == NotFoundFailure) {
-                    return;
-                }
-
-                Log.d(TAG, "Failed to register");
-                task.retries++;
-                ESTask.addTask(task);
+                registerUser(task.firstname, task.lastname, 0);
                 break;
             }
             case SEND_MSG: {
-                if (task.retries >= RETRIES)
-                    return;
                 if (task.encounter == null || task.msg == null)
                     return;
-
-                resp = send_msg(task.encounter, task.msg);
-                if (resp == OK || resp == DuplicateFailure || resp == NotFoundFailure) {
-                    return;
-                }
-
-                Log.d(TAG, "Failed to send message");
-                task.retries++;
-                ESTask.addTask(task);
+                send_msg(task.encounter, task.msg, 0);
                 break;
             }
             case CREATE_TOPIC: {
                 // don't respond to create topic tasks unless some application wants to create topics
                 if (!addTopics)
                     return;
-                if (task.retries >= RETRIES)
-                    return;
                 if (task.encounterID == null)
                     return;
-                resp = create_topic(task.encounterID);
-                if (resp == OK || resp == DuplicateFailure || resp == NotFoundFailure) {
-                    return;
-                }
-                task.retries++;
-                ESTask.addTask(task);
+                create_topic(task.encounterID, 0);
                 break;
             }
             case GET_NOTIFICATIONS: {
-                if (task.retries >= RETRIES)
-                    return;
                 if (task.notificationCallback == null) {
                     return;
                 }
-                resp = get_notifications(task.notificationCallback);
-                if (resp == OK || resp == DuplicateFailure || resp == NotFoundFailure) {
-                    return;
-                }
-
-                Log.d(TAG, "Failed to get notifications");
-                task.retries++;
-                ESTask.addTask(task);
+                get_notifications(task.notificationCallback, 0);
                 break;
             }
             default:
@@ -261,16 +210,15 @@ public class ESTask {
         }
     }
 
-    private static ResponseTyp loginGoogle(String googletoken) {
+    private static void loginGoogle(String googletoken) {
         if (googletoken == null) {
             Log.d(TAG, "Not registered with Google yet");
-            return AuthFailure;
+        } else {
+            GOOGLETOKEN = googletoken;
         }
-        GOOGLETOKEN = googletoken;
-        return OK;
     }
 
-    private static ResponseTyp registerUser(String firstname, String lastname) {
+    private static void registerUser(final String firstname, final String lastname, final int retries) {
         final String esAuth = String.format(OAUTH_TEMPLATE, ESAPI_KEY, GOOGLETOKEN);
         Log.d(TAG, "esAuth is " + esAuth);
 
@@ -279,242 +227,261 @@ public class ESTask {
         req.setLastName(lastname);
         req.setInstanceId(SDDR_ID);
 
-        ServiceResponse<PostUserResponse> serviceResponse;
-        try {
-            serviceResponse = ES_USEROPS.postUser(req, esAuth);
-        } catch (ServiceException | IOException e) {
-            return ExceptionFailure;
-        }
-        Response response = serviceResponse.getResponse();
-        if (!response.isSuccess()) {
-            Log.d(TAG, "Failed to register user");
-            return handleFailures(response);
-        } else {
-            Log.d(TAG, "Registered user!");
-            USER_HANDLE = serviceResponse.getBody().getUserHandle();
-            SESSION = serviceResponse.getBody().getSessionToken();
-            SESSION_DATE = new Date();
-            return OK;
-        }
+        ServiceCallback<PostUserResponse> serviceCallback = new ServiceCallback<PostUserResponse>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.d(TAG, "Failed to register user, " + t.getMessage());
+                if (retries < RETRIES) {
+                    registerUser(firstname, lastname, retries+1);
+                }
+            }
+            @Override
+            public void success(ServiceResponse<PostUserResponse> result) {
+                Response response = result.getResponse();
+                Log.d(TAG, "Registered user!");
+                USER_HANDLE = result.getBody().getUserHandle();
+                SESSION = result.getBody().getSessionToken();
+                SESSION_DATE = new Date();
+            }
+        };
+        ES_USEROPS.postUserAsync(req, esAuth, serviceCallback);
     }
 
-    private static ResponseTyp getnewsession() {
+    private static void getnewsession(final int retries) {
         final String esAuth = String.format(OAUTH_TEMPLATE, ESAPI_KEY, GOOGLETOKEN);
         Log.d(TAG, "esAuth is " + esAuth);
 
-        try {
-            // find the user handle if we haven't set it yet
-            if (USER_HANDLE == null) {
-                ServiceResponse<UserProfileView> sResp = ES_USEROPS.getMyProfile(esAuth);
-                if (!sResp.getResponse().isSuccess()) {
-                    return handleFailures(sResp.getResponse());
+        // find the user handle if we haven't set it yet
+        if (USER_HANDLE == null) {
+            ServiceCallback<UserProfileView> serviceCallback = new ServiceCallback<UserProfileView>() {
+                @Override
+                public void failure(Throwable t) {
+                    Log.d(TAG, "Failed to register user, " + t.getMessage());
+                    if (retries < RETRIES) {
+                        getnewsession(retries + 1);
+                    }
                 }
-                Log.d(TAG, "Got user info");
-                USER_HANDLE = sResp.getBody().getUserHandle();
-            }
-
-            // create a new session for this user
-            final PostSessionRequest req = new PostSessionRequest();
-            req.setUserHandle(USER_HANDLE);
-            req.setInstanceId(SDDR_ID);
-
-            ServiceResponse<PostSessionResponse> sResp2 = ES_SESSION.postSession(req, esAuth);
-            Response response = sResp2.getResponse();
-            if (!response.isSuccess()) {
-                Log.d(TAG, "Getting new session failed");
-                return handleFailures(response);
-            } else {
-                Log.d(TAG, "New session!");
-                USER_HANDLE = sResp2.getBody().getUserHandle();
-                SESSION = sResp2.getBody().getSessionToken();
-                SESSION_DATE = new Date();
-                return OK;
-            }
-        } catch (ServiceException | IOException e) {
-            return ExceptionFailure;
+                @Override
+                public void success(ServiceResponse<UserProfileView> sResp) {
+                    Log.d(TAG, "Got user info");
+                    USER_HANDLE = sResp.getBody().getUserHandle();
+                }
+            };
+            ES_USEROPS.getMyProfileAsync(esAuth, serviceCallback);
         }
+
+        // create a new session for this user
+        final PostSessionRequest req = new PostSessionRequest();
+        req.setUserHandle(USER_HANDLE);
+        req.setInstanceId(SDDR_ID);
+
+        ServiceCallback<PostSessionResponse> serviceCallback = new ServiceCallback<PostSessionResponse>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.d(TAG, "Getting new session failed");
+                if (retries < RETRIES) {
+                    getnewsession(retries + 1);
+                }
+            }
+            @Override
+            public void success(ServiceResponse<PostSessionResponse> sResp) {
+                Log.d(TAG, "New session!");
+                USER_HANDLE = sResp.getBody().getUserHandle();
+                SESSION = sResp.getBody().getSessionToken();
+                SESSION_DATE = new Date();
+            }
+        };
+        ES_SESSION.postSessionAsync(req, esAuth, serviceCallback);
     }
 
-    private static ResponseTyp create_topic(Identifier title) {
-        ResponseTyp resp = checkLoginStatus();
-        if (resp != OK) return resp;
+    private static void create_topic(final Identifier title, final int retries) {
+        checkLoginStatus();
 
         Log.d(TAG, "Creating topic " + title);
         PostTopicRequest topicReq = new PostTopicRequest();
         topicReq.setPublisherType(PublisherType.USER);
         topicReq.setTitle(title.toString());
         topicReq.setText(USER_HANDLE);
-        ServiceResponse<PostTopicResponse> sResp;
-        try {
-            sResp = ES_TOPICS.postTopic(topicReq, String.format(SESSION_TEMPLATE, SESSION));
-            if (!sResp.getResponse().isSuccess()) {
+        ServiceCallback<PostTopicResponse> serviceCallback = new ServiceCallback<PostTopicResponse>() {
+            @Override
+            public void failure(Throwable t) {
                 Log.d(TAG, "Posting topic failed");
-                return handleFailures(sResp.getResponse());
-            } else {
-                Log.d(TAG, "Created topic for EID " + title);
-                return OK;
+                if (retries < RETRIES) {
+                    create_topic(title, retries + 1);
+                }
             }
-        } catch (ServiceException | IOException e) {
-            e.printStackTrace();
-            return ExceptionFailure;
-        }
+            @Override
+            public void success(ServiceResponse<PostTopicResponse> result) {
+                Log.d(TAG, "Created topic for EID " + title);
+            }
+        };
+        ES_TOPICS.postTopicAsync(topicReq, String.format(SESSION_TEMPLATE, SESSION), serviceCallback);
     }
 
-    private static ResponseTyp send_msg(MEncounter encounter, String msg) {
-        ResponseTyp resp = checkLoginStatus();
-        if (resp != OK) return resp;
+    private static void send_msg(final MEncounter encounter, final String msg, final int retries) {
+        checkLoginStatus();
 
+        // TODO this sends to all of the different encounterIDs associated with this encounter
         Log.d(TAG, "Sending message to " + encounter.getEncounterIDs(context).size() + " encounters");
-        try {
-            for (Identifier eid : encounter.getEncounterIDs(context)) {
-                PostCommentRequest req = new PostCommentRequest();
-                req.setText(msg);
-
-                ServiceResponse<FeedResponseTopicView> sResp = ES_SEARCH.getTopics(eid.toString(), String.format(SESSION_TEMPLATE, SESSION));
-                if (!sResp.getResponse().isSuccess()) {
-                    Log.d(TAG, "Topic Error " + sResp.getResponse().code());
-                    return handleFailures(sResp.getResponse());
-                }
-
-                List<TopicView> topics = sResp.getBody().getData();
-                if (topics.size() == 0) {
-                    Log.d(TAG, "Too few topics with this EID, need to create " + eid.toString());
-                    create_topic(eid);
-                    return Unknown;
-                } else if (topics.size() == 1) {
-                    if (topics.get(0).getText().compareTo(USER_HANDLE) == 0) {
-                        return Unknown;
-                    } else {
-                        Log.d(TAG, "We don't have a topic for this EID, need to create " + eid.toString());
-                        create_topic(eid);
-                        return Unknown;
+        final PostCommentRequest req = new PostCommentRequest();
+        req.setText(msg);
+        final String auth = String.format(SESSION_TEMPLATE, SESSION);
+        for (final Identifier eid : encounter.getEncounterIDs(context)) {
+            final ServiceCallback<FeedResponseTopicView> serviceCallback = new ServiceCallback<FeedResponseTopicView>() {
+                @Override
+                public void failure(Throwable t) {
+                    Log.d(TAG, "Topic Error");
+                    if (retries < RETRIES) {
+                        send_msg(encounter, msg, retries + 1);
                     }
                 }
-
-                // send to the topic with text not equal to our own UUID
-                Log.d(TAG, "USER 0: " + ((topics.get(0).getText()) + " " + USER_HANDLE));
-                Log.d(TAG, "USER 1: " + ((topics.get(1).getText()) + " " + USER_HANDLE));
-                String topicHandle = ((topics.get(0).getText()).compareTo(USER_HANDLE) == 0) ?
-                        topics.get(1).getTopicHandle() : topics.get(0).getTopicHandle();
-                ServiceResponse<PostCommentResponse> sRespTH = ES_TOPIC_COMMENTS.postComment(topicHandle, req, String.format(SESSION_TEMPLATE, SESSION));
-                if (!sRespTH.getResponse().isSuccess()) {
-                    Log.d(TAG, "Sending to topic failed");
-                    return handleFailures(sRespTH.getResponse());
+                @Override
+                public void success(ServiceResponse<FeedResponseTopicView> result) {
+                    List<TopicView> topics = result.getBody().getData();
+                    if (topics.size() == 0) {
+                        Log.d(TAG, "Too few topics with this EID, need to create " + eid.toString());
+                        create_topic(eid, 0);
+                    } else if (topics.size() == 1) {
+                        if (topics.get(0).getText().compareTo(USER_HANDLE) == 0) {
+                        } else {
+                            Log.d(TAG, "We don't have a topic for this EID, need to create " + eid.toString());
+                            create_topic(eid, 0);
+                        }
+                    }
+                    // send to the topic with text not equal to our own UUID
+                    Log.d(TAG, "USER 0: " + ((topics.get(0).getText()) + " " + USER_HANDLE));
+                    Log.d(TAG, "USER 1: " + ((topics.get(1).getText()) + " " + USER_HANDLE));
+                    String topicHandle = ((topics.get(0).getText()).compareTo(USER_HANDLE) == 0) ?
+                            topics.get(1).getTopicHandle() : topics.get(0).getTopicHandle();
+                    postComment(eid.toString(), topicHandle, req, auth, 0);
                 }
-                Log.d(TAG, "Messages sent to EID " + eid + ": " + msg);
-            }
-            return OK;
-            // deal with all the possible exceptions
-        } catch (ServiceException | IOException e) {
-            e.printStackTrace();
-            return ExceptionFailure;
+            };
+            ES_SEARCH.getTopicsAsync(eid.toString(), auth, serviceCallback);
         }
     }
+    private static void postComment(final String eid, final String topicHandle, final PostCommentRequest req, final String ESAuth, final int retries) {
+         ServiceCallback<PostCommentResponse> serviceCallback = new ServiceCallback<PostCommentResponse>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.d(TAG, "PostComment to topic failed");
+                if (retries < RETRIES) {
+                    postComment(eid, topicHandle, req, ESAuth, retries + 1);
+                }
+            }
+            @Override
+            public void success(ServiceResponse<PostCommentResponse> result) {
+                Log.d(TAG, "Messages sent to EID " + eid + ": " + req.getText());
+            }
+        };
+        ES_TOPIC_COMMENTS.postCommentAsync(topicHandle, req, ESAuth, serviceCallback);
+    }
 
-    private static ResponseTyp get_notifications(NotificationCallback notificationCallback) {
-        ResponseTyp resp = checkLoginStatus();
-        if (resp != OK) return resp;
+    private static void get_notifications(final NotificationCallback notificationCallback, final int retries) {
+        checkLoginStatus();
 
         Log.d(TAG, "Getting notifications");
-        String auth = String.format(SESSION_TEMPLATE, SESSION);
-        Map<String, List<String>> messages = new HashMap<>();
-        String readActivityHandle = null;
-        try {
-            ServiceResponse<FeedResponseActivityView> sResp = ES_NOTIFS.getNotifications(auth);
-            if (!sResp.getResponse().isSuccess()) {
-                Log.d(TAG, "Notif Error " + sResp.getResponse().code());
-                return handleFailures(sResp.getResponse());
+        final String auth = String.format(SESSION_TEMPLATE, SESSION);
+        ServiceCallback<FeedResponseActivityView> serviceCallback = new ServiceCallback<FeedResponseActivityView>() {
+           @Override
+           public void failure(Throwable t) {
+               Log.d(TAG, "Failed to get notifications");
+               if (retries < RETRIES) {
+                   get_notifications(notificationCallback, retries + 1);
+               }
+           }
+           @Override
+           public void success(ServiceResponse<FeedResponseActivityView> result) {
+               Map<String, List<String>> messages = new HashMap<>();
+               String readActivityHandle = null;
+               String commentHandle, topicHandle, msg, encounterID;
+               for (ActivityView view : result.getBody().getData()) {
+                   // we've seen all the unread messages by now
+                   if (!view.getUnread()) {
+                       break;
+                   }
+                   Log.d(TAG, "New unread notification!");
+                   if (view.getActivityType() != ActivityType.COMMENT) {
+                       Log.d(TAG, "Not a Comment");
+                       continue; // ignore anything that isn't a comment for now
+                   }
+                   if (view.getActedOnContent().getContentType() != ContentType.TOPIC) {
+                       Log.d(TAG, "Comment not posted on topic");
+                       continue; // ignore comments not posted to topics (?)
+                   }
+
+                   // get the unread message
+                   commentHandle = view.getActivityHandle();
+                   // set the latest read comment
+                   if (readActivityHandle == null) {
+                       readActivityHandle = commentHandle;
+                   }
+
+                    /* TODO getting messages synchronously for now so that we can return a list of
+                         all notification messages
+                    */
+                   ServiceResponse<CommentView> sResp2 = null;
+                   try {
+                       sResp2 = ES_COMMENTS.getComment(commentHandle, auth);
+                       if (!sResp2.getResponse().isSuccess()) {
+                           Log.d(TAG, "Topic Error " + sResp2.getResponse().code());
+                           get_notifications(notificationCallback, retries + 1);
+                       }
+                       msg = sResp2.getBody().getText();
+                       Log.d(TAG, "Got message " + msg);
+
+                       // get the encounterID
+                       topicHandle = sResp2.getBody().getTopicHandle();
+                       ServiceResponse<TopicView> sResp3 = ES_TOPICS.getTopic(topicHandle, auth);
+                       if (!sResp3.getResponse().isSuccess()) {
+                           Log.d(TAG, "Topic Error " + sResp3.getResponse().code());
+                           get_notifications(notificationCallback, retries + 1);
+                       }
+                       encounterID = sResp3.getBody().getTitle();
+                       if (messages.get(encounterID) == null) {
+                           List<String> msgs = new LinkedList<String>();
+                           msgs.add(msg);
+                           messages.put(encounterID, msgs);
+                       } else {
+                           messages.get(encounterID).add(msg);
+                       }
+                       Log.d(TAG, "Messages for encounterID " + encounterID + " is size " + messages.get(encounterID).size());
+                   } catch (ServiceException | IOException e) {
+                       e.printStackTrace();
+                   }
+               }
+               notificationCallback.onReceiveMessages(messages);
+
+               if (readActivityHandle != null) {
+                   updateReadNotifs(readActivityHandle, auth, 0);
+              }
+           }
+       };
+       ES_NOTIFS.getNotificationsAsync(auth, serviceCallback);
+    }
+    private static void updateReadNotifs(final String readActivityHandle, final String auth, final int retries) {
+        PutNotificationsStatusRequest req = new PutNotificationsStatusRequest();
+        req.setReadActivityHandle(readActivityHandle);
+
+        ServiceCallback<Object> serviceCallback = new ServiceCallback<Object>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.d(TAG, "Failed to update notification status");
+                if (retries < RETRIES) {
+                    updateReadNotifs(readActivityHandle, auth, retries + 1);
+                }
             }
-
-            String commentHandle, topicHandle, msg, encounterID;
-            for (ActivityView view : sResp.getBody().getData()) {
-                // we've seen all the unread messages by now
-                if (!view.getUnread()) {
-                    break;
-                }
-                Log.d(TAG, "New unread notification!");
-                if (view.getActivityType() != ActivityType.COMMENT) {
-                    Log.d(TAG, "Not a Comment");
-                    continue; // ignore anything that isn't a comment for now
-                }
-                if (view.getActedOnContent().getContentType() != ContentType.TOPIC) {
-                    Log.d(TAG, "Comment not posted on topic");
-                    continue; // ignore comments not posted to topics (?)
-                }
-
-                // get the unread message
-                commentHandle = view.getActivityHandle();
-                // set the latest read comment
-                if (readActivityHandle == null) {
-                    readActivityHandle = commentHandle;
-                }
-                ServiceResponse<CommentView> sResp2 = ES_COMMENTS.getComment(commentHandle, auth);
-                if (!sResp2.getResponse().isSuccess()) {
-                    Log.d(TAG, "Topic Error " + sResp2.getResponse().code());
-                    return handleFailures(sResp2.getResponse());
-                }
-                msg = sResp2.getBody().getText();
-                Log.d(TAG, "Got message " + msg);
-
-                // get the encounterID
-                topicHandle = sResp2.getBody().getTopicHandle();
-                ServiceResponse<TopicView> sResp3 = ES_TOPICS.getTopic(topicHandle, auth);
-                if (!sResp3.getResponse().isSuccess()) {
-                    Log.d(TAG, "Topic Error " + sResp3.getResponse().code());
-                    return handleFailures(sResp3.getResponse());
-                }
-                encounterID = sResp3.getBody().getTitle();
-                if (messages.get(encounterID) == null) {
-                    List<String> msgs = new LinkedList<String>();
-                    msgs.add(msg);
-                    messages.put(encounterID, msgs);
-                } else {
-                    messages.get(encounterID).add(msg);
-                }
-                Log.d(TAG, "Messages for encounterID " + encounterID + " is size " + messages.get(encounterID).size());
+            @Override
+            public void success(ServiceResponse<Object> result) {
+                Log.d(TAG, "Set read activity to latest notification");
             }
-            notificationCallback.onReceiveMessages(messages);
-
-            // set these messages as read if we've read any unread comments
-            if (readActivityHandle != null) {
-                PutNotificationsStatusRequest req = new PutNotificationsStatusRequest();
-                req.setReadActivityHandle(readActivityHandle);
-
-                ServiceResponse<Object> sResp4 = ES_NOTIFS.putNotificationsStatus(req, auth);
-                if (!sResp4.getResponse().isSuccess())
-                    return handleFailures(sResp4.getResponse());
-                Log.d(TAG, "Setting read activity to latest notification");
-                return OK;
-            }
-            Log.d(TAG, "Finished handling all notifications");
-            return OK;
-        } catch (ServiceException | IOException e) {
-            e.printStackTrace();
-            return ExceptionFailure;
-        }
+        };
+        ES_NOTIFS.putNotificationsStatusAsync(req, auth, serviceCallback);
     }
 
-    private static ResponseTyp checkLoginStatus() {
+    private static void checkLoginStatus() {
        if (SESSION == null) {
             Log.d(TAG, "User not logged in");
-            getnewsession();
-            return AuthFailure;
-        }
-        return OK;
-    }
-
-    private static ResponseTyp handleFailures(Response response) {
-        if (response.code() == 409) {
-            Log.d(TAG, "Duplicate Failure");
-            return DuplicateFailure;
-        } else if (response.code() == 401) {
-            return AuthFailure;
-        } else if (response.code() == 500) {
-            return ServerFailure;
-        } else if (response.code() == 404) {
-            return NotFoundFailure;
-        } else {
-            return Unknown;
+            getnewsession(0);
         }
     }
 }
