@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.mpi_sws.sddrapp.R;
+import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
+import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.SDDR_API;
 import org.mpisws.sddrservice.embedded_social.ESTask;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
@@ -30,6 +33,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "SDDR_API: " + MainActivity.class.getSimpleName();
     private static SDDR_API sddrAPI;
+    private static Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.get_messages).setOnClickListener(this);
         findViewById(R.id.SendMsg).setOnClickListener(this);
         findViewById(R.id.AddLink).setOnClickListener(this);
+
+        handler = new Handler();
     }
 
     @Override
@@ -72,6 +78,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.sign_in_button:
+                if (GoogleToken.getToken() == null) {
+                    Log.d(TAG, "Not registered with Google yet");
+                    GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
+                    GNA.makeAuthRequest();
+                    break;
+                }
+
                 sddrAPI.register_user("Lily", "Tsai");
                 break;
             case R.id.sign_out_button:
@@ -82,15 +95,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "Getting messages");
                 ESTask.NotificationCallback callback = new ESTask.NotificationCallback() {
                     @Override
-                    public void onReceiveMessages(Map<String, List<String>> messages) {
-                        final TextView text = MainActivity.this.findViewById(R.id.new_messages);
-                        for (Map.Entry<String, List<String>> entry : messages.entrySet())
-                        {
-                            text.append(entry.getKey() + ": ");
-                            for (String msg : entry.getValue()) {
-                                text.append(entry.getKey() + ": " + msg + "\n");
+                    public void onReceiveMessages(final Map<String, List<String>> messages) {
+                        handler.post(new Runnable() {
+                            public void run() {
+                                final TextView text = MainActivity.this.findViewById(R.id.new_messages);
+                                for (Map.Entry<String, List<String>> entry : messages.entrySet()) {
+                                    text.append(entry.getKey() + ": ");
+                                    for (String msg : entry.getValue()) {
+                                        text.append(entry.getKey() + ": " + msg + "\n");
+                                    }
+                                }
                             }
-                        }
+                        });
                     }
                 };
                 if (sddrAPI != null) sddrAPI.get_msgs(callback);
