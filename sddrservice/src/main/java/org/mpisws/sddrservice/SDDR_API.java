@@ -45,7 +45,7 @@ public class SDDR_API {
         serviceIntent.putExtra("@string.add_linkid", linkID);
         // TODO if we change the mode to listen-only, this is the same as retroactive linking
         serviceIntent.putExtra("Mode", LinkabilityEntryMode.AdvertiseAndListen);
-        Log.d(TAG, "Adding linkID " + linkID);
+        Log.v(TAG, "Adding linkID " + linkID);
         context.startService(serviceIntent);
     }
 

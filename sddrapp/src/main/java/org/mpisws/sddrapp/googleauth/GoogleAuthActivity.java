@@ -33,19 +33,19 @@ public class GoogleAuthActivity extends AppCompatActivity {
                             @Override public void onTokenRequestCompleted(
                                     TokenResponse resp, AuthorizationException ex) {
                                 if (ex == null && resp != null) {
-                                    Log.d(TAG, "Got access token!!!" + resp.accessToken);
+                                    Log.v(TAG, "Got access token!!!" + resp.accessToken);
                                     GoogleToken.setToken(resp.accessToken);
                                 } else {
-                                    Log.d(TAG, ex.getStackTrace().toString());
-                                    Log.d(TAG, "Auth failed");
+                                    Log.v(TAG, ex.getStackTrace().toString());
+                                    Log.v(TAG, "Auth failed");
                                 }
-                                Log.d(TAG, "Finishing activity");
+                                Log.v(TAG, "Finishing activity");
                                 finish();
                             }
                         });
                 service.dispose();
             } else {
-                Log.d(TAG, "Auth failed");
+                Log.v(TAG, "Auth failed");
             }
        }
     }

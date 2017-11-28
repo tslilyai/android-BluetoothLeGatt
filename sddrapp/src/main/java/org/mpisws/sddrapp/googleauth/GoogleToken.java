@@ -16,9 +16,9 @@ public class GoogleToken {
         return token;
     }
     public static void setToken(String newtoken) {
-        Log.d(TAG, "Set access token " + newtoken);
+        Log.v(TAG, "Set access token " + newtoken);
         token = newtoken;
-        Log.d(TAG, "Registering with SDDR with new token");
+        Log.v(TAG, "Registering with SDDR with new token");
         SDDR_API.register_user(GoogleToken.getToken(), "Lily", "Tsai");
     }
 }

@@ -59,7 +59,7 @@ public class GoogleNativeAuthenticator {
     private void sendAuthRequest(AuthorizationServiceConfiguration serviceConfiguration) {
         String authRedirect = String.format("%s:/oauth2redirect", redirectURI);
         Uri redirectUri = Uri.parse(authRedirect);
-        Log.d(TAG, authRedirect);
+        Log.v(TAG, authRedirect);
 
         AuthorizationRequest request = new AuthorizationRequest.Builder(
                 serviceConfiguration,
@@ -69,7 +69,7 @@ public class GoogleNativeAuthenticator {
                 .setScopes(authMode.getPermissions())
                 .build();
 
-        Log.d(TAG, "Making request!");
+        Log.v(TAG, "Making request!");
         Intent intent = new Intent(context, GoogleAuthActivity.class);
         PendingIntent pi = PendingIntent.getActivity(context, request.hashCode(), intent, 0);
         service.performAuthorizationRequest(request, pi);
