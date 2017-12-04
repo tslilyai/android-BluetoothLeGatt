@@ -27,7 +27,7 @@ public class Constants {
     /**
      * Scanning-related constants
      */
-    public static final long SCAN_PERIOD = 12000;
+    public static final long SCAN_PERIOD = 700;
 
     /**
      * Other Constants

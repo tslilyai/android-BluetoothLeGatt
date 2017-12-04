@@ -14,7 +14,7 @@ import android.util.Log;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import org.mpisws.sddrservice.embedded_social.ESTask;
+import org.mpisws.sddrservice.embeddedsocial.ESTask;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
@@ -83,13 +83,13 @@ public class SDDR_Core implements Runnable {
     }
 
     private void updateAdvert() {
-        Log.d(TAG, "Updating Advert");
+        Log.v(TAG, "Updating Advert");
         mAdvertiser.setAdData(SDDR_Native.c_changeAndGetAdvert());
         mAdvertiser.resetAdvertiser();
     }
 
     public void initialize() {
-        Log.d(TAG, "onCreate");
+        Log.v(TAG, "onCreate");
         final BluetoothManager bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
@@ -101,7 +101,7 @@ public class SDDR_Core implements Runnable {
         ESTask.setContext(mService);
 
         // initialize the C radio class
-        Log.d(TAG, "Initializing radio");
+        Log.v(TAG, "Initializing radio");
         SDDR_Native.c_mallocRadio();
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter);
@@ -113,7 +113,7 @@ public class SDDR_Core implements Runnable {
     }
 
     public void run() {
-        Log.d(TAG, "Running core");
+        Log.v(TAG, "Running core");
         // set the initial UUIDs and advert data
         updateAddr();
         updateAdvert();
@@ -125,19 +125,19 @@ public class SDDR_Core implements Runnable {
         while (should_run) {
             mRA = SDDR_Native.c_getNextRadioAction();
             if (mRA.duration > 0) {
-                Log.d(TAG, "sleeping for " + mRA.duration);
+                Log.v(TAG, "sleeping for " + mRA.duration);
                 mSleeper.sleep(mRA.duration);
             } else {
-                Log.d(TAG, "executing action immediately");
+                Log.v(TAG, "executing action immediately");
             }
             switch (mRA.type) {
                 case ChangeEpoch:
-                    Log.d(TAG, "Changing Epoch");
+                    Log.v(TAG, "Changing Epoch");
                     SDDR_Native.c_changeEpoch();
                     updateAddr();
                     break;
                 case Discover:
-                    Log.d(TAG, "Performing Discovery");
+                    Log.v(TAG, "Performing Discovery");
                     updateAdvert();
                     mScanner.discoverEncounters();
                     processEncounters(mService);
@@ -151,13 +151,13 @@ public class SDDR_Core implements Runnable {
                         new Thread() {
                             @Override
                             public void run() {
-                                while (true) {
-                                    ESTask t = ESTask.getTask();
-                                    if (t == null) {
-                                        return;
-                                    }
-                                    ESTask.exec_task(t);
+                            while (true) {
+                                ESTask t = ESTask.getTask();
+                                if (t == null) {
+                                    return;
                                 }
+                                ESTask.exec_task(t);
+                            }
                             }
                         }.start();
                     }
@@ -191,7 +191,7 @@ public class SDDR_Core implements Runnable {
     protected void updateEncounterMatchings() {
         List<MEncounter> encounters = mEncounterBridge.getAllItems();
         for (MEncounter e : encounters) {
-            Log.d(TAG, "Retroactive matching for encounter " + e.getPKID());
+            Log.v(TAG, "Retroactive matching for encounter " + e.getPKID());
             e.updateEncounterMatchings(mService);
         }
     }
@@ -209,7 +209,7 @@ public class SDDR_Core implements Runnable {
                 entryBuilder.setMode(SDDR_Proto.Event.LinkabilityEvent.Entry.ModeType.AdvertAndListen);
             }
             eventEntries.add(entryBuilder.setLinkValue(ByteString.copyFrom(entry.getIdValue().getBytes())).build());
-            Log.d(TAG, "Adding linkability entry with ID " + entry.getIdValue() + " to listen/advertise set");
+            Log.v(TAG, "Adding linkability entry with ID " + entry.getIdValue() + " to listen/advertise set");
         }
         final SDDR_Proto.Event event = SDDR_Proto.Event.newBuilder().
                 setLinkabilityEvent(SDDR_Proto.Event.LinkabilityEvent.newBuilder().
@@ -223,17 +223,17 @@ public class SDDR_Core implements Runnable {
         try {
             // TODO this is pretty inefficient
             mLinkBridge.getPKIDForIDValue(entry.getIdValue());
-            Log.d(TAG, "ID " + entry.getIdValue() + " already in database");
+            Log.v(TAG, "ID " + entry.getIdValue() + " already in database");
             return false;
         } catch (NotFoundException e) {
-            Log.d(TAG, "ID " + entry.getIdValue() + " not found, adding to database");
+            Log.v(TAG, "ID " + entry.getIdValue() + " not found, adding to database");
             mLinkBridge.addItem(entry);
             return true;
         }
     }
 
     public static void processEncounters(Context context) {
-        Log.d(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
+        Log.v(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
 
         //for (byte[] msg : SDDR_Native.c_EncounterMsgs) {
         for (Iterator<byte[]> iterator = SDDR_Native.c_EncounterMsgs.iterator(); iterator.hasNext();) {

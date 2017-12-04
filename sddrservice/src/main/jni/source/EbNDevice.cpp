@@ -135,7 +135,7 @@ void EbNDevice::confirmPassive(const BloomFilter *bloom, const uint8_t *prefix, 
           secret.confirm(SharedSecret::ConfirmScheme::Passive);
           secretsToReport_.push_back(secret);
 
-          LOG_P("EbNDevice", "Confirmed shared secret \'%s\' for id %d", secret.value.toString().c_str(), id_);
+          LOG_D("EbNDevice", "Confirmed shared secret \'%s\' for id %d", secret.value.toString().c_str(), id_);
         }
       }
       else
@@ -145,7 +145,7 @@ void EbNDevice::confirmPassive(const BloomFilter *bloom, const uint8_t *prefix, 
 
       if(!secret.confirmed)
       {
-        LOG_P("EbNDevice", "Shared secret \'%s\' for id %d has pFalse %g", secret.value.toString().c_str(), id_, secret.pFalse);
+        LOG_D("EbNDevice", "Shared secret \'%s\' for id %d has pFalse %g", secret.value.toString().c_str(), id_, secret.pFalse);
       }
     }
   }
@@ -191,12 +191,7 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
     const bool reportRSSI = !rssiToReport_.empty() && ((getTimeMS() - lastReportTime_) > rssiReportingInterval);
 
     const bool isUpdated = confirmed_ && shakenHands_ && (reportSecrets || reportMatching || reportRSSI || reportBlooms);
-    LOG_D(TAG, "getEncounterInfo -- reportSecrets ? %d", reportSecrets);
     LOG_D(TAG, "getEncounterInfo -- Updated ? %d", isUpdated);
-    LOG_D(TAG, "getEncounterInfo -- confirmed ? %d", confirmed_);
-    LOG_D(TAG, "getEncounterInfo -- shakenHands? %d", shakenHands_);
-    LOG_D(TAG, "getEncounterInfo -- reportMatching? %d", reportMatching);
-    LOG_D(TAG, "getEncounterInfo -- reportBlooms? %d", reportBlooms);
     if(isUpdated)
     {
       dest.type = (reported_ ? EncounterEvent::Updated : EncounterEvent::Started);

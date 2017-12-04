@@ -198,7 +198,6 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
 
     processAdvert(device, scanTime, data);
     processEpochs(device);
-    LOG_D(TAG, "Processing adverts and epochs done");
 }
 
 vector<std::string> SDDRRadio::postDiscoveryGetEncounters()

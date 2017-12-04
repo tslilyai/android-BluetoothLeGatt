@@ -42,6 +42,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
+
 /**
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
  */
@@ -62,7 +64,7 @@ public class Scanner {
         this.mBluetoothAdapter = btAdapter;
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mHandler = new Handler();
-        Log.d(TAG, "Initialized Scanner");
+        Log.v(TAG, "Initialized Scanner");
     }
 
     private class RunPostDiscovery implements Runnable {
@@ -70,7 +72,7 @@ public class Scanner {
 
         public void run() {
             stopScanning();
-            Log.d(TAG, "Post discovery");
+            Log.v(TAG, "Post discovery");
 
             /* sets the c_EncounterMsgs list in SDDR_Core */
             SDDR_Native.c_postDiscovery();
@@ -83,7 +85,7 @@ public class Scanner {
     }
     private final RunPostDiscovery RunPD = new RunPostDiscovery();
     public void discoverEncounters() {
-        Log.d(TAG, "Prediscovery");
+        Log.v(TAG, "Prediscovery");
         SDDR_Native.c_preDiscovery();
         startScanning();
         mHandler.postDelayed(RunPD, Constants.SCAN_PERIOD);
@@ -93,7 +95,7 @@ public class Scanner {
                     RunPD.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    Log.d(TAG, "Interrupted before PostDiscovery runnable completed");
+                    Log.v(TAG, "Interrupted before PostDiscovery runnable completed");
                 }
             }
         }
@@ -104,20 +106,20 @@ public class Scanner {
      */
     public void startScanning() {
         if (mScanCallback == null) {
-            Log.d(TAG, "Creating new scan callback");
+            Log.v(TAG, "Creating new scan callback");
             mScanCallback = new SDDRScanCallback();
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
         } else {
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
         }
-        Log.d(TAG, "Starting Scanning");
+        Log.v(TAG, "Starting Scanning");
     }
 
     /**
      * Stop scanning for BLE Advertisements.
      */
     public void stopScanning() {
-        Log.d(TAG, "Stopping Scanning");
+        Log.v(TAG, "Stopping Scanning");
         mBluetoothLeScanner.stopScan(mScanCallback);
     }
 
@@ -136,6 +138,7 @@ public class Scanner {
      */
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
+        builder.setScanMode(SCAN_MODE_BALANCED);
         return builder.build();
     }
 
@@ -147,21 +150,19 @@ public class Scanner {
         private void connectResult(ScanResult result) {
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getAddress();
-            Log.d(TAG, "Got BT address to connect: " + deviceAddress);
+            Log.v(TAG, "Got BT address to connect: " + deviceAddress);
             mGatt = device.connectGatt(mService, false, new GattClientCallback());
         }
 
         private void processResult(ScanResult result) {
-            Log.d(TAG, "Got scan result");
             ScanRecord record = result.getScanRecord();
             if (record == null) {
-                Log.d(TAG, "No scan record");
+                Log.v(TAG, "No scan record");
                 return;
             } else {
-                Log.d(TAG, "Scan Result Device: " + result.getDevice().getAddress());
                 Map<ParcelUuid, byte[]> datamap = record.getServiceData();
                 if (datamap.size() != 1) {
-                    Log.d(TAG, "Not SDDR_API: Not one service");
+                    Log.d(TAG, "Scan Result (not SDDR: not one service!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                     return;
                 }
 
@@ -170,13 +171,13 @@ public class Scanner {
                     bb.putLong(pu.getUuid().getMostSignificantBits());
                     bb.putLong(pu.getUuid().getLeastSignificantBits());
                     byte[] datahead = bb.array();
-                    Log.d(TAG, "Got parceluuid data " + pu.getUuid().toString() + " of len " + datahead.length);
+                    Log.v(TAG, "Got parceluuid data " + pu.getUuid().toString() + " of len " + datahead.length);
 
                     byte[] datatail = datamap.get(pu);
                     int len = datatail.length + datahead.length;
                     Utils.myAssert(datahead.length == Constants.PUUID_LENGTH);
                     if (len != Constants.PUUID_LENGTH + Constants.ADVERT_LENGTH) {
-                        Log.d(TAG,"Not SDDR_API: Wrong advert length " + len);
+                        Log.d(TAG, "Scan Result (not SDDR: wrong advert length " + len + "!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                         return;
                     }
                     byte[] ID = Arrays.copyOfRange(datahead, 0, Constants.ADDR_LENGTH);
@@ -186,7 +187,8 @@ public class Scanner {
                     System.arraycopy(datatail, 0, advert, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH, Constants.ADVERT_LENGTH);
 
                     int rssi = result.getRssi();
-                    Log.d(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
+                    Log.d(TAG, "Scan Result (SDDR): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
+                    Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi);
                     SDDR_Native.c_processScanResult(ID, rssi, advert);
@@ -210,7 +212,7 @@ public class Scanner {
 
         @Override
         public void onScanFailed(int errorCode) {
-            Log.d(TAG, "Scanning failed: " + errorCode);
+            Log.v(TAG, "Scanning failed: " + errorCode);
         }
     }
 
@@ -221,22 +223,22 @@ public class Scanner {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
             if (status == BluetoothGatt.GATT_FAILURE) {
-                Log.d(TAG, "ResponseTyp to connect to device");
+                Log.v(TAG, "ResponseTyp to connect to device");
                 disconnectGattServer();
                 return;
             } else if (status != BluetoothGatt.GATT_SUCCESS) {
                 disconnectGattServer();
-                Log.d(TAG, "Unsuccessful connect to device");
+                Log.v(TAG, "Unsuccessful connect to device");
                 return;
             }
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d(TAG, "Connected to device");
+                Log.v(TAG, "Connected to device");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 disconnectGattServer();
             }
         }
         public void disconnectGattServer() {
-            Log.d(TAG, "Disconnecting device");
+            Log.v(TAG, "Disconnecting device");
             if (mGatt != null) {
                 mGatt.disconnect();
                 mGatt.close();

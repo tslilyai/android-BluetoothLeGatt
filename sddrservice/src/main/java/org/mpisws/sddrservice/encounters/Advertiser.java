@@ -18,6 +18,8 @@ import org.mpisws.sddrservice.lib.Utils;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_BALANCED;
+
 /**
  * Manages BLE Advertising.
  */
@@ -119,6 +121,7 @@ public class Advertiser {
         // TODO active scheme connectable or scannable
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
         settingsBuilder.setConnectable(false); // TODO
+        settingsBuilder.setAdvertiseMode(ADVERTISE_MODE_BALANCED);
         settingsBuilder.setTimeout(0);
         return settingsBuilder.build();
     }

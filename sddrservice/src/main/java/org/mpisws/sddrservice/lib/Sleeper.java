@@ -35,7 +35,7 @@ public class Sleeper extends BroadcastReceiver {
     /** Must be called from a worker thread
      Should not be called more than once concurrently */
     public synchronized void sleep(final long sleepTime_ms) {
-        Log.d(TAG, sleepTime_ms + " ms sleep requested, setting wakeup alarm");
+        Log.v(TAG, sleepTime_ms + " ms sleep requested, setting wakeup alarm");
         Utils.myAssert(sleepTime_ms > 0);
         Utils.myAssert(sleepTime_ms < 300000);
         final Intent wakeIntent = new Intent(context, Sleeper.class);//ACTION_WAKE_UP);
@@ -44,22 +44,22 @@ public class Sleeper extends BroadcastReceiver {
         alarmMgr.set(RTC_WAKEUP, System.currentTimeMillis() + sleepTime_ms, pending);
 
         if (wakeLock.isHeld()) {
-            Log.d(TAG, "Releasing wakelock");
+            Log.v(TAG, "Releasing wakelock");
             wakeLock.release();
         } else {
-            Log.d(TAG, "Wakelock not held (another sleep ongoing?)");
+            Log.v(TAG, "Wakelock not held (another sleep ongoing?)");
         }
         // TODO block onReceive until this point
         semaphore.acquireUninterruptibly(); // Wait for alarm
-        Log.d(TAG, "Sleep (" + sleepTime_ms + " ms) DONE");
+        Log.v(TAG, "Sleep (" + sleepTime_ms + " ms) DONE");
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (wakeLock != null) { // TODO HACK
-            Log.d(TAG, "[onReceive] Reacquiring wakelock");
+            Log.v(TAG, "[onReceive] Reacquiring wakelock");
             wakeLock.acquire();
-            Log.d(TAG, "[onReceive] Releasing semaphore for sleeper");
+            Log.v(TAG, "[onReceive] Releasing semaphore for sleeper");
             semaphore.release();
         } else {
             Log.w(TAG, "[onReceive] Wakelock totally null !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

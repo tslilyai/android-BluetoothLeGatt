@@ -12,7 +12,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import org.mpisws.sddrservice.embedded_social.ESTask;
+import org.mpisws.sddrservice.embeddedsocial.ESTask;
 import org.mpisws.sddrservice.encounters.SDDR_Proto;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.FacebookEventStatus;
@@ -24,7 +24,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import static org.mpisws.sddrservice.embedded_social.ESTask.Typ.CREATE_TOPIC;
+import static org.mpisws.sddrservice.embeddedsocial.ESTask.Typ.CREATE_TOPIC;
 
 public abstract class EncounterEvent implements Serializable {
     private static final String TAG = EncounterEvent.class.getSimpleName();
