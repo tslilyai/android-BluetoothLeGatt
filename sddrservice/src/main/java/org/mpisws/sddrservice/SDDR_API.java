@@ -10,9 +10,11 @@ import org.mpisws.sddrservice.embeddedsocial.ESTask;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
+import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.mpisws.sddrservice.embeddedsocial.ESTask.Typ.*;
@@ -60,10 +62,15 @@ public class SDDR_API {
         context.startService(serviceIntent);
     }
 
-    public static List<MEncounter> get_encounters(Filter filter) {
+    public static List<Identifier> get_encounters(Filter filter) {
         if (!isRunning) return null;
         /* TODO efficiency? */
-        return new EncounterBridge(context).getEncountersFiltered(filter);
+        List<MEncounter> encounters = new EncounterBridge(context).getEncountersFiltered(filter);
+        List<Identifier> eids = new LinkedList<>();
+        for (MEncounter e : encounters) {
+            eids.add(e.getEncounterIDs(context).get(0));
+        }
+        return eids;
     }
 
     public static void register_user(String googletoken, String firstname, String lastname) {
@@ -78,11 +85,19 @@ public class SDDR_API {
         ESTask.addTask(newTask2);
     }
 
-    public static void send_msg(MEncounter encounter, String msg) {
+    public static void send_msg(Identifier encounterID, String msg) {
         if (!isRunning) return;
         ESTask newTask = new ESTask(SEND_MSG);
         newTask.msg = msg;
-        newTask.encounter = encounter;
+        newTask.encounterID = encounterID;
+        ESTask.addTask(newTask);
+    }
+
+    public static void get_msgs(Identifier encounterID, ESTask.MsgsCallback callback) {
+        if (!isRunning) return;
+        ESTask newTask = new ESTask(GET_MSGS);
+        newTask.encounterID = encounterID;
+        newTask.msgsCallback = callback;
         ESTask.addTask(newTask);
     }
 
@@ -105,7 +120,7 @@ public class SDDR_API {
         }
     }
 
-    public static void get_msgs(ESNotifs.NotificationCallback callback) {
+    public static void get_notifs(ESTask.NotificationCallback callback) {
         if (!isRunning) return;
         ESTask newTask = new ESTask(GET_NOTIFICATIONS);
         newTask.notificationCallback = callback;

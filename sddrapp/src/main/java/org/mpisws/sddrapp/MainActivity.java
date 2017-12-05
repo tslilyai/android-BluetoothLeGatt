@@ -23,12 +23,14 @@ import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.SDDR_API;
+import org.mpisws.sddrservice.embeddedsocial.ESMsgTopics;
+import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.embeddedsocial.ESTask;
-import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.lib.Constants;
+import org.mpisws.sddrservice.lib.Identifier;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "SDDR_API: " + MainActivity.class.getSimpleName();
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.get_messages).setOnClickListener(this);
+        findViewById(R.id.get_notifs).setOnClickListener(this);
         findViewById(R.id.SendMsg).setOnClickListener(this);
         findViewById(R.id.AddLink).setOnClickListener(this);
 
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.SendMsg:
                 final EditText msg = (EditText) MainActivity.this.findViewById(R.id.Msg);
                 Log.d(TAG, "SENDING MESSAGE " + msg.getText().toString());
-                final List<MEncounter> encounters = SDDR_API.get_encounters(null);
+                List<Identifier> encounters = SDDR_API.get_encounters(null);
                 if (encounters.size() > 0)
                     SDDR_API.send_msg(encounters.get(0), msg.getText().toString());
                 break;
@@ -76,25 +78,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     GNA.makeAuthRequest();
                 }
                 break;
-            case R.id.get_messages:
-                Log.d(TAG, "Getting messages");
+            case R.id.get_notifs:
+                Log.d(TAG, "Getting notifs");
                 ESTask.NotificationCallback callback = new ESTask.NotificationCallback() {
                     @Override
-                    public void onReceiveMessages(final Map<String, List<String>> messages) {
+                    public void onReceiveNotifs(final Queue<ESNotifs.Notif> notifs) {
                         handler.post(new Runnable() {
                             public void run() {
-                                final TextView text = MainActivity.this.findViewById(R.id.new_messages);
-                                for (Map.Entry<String, List<String>> entry : messages.entrySet()) {
-                                    text.append(entry.getKey() + ": ");
-                                    for (String msg : entry.getValue()) {
-                                        text.append(entry.getKey() + ": " + msg + "\n");
-                                    }
+                                final TextView text = MainActivity.this.findViewById(R.id.new_notifs);
+                                for (ESNotifs.Notif notif : notifs) {
+                                    text.append(notif.getEid().toString() + ": ");
+                                    text.append(notif.getMsg() + " (" + notif.getTimestamp().toString() + ")\n");
                                 }
                             }
                         });
                     }
                 };
-                SDDR_API.get_msgs(callback);
+                SDDR_API.get_notifs(callback);
+                break;
+            case R.id.get_msgs:
+                Log.d(TAG, "Getting messages");
+                final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
+                if (encounters2.size() > 0) {
+                    ESTask.MsgsCallback callback2 = new ESTask.MsgsCallback() {
+                        @Override
+                        public void onReceiveMessages(final List<String> messages) {
+                            handler.post(new Runnable() {
+                                public void run() {
+                                    final TextView text = MainActivity.this.findViewById(R.id.new_messages);
+                                    for (String msg : messages) {
+                                        text.append(encounters2.get(0).toString() + ": ");
+                                        text.append(msg);
+                                        text.append("\n");
+                                    }
+                                }
+                            });
+                        }
+                    };
+                    SDDR_API.get_msgs(encounters2.get(0), callback2);
+                }
                 break;
             default:
                 // Unknown id.

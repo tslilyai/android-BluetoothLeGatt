@@ -2,7 +2,6 @@ package org.mpisws.sddrservice.embeddedsocial;
 
 import android.content.Context;
 import android.util.Log;
-import android.util.Pair;
 
 import com.microsoft.embeddedsocial.autorest.CommentsOperations;
 import com.microsoft.embeddedsocial.autorest.CommentsOperationsImpl;
@@ -19,15 +18,18 @@ import com.microsoft.embeddedsocial.autorest.models.FeedResponseActivityView;
 import com.microsoft.embeddedsocial.autorest.models.PutNotificationsStatusRequest;
 import com.microsoft.embeddedsocial.autorest.models.TopicView;
 import com.microsoft.rest.ServiceCallback;
-import com.microsoft.rest.ServiceException;
 import com.microsoft.rest.ServiceResponse;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
+import org.joda.time.DateTime;
+import org.mpisws.sddrservice.lib.Identifier;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Retrofit;
 
@@ -41,70 +43,52 @@ import static org.mpisws.sddrservice.embeddedsocial.ESTask.RETRIES;
 public class ESNotifs {
     private static final String TAG = ESNotifs.class.getSimpleName();
 
+    public class Notif {
+        private Identifier eid;
+        private String msg;
+        private DateTime timestamp;
+
+        Notif(Identifier eid, String msg, DateTime timestamp) {
+            this.eid = eid;
+            this.msg = msg;
+            this.timestamp = timestamp;
+        }
+        public Identifier getEid() {
+            return eid;
+        }
+        public String getMsg() {
+            return msg;
+        }
+        public DateTime getTimestamp() {
+            return timestamp;
+        }
+    }
     private Context context;
     private TopicsOperations ES_TOPICS;
     private CommentsOperations ES_COMMENTS;
     private MyNotificationsOperations ES_NOTIFS;
 
-    /* Flag that indicates whether topics (message-channels) should be created for each encounter formed */
-    private static boolean addTopics;
-    public static void setAddTopics(boolean bool) {
-        addTopics = bool;
-    }
+    private ConcurrentLinkedQueue<Notif> notifQueue;
+    private boolean failed = false;
+    private AtomicInteger doneCount;
 
-    public interface NotificationCallback {
-        // unread messages are returned with the most recent message first in the list
-        public void onReceiveMessages(Map<String, List<String>> messages);
-    }
 
     public ESNotifs(Context context, Retrofit RETROFIT, EmbeddedSocialClient ESCLIENT) {
         this.context = context;
         ES_TOPICS = new TopicsOperationsImpl(RETROFIT, ESCLIENT);;
         ES_COMMENTS = new CommentsOperationsImpl(RETROFIT, ESCLIENT);
         ES_NOTIFS = new MyNotificationsOperationsImpl(RETROFIT, ESCLIENT);
+        notifQueue = new ConcurrentLinkedQueue<>();
+        doneCount = new AtomicInteger(0);
         this.context = context;
     }
 
-    private class getMsgRunnable implements Runnable {
-        int me;
-        String commentHandle;
-        String auth;
-        List<Pair<String, String>> msgs;
-
-        public getMsgRunnable(int me, String commentHandle, String auth, List<Pair<String, String>> msgs) {
-            this.me = me;
-            this.commentHandle = commentHandle;
-            this.auth = auth;
-            this.msgs = msgs;
-        }
-
-        @Override
-        public void run() {
-            ServiceResponse<CommentView> sResp2;
-            try {
-                sResp2 = ES_COMMENTS.getComment(commentHandle, auth);
-                if (!sResp2.getResponse().isSuccess()) {
-                    Log.v(TAG, "Topic Error " + sResp2.getResponse().code());
-                }
-                String msg = sResp2.getBody().getText();
-                Log.v(TAG, "Got message " + msg);
-
-                // get the encounterID
-                String topicHandle = sResp2.getBody().getTopicHandle();
-                ServiceResponse<TopicView> sResp3 = ES_TOPICS.getTopic(topicHandle, auth);
-                if (!sResp3.getResponse().isSuccess()) {
-                    Log.v(TAG, "Topic Error " + sResp3.getResponse().code());
-                }
-                String encounterID = sResp3.getBody().getTitle();
-                msgs.set(me, new Pair<>(encounterID, msg));
-            } catch (ServiceException | IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    protected void get_notifications(final String auth, final NotificationCallback notificationCallback, final int retries) {
+    protected void get_notifications(final String auth, final ESTask.NotificationCallback notificationCallback, final int retries) {
         Log.v(TAG, "Getting notifications");
+        failed = false;
+        notifQueue.clear();
+        doneCount.set(0);
+
         ServiceCallback<FeedResponseActivityView> serviceCallback = new ServiceCallback<FeedResponseActivityView>() {
            @Override
            public void failure(Throwable t) {
@@ -119,73 +103,66 @@ public class ESNotifs {
                    failure(new Throwable());
                    return;
                }
-               Map<String, List<String>> messages = new HashMap<>();
-               String readActivityHandle = null;
-               String commentHandle, topicHandle, msg, encounterID;
-               List<ActivityView> activities = result.getBody().getData();
-               List<Thread> msgThreads = new ArrayList<>();
-               List<Pair<String, String>> msgs = new ArrayList<>();
 
-               for (int i = 0; i < activities.size(); i++) {
-                   ActivityView view = activities.get(i);
+               String readActivityHandle = null;
+               List<ActivityView> activities = result.getBody().getData();
+               Set<String> seenCommentHandles = new HashSet<>();
+               int newNotifs = 0;
+               boolean sawUnread = false;
+
+               for (ActivityView view : activities) {
                    // we've seen all the unread messages by now
                    if (!view.getUnread()) {
+                       sawUnread = true;
                        break;
                    }
                    Log.v(TAG, "New unread notification!");
-                   if (view.getActivityType() != ActivityType.COMMENT) {
+                   if (view.getActivityType() != ActivityType.COMMENT || view.getActivityType() != ActivityType.COMMENTPEER) {
                        Log.v(TAG, "Not a Comment");
                        continue; // ignore anything that isn't a comment for now
                    }
-                   if (view.getActedOnContent().getContentType() != ContentType.TOPIC) {
+                   if (view.getActedOnContent().getContentType() != ContentType.TOPIC
+                           || view.getActedOnContent().getContentType() != ContentType.COMMENT) {
                        Log.v(TAG, "Comment not posted on topic");
                        continue; // ignore comments not posted to topics (?)
                    }
 
-                   // get the unread message
-                   commentHandle = view.getActivityHandle();
+                   // get the comment handle. make sure we don't get duplicate comments
+                   String commentHandle = view.getActivityHandle();
+                   if (seenCommentHandles.contains(commentHandle)) {
+                       continue;
+                   }
+                   seenCommentHandles.add(commentHandle);
+
                    // set the latest read comment
                    if (readActivityHandle == null) {
                        readActivityHandle = commentHandle;
                    }
-                   msgs.add(null);
-                   msgThreads.add(new Thread(new getMsgRunnable(i, commentHandle, auth, msgs)));
+                   ES_COMMENTS.getCommentAsync(commentHandle, auth, new CommentCallback(auth));
+                   newNotifs++;
                }
-               // Spawn and wait for all threads to get all comments
-               for (Thread t : msgThreads) {
-                    t.start();
-               }
-               for (Thread t : msgThreads) {
-                    try {
-                        t.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-               }
-               for (Pair<String, String> p : msgs) {
-                   if (p == null) {
-                       Log.v(TAG, "Failed to get a comment! Retry " + retries);
-                       get_notifications(auth, notificationCallback, retries + 1);
-                       return;
+               // wait for all callbacks to complete before we check for success
+               while (doneCount.get() < newNotifs) {
+                   try {
+                       Thread.sleep(100);
+                   } catch (InterruptedException e) {
                    }
-                   if (messages.get(p.first) == null) {
-                        List<String> msgList = new LinkedList<String>();
-                        msgList.add(p.second);
-                        messages.put(p.first, msgList);
-                   } else {
-                        messages.get(p.first).add(p.second);
-                   }
-                   Log.v(TAG, "Messages for encounterID " + p.first + " is size " + messages.get(p.first).size());
                }
-               notificationCallback.onReceiveMessages(messages);
-
-               if (readActivityHandle != null) {
+               if (failed) {
+                   // try again
+                  get_notifications(auth, notificationCallback, retries + 1);
+               }
+               notificationCallback.onReceiveNotifs(notifQueue);
+               if (sawUnread && readActivityHandle != null) {
                    updateReadNotifs(readActivityHandle, auth, 0);
-              }
+               } else {
+
+               }
            }
        };
        ES_NOTIFS.getNotificationsAsync(auth, serviceCallback);
     }
+
     private void updateReadNotifs(final String readActivityHandle, final String auth, final int retries) {
         PutNotificationsStatusRequest req = new PutNotificationsStatusRequest();
         req.setReadActivityHandle(readActivityHandle);
@@ -208,5 +185,58 @@ public class ESNotifs {
             }
         };
         ES_NOTIFS.putNotificationsStatusAsync(req, auth, serviceCallback);
+    }
+
+    private class TopicCallback extends ServiceCallback<TopicView> {
+        private String msg;
+        private DateTime date;
+
+        TopicCallback(String msg, DateTime date) {
+            this.msg = msg;
+            this.date = date;
+        }
+
+        @Override
+        public void failure(Throwable t) {
+            failed = true;
+        }
+
+        @Override
+        public void success(ServiceResponse<TopicView> result) {
+            if (!result.getResponse().isSuccess()) {
+                failure(new Throwable());
+                doneCount.getAndIncrement();
+                return;
+            }
+            Identifier eid = new Identifier(result.getBody().getTitle().getBytes());
+            Log.v(TAG, "Adding message " + msg + " of eid " + eid.toString());
+            notifQueue.add(new Notif(eid, msg, date));
+            doneCount.getAndIncrement();
+        }
+    }
+
+    private class CommentCallback extends ServiceCallback<CommentView> {
+        private String auth;
+
+        CommentCallback(String auth) {
+            this.auth = auth;
+        }
+
+        @Override
+        public void failure(Throwable t) {
+            failed = true;
+        }
+
+        @Override
+        public void success(ServiceResponse<CommentView> result) {
+            if (!result.getResponse().isSuccess()) {
+                failure(new Throwable());
+                return;
+            }
+            String msg = result.getBody().getText();
+            String topicHandle = result.getBody().getTopicHandle();
+            DateTime createTime = result.getBody().getCreatedTime();
+            ES_TOPICS.getTopicAsync(topicHandle, auth, new TopicCallback(msg, createTime));
+        }
     }
 }

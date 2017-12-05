@@ -98,8 +98,6 @@ public class SDDR_Core implements Runnable {
         mLinkBridge = new LinkabilityBridge(mService);
         mEncounterBridge = new EncounterBridge(mService);
 
-        ESTask.setContext(mService);
-
         // initialize the C radio class
         Log.v(TAG, "Initializing radio");
         SDDR_Native.c_mallocRadio();
@@ -235,7 +233,6 @@ public class SDDR_Core implements Runnable {
     public static void processEncounters(Context context) {
         Log.v(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
 
-        //for (byte[] msg : SDDR_Native.c_EncounterMsgs) {
         for (Iterator<byte[]> iterator = SDDR_Native.c_EncounterMsgs.iterator(); iterator.hasNext();) {
             byte[] msg = iterator.next();
             final SDDR_Proto.Event event;
@@ -341,6 +338,5 @@ public class SDDR_Core implements Runnable {
             encEvent.broadcast(context);
             iterator.remove();
         }
-        //SDDR_Native.c_EncounterMsgs.clear();
     }
 }

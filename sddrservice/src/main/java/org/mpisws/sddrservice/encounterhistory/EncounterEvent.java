@@ -174,6 +174,7 @@ public abstract class EncounterEvent implements Serializable {
             values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
 
+            // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
             Log.d(TAG, "Inserting create topic task for " + encounterID);
             ESTask newTask = new ESTask(CREATE_TOPIC);
             newTask.encounterID = new Identifier(encounterID);

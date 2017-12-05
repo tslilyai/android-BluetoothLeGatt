@@ -9,6 +9,8 @@ import com.microsoft.embeddedsocial.autorest.EmbeddedSocialClientImpl;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.lib.Identifier;
 
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -54,9 +56,9 @@ public class ESTask {
     public String lastname;
     public String googletoken;
     public String msg;
-    public MEncounter encounter;
     public Identifier encounterID;
-    public ESNotifs.NotificationCallback notificationCallback;
+    public NotificationCallback notificationCallback;
+    public MsgsCallback msgsCallback;
 
     public enum Typ {
         /* Must be called first to register a permanent "Google" identity with each user */
@@ -66,10 +68,11 @@ public class ESTask {
         /* Creates a topic (used to communicate between encounters) */
         CREATE_TOPIC,
         /* Gets the notifications (comments posted on topics, i.e., messages between
-        encounter participants) and returns them as a list of encounter IDs mapping to
-        messages from that ID
+        encounter participants) and returns them as a queue of Notifs (encounter ID + msg + timestamp)
          */
         GET_NOTIFICATIONS,
+        /* Gets the messages associated with the specified encounterID */
+        GET_MSGS,
         /* Sends a message to a particular encounter */
         SEND_MSG,
         /* By default, create a topic / enable messaging when an encounter is formed */
@@ -77,6 +80,14 @@ public class ESTask {
         /* By default, do not create a topic / enable messaging when an encounter is formed */
         MESSAGING_OFF_DEFAULT
      }
+
+    public interface NotificationCallback {
+        void onReceiveNotifs(Queue<ESNotifs.Notif> notifs);
+    }
+
+    public interface MsgsCallback {
+        void onReceiveMessages(List<String> messages);
+    }
 
     public ESTask(Typ typ) {
         this.typ = typ;
@@ -133,11 +144,19 @@ public class ESTask {
                 }
                 break;
             }
-            case SEND_MSG: {
-                if (task.encounter == null || task.msg == null)
+            case GET_MSGS: {
+                if (task.encounterID == null || task.msgsCallback == null)
                     return;
                 if (esUser.checkLoginStatus() == true) {
-                    esMsgTopics.send_msg(esUser.auth, task.encounter, task.msg, 0);
+                    esMsgTopics.get_encounter_msgs(task.encounterID, task.msgsCallback, esUser.auth, 0);
+                }
+                break;
+            }
+            case SEND_MSG: {
+                if (task.encounterID == null || task.msg == null)
+                    return;
+                if (esUser.checkLoginStatus() == true) {
+                    esMsgTopics.send_msg(esUser.auth, task.encounterID, task.msg, 0);
                 }
                 break;
             }
