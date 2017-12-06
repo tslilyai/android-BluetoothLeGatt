@@ -44,7 +44,6 @@ public class ESTask {
             .client(httpClient.build())
             .build();
     private static EmbeddedSocialClient ESCLIENT = new EmbeddedSocialClientImpl("https://ppe.embeddedsocial.microsoft.com/");
-    private static Context context;
     private static ESUser esUser;
     private static ESMsgTopics esMsgTopics;
     private static ESNotifs esNotifs;
@@ -93,11 +92,10 @@ public class ESTask {
         this.typ = typ;
     }
 
-    public static void initialize_static_vars(Context context) {
-        ESTask.context = context;
-        esUser = new ESUser(context, RETROFIT, ESCLIENT);
-        esMsgTopics = new ESMsgTopics(context, RETROFIT, ESCLIENT);
-        esNotifs = new ESNotifs(context, RETROFIT, ESCLIENT);
+    public static void initialize_static_vars() {
+        esUser = new ESUser(RETROFIT, ESCLIENT);
+        esMsgTopics = new ESMsgTopics(RETROFIT, ESCLIENT);
+        esNotifs = new ESNotifs(RETROFIT, ESCLIENT);
     }
 
     public static void addTask(ESTask task) {
@@ -114,7 +112,7 @@ public class ESTask {
     }
 
     public static void exec_task(ESTask task) {
-        if (task == null || context == null) {
+        if (task == null) {
             return;
         }
         // return if we can't possible authenticate this request

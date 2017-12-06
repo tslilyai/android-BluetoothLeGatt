@@ -40,15 +40,13 @@ public class ESUser {
     private Date SESSION_DATE;
     protected String GOOGLETOKEN;
 
-    private Context context;
     private UsersOperations ES_USEROPS;
     private SessionsOperations ES_SESSION;
 
     /* Public auth string (reset every time a new session is created */
     public String auth;
 
-    public ESUser(Context context, Retrofit retrofit, EmbeddedSocialClient esclient) {
-        this.context= context;
+    public ESUser(Retrofit retrofit, EmbeddedSocialClient esclient) {
         ES_USEROPS = new UsersOperationsImpl(retrofit, esclient);
         ES_SESSION = new SessionsOperationsImpl(retrofit, esclient);
     }

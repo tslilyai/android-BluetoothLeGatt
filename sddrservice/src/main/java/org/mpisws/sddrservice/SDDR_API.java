@@ -42,7 +42,7 @@ public class SDDR_API {
 
     public static void start_service(Context context) {
         SDDR_API.context = context;
-        ESTask.initialize_static_vars(context);
+        ESTask.initialize_static_vars();
 
         // start the service
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);

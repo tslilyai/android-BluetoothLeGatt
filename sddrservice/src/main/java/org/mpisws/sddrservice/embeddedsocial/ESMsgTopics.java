@@ -39,7 +39,6 @@ import static org.mpisws.sddrservice.embeddedsocial.ESTask.RETRIES;
 
 public class ESMsgTopics {
     private static final String TAG = ESMsgTopics.class.getSimpleName();
-    private Context context;
     private SearchOperations ES_SEARCH;
     private TopicsOperations ES_TOPICS;
     private TopicCommentsOperations ES_TOPIC_COMMENTS;
@@ -51,8 +50,7 @@ public class ESMsgTopics {
         addTopics = bool;
     }
 
-    public ESMsgTopics(Context context, Retrofit RETROFIT, EmbeddedSocialClient ESCLIENT) {
-        this.context = context;
+    public ESMsgTopics(Retrofit RETROFIT, EmbeddedSocialClient ESCLIENT) {
         ES_TOPICS = new TopicsOperationsImpl(RETROFIT, ESCLIENT);
         ES_SEARCH = new SearchOperationsImpl(RETROFIT, ESCLIENT);
         ES_TOPIC_COMMENTS = new TopicCommentsOperationsImpl(RETROFIT, ESCLIENT);

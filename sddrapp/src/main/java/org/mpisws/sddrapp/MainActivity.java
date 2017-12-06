@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.SendMsg:
                 final EditText msg = (EditText) MainActivity.this.findViewById(R.id.Msg);
-                Log.d(TAG, "SENDING MESSAGE " + msg.getText().toString());
                 List<Identifier> encounters = SDDR_API.get_encounters(null);
+                Log.d(TAG, "Sending message " + msg.getText().toString() +  " for " + encounters.size() + " encounters");
                 if (encounters.size() > 0)
                     SDDR_API.send_msg(encounters.get(0), msg.getText().toString());
                 break;
@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.get_msgs:
                 Log.d(TAG, "Getting messages");
                 final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
+                Log.d(TAG, "Getting messages for " + encounters2.size() + " encounters");
                 if (encounters2.size() > 0) {
                     ESTask.MsgsCallback callback2 = new ESTask.MsgsCallback() {
                         @Override

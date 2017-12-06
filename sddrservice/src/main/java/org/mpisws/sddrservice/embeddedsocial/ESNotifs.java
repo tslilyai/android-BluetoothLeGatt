@@ -63,7 +63,6 @@ public class ESNotifs {
             return timestamp;
         }
     }
-    private Context context;
     private TopicsOperations ES_TOPICS;
     private CommentsOperations ES_COMMENTS;
     private MyNotificationsOperations ES_NOTIFS;
@@ -73,14 +72,12 @@ public class ESNotifs {
     private AtomicInteger doneCount;
 
 
-    public ESNotifs(Context context, Retrofit RETROFIT, EmbeddedSocialClient ESCLIENT) {
-        this.context = context;
+    public ESNotifs(Retrofit RETROFIT, EmbeddedSocialClient ESCLIENT) {
         ES_TOPICS = new TopicsOperationsImpl(RETROFIT, ESCLIENT);;
         ES_COMMENTS = new CommentsOperationsImpl(RETROFIT, ESCLIENT);
         ES_NOTIFS = new MyNotificationsOperationsImpl(RETROFIT, ESCLIENT);
         notifQueue = new ConcurrentLinkedQueue<>();
         doneCount = new AtomicInteger(0);
-        this.context = context;
     }
 
     protected void get_notifications(final String auth, final ESTask.NotificationCallback notificationCallback, final int retries) {
