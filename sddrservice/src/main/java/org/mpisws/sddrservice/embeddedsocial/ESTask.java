@@ -32,7 +32,6 @@ public class ESTask {
     protected static final String SDDR_ID = "0.0.0";
 
     /* Task queue that is queried and emptied every waking cycle */
-    protected static final int RETRIES = 3;
     private static final int QUEUE_CAP = 1000;
     private static BlockingQueue<ESTask> taskList = new ArrayBlockingQueue<>(QUEUE_CAP);
 
@@ -130,7 +129,7 @@ public class ESTask {
             case REGISTER_USER: {
                 if (task.firstname == null || task.lastname == null)
                     return;
-                esUser.registerUser(task.firstname, task.lastname, 0);
+                esUser.registerUser(task.firstname, task.lastname);
                 break;
             }
             case GET_NOTIFICATIONS: {
@@ -138,7 +137,7 @@ public class ESTask {
                     return;
                 }
                 if (esUser.checkLoginStatus() == true) {
-                    esNotifs.get_notifications(esUser.AUTH, task.notificationCallback, 0);
+                    esNotifs.get_notifications(esUser.AUTH, task.notificationCallback);
                 }
                 break;
             }
@@ -146,7 +145,7 @@ public class ESTask {
                 if (task.encounterID == null || task.msgsCallback == null)
                     return;
                 if (esUser.checkLoginStatus() == true) {
-                    esMsgTopics.get_encounter_msgs(task.encounterID, task.msgsCallback, esUser.AUTH, 0);
+                    esMsgTopics.get_encounter_msgs(task.encounterID, task.msgsCallback, esUser.AUTH);
                 }
                 break;
             }
@@ -155,7 +154,7 @@ public class ESTask {
                     return;
                 if (esUser.checkLoginStatus() == true) {
                     Log.d(TAG, "Sending message");
-                    esMsgTopics.send_msg(esUser.AUTH, task.encounterID, task.msg, 0);
+                    esMsgTopics.send_msg(esUser.AUTH, task.encounterID, task.msg);
                 }
                 break;
             }
@@ -175,7 +174,7 @@ public class ESTask {
                     return;
                 if (esUser.checkLoginStatus() == true) {
                     Log.d(TAG, "Creating topic");
-                    esMsgTopics.create_topic(esUser.AUTH, task.encounterID, 0);
+                    esMsgTopics.create_topic(esUser.AUTH, task.encounterID);
                 }
                 break;
             }

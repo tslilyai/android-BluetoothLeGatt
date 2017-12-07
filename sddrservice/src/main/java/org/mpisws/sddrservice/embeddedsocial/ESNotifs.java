@@ -33,8 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Retrofit;
 
-import static org.mpisws.sddrservice.embeddedsocial.ESTask.RETRIES;
-
 /**
  * Created by tslilyai on 11/14/17.
  */
@@ -80,7 +78,7 @@ public class ESNotifs {
         doneCount = new AtomicInteger(0);
     }
 
-    protected void get_notifications(final String auth, final ESTask.NotificationCallback notificationCallback, final int retries) {
+    protected void get_notifications(final String auth, final ESTask.NotificationCallback notificationCallback) {
         Log.v(TAG, "Getting notifications");
         failed = false;
         notifQueue.clear();
@@ -90,9 +88,6 @@ public class ESNotifs {
            @Override
            public void failure(Throwable t) {
                Log.v(TAG, "Failed to get notifications");
-               if (retries < RETRIES) {
-                   get_notifications(auth, notificationCallback, retries + 1);
-               }
            }
            @Override
            public void success(ServiceResponse<FeedResponseActivityView> result) {
@@ -147,11 +142,11 @@ public class ESNotifs {
                }
                if (failed) {
                    // try again
-                  get_notifications(auth, notificationCallback, retries + 1);
+                  get_notifications(auth, notificationCallback);
                }
                notificationCallback.onReceiveNotifs(notifQueue);
                if (sawUnread && readActivityHandle != null) {
-                   updateReadNotifs(readActivityHandle, auth, 0);
+                   updateReadNotifs(readActivityHandle, auth);
                } else {
 
                }
@@ -160,7 +155,7 @@ public class ESNotifs {
        ES_NOTIFS.getNotificationsAsync(auth, serviceCallback);
     }
 
-    private void updateReadNotifs(final String readActivityHandle, final String auth, final int retries) {
+    private void updateReadNotifs(final String readActivityHandle, final String auth) {
         PutNotificationsStatusRequest req = new PutNotificationsStatusRequest();
         req.setReadActivityHandle(readActivityHandle);
 
@@ -168,9 +163,6 @@ public class ESNotifs {
             @Override
             public void failure(Throwable t) {
                 Log.v(TAG, "Failed to update notification status");
-                if (retries < RETRIES) {
-                    updateReadNotifs(readActivityHandle, auth, retries + 1);
-                }
             }
             @Override
             public void success(ServiceResponse<Object> result) {
