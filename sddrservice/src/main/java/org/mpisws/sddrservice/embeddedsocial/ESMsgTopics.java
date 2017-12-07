@@ -1,6 +1,5 @@
 package org.mpisws.sddrservice.embeddedsocial;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.autorest.EmbeddedSocialClient;
@@ -24,14 +23,11 @@ import com.microsoft.rest.ServiceResponse;
 
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Utils;
-import org.w3c.dom.Comment;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import retrofit2.Retrofit;
-
-import static org.mpisws.sddrservice.embeddedsocial.ESTask.RETRIES;
 
 /**
  * Created by tslilyai on 11/14/17.
@@ -42,6 +38,12 @@ public class ESMsgTopics {
     private SearchOperations ES_SEARCH;
     private TopicsOperations ES_TOPICS;
     private TopicCommentsOperations ES_TOPIC_COMMENTS;
+
+    private enum TopicAction {
+        SendMsg,
+        CreateOnly,
+        GetMsgs
+    }
 
     /* Flag that indicates whether topics (message-channels) should be created for each encounter formed */
     protected boolean addTopics;
@@ -55,263 +57,144 @@ public class ESMsgTopics {
         ES_SEARCH = new SearchOperationsImpl(RETROFIT, ESCLIENT);
         ES_TOPIC_COMMENTS = new TopicCommentsOperationsImpl(RETROFIT, ESCLIENT);
     }
+    protected void create_topic(final String auth, final Identifier title) {
+        Log.v(TAG, "Creating topic " + title);
+        find_and_do_action_on_topic(auth, title, TopicAction.CreateOnly, null, null);
+    }
 
-    private void create_topic(final String auth, final Identifier title, ServiceCallback<PostTopicResponse> serviceCallback) {
+    protected void get_encounter_msgs(Identifier eid, ESTask.MsgsCallback msgsCallback, String auth) {
+        Log.d(TAG, "Getting encounter msgs for " + eid);
+        find_and_do_action_on_topic(auth, eid, TopicAction.GetMsgs, msgsCallback, null);
+    }
+
+    protected void send_msg(final String auth, final Identifier eid, final String msg) {
+        final PostCommentRequest req = new PostCommentRequest();
+        req.setText(msg);
+        Log.v(TAG, "Sending message " + msg + " to " + eid.toString() + " with auth " + auth);
+        find_and_do_action_on_topic(auth, eid, TopicAction.SendMsg, null, msg);
+    }
+
+    /* Private helper functions */
+    private void find_and_do_action_on_topic(final String auth, final Identifier title, final TopicAction topicAction, final ESTask.MsgsCallback msgsCallback, final String msg) {
+        // callback if we have to create a new topic. this simply re-invokes find_and_do_action on success
+        final ServiceCallback<PostTopicResponse> createTopicCallback = new ServiceCallback<PostTopicResponse>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.v(TAG, "Failed create topic");
+            }
+
+            @Override
+            public void success(ServiceResponse<PostTopicResponse> result) {
+                find_and_do_action_on_topic(auth, title, topicAction, msgsCallback, msg);
+            }
+        };
+        // callback if we have to create a new topic. this simply re-invokes find_and_do_action
+        final ServiceCallback<Object> removeTopicCallback = new ServiceCallback<Object>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.v(TAG, "Failed remove topic");
+            }
+
+            @Override
+            public void success(ServiceResponse<Object> result) {
+                find_and_do_action_on_topic(auth, title, topicAction, msgsCallback, msg);
+            }
+        };
+        ServiceCallback<FeedResponseTopicView> serviceCallback = new ServiceCallback<FeedResponseTopicView>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.v(TAG, "Failed search topics");
+            }
+
+            @Override
+            public void success(ServiceResponse<FeedResponseTopicView> result) {
+                if (!result.getResponse().isSuccess()) {
+                    failure(new Throwable());
+                    return;
+                }
+                List<TopicView> topics = result.getBody().getData();
+                if (topics.size() > 1) {
+                    Utils.myAssert(topics.size() == 2);
+                    String topichandle = (topics.get(0).getCreatedTime().compareTo(topics.get(1).getCreatedTime()) > 0)
+                            ? topics.get(0).getTopicHandle() : topics.get(1).getTopicHandle();
+                    Log.d(TAG, ">1 topic for this encounter " + title.toString() + ", removing topichandle " + topichandle);
+                    delete_topic(topichandle, auth, removeTopicCallback);
+                    return;
+                }
+                // we need to try and create the topic, which calls send_msg again
+                if (topics.size() == 0) {
+                    create_topic(auth, title, createTopicCallback);
+                    return;
+                }
+                if (topics.size() == 1) {
+                    String topichandle = topics.get(0).getTopicHandle();
+                    switch (topicAction) {
+                        case SendMsg: {
+                            PostCommentRequest req = new PostCommentRequest();
+                            req.setText(msg);
+                            ServiceCallback<PostCommentResponse> serviceCallback = new ServiceCallback<PostCommentResponse>() {
+                                @Override
+                                public void failure(Throwable t) {
+                                    Log.v(TAG, "PostComment to topic failed");
+                                }
+
+                                @Override
+                                public void success(ServiceResponse<PostCommentResponse> result) {
+                                    if (!result.getResponse().isSuccess()) {
+                                        failure(new Throwable());
+                                        return;
+                                    }
+                                    Log.v(TAG, "Messages sent to EID " + title.toString() + ": " + msg);
+                                }
+                            };
+                            ES_TOPIC_COMMENTS.postCommentAsync(topichandle, req, auth, serviceCallback);
+                            break;
+                        }
+                        case GetMsgs: {
+                            final ServiceCallback<FeedResponseCommentView> serviceCallbackComments = new ServiceCallback<FeedResponseCommentView>() {
+                                @Override
+                                public void failure(Throwable t) {
+                                }
+
+                                @Override
+                                public void success(ServiceResponse<FeedResponseCommentView> result) {
+                                    if (!result.getResponse().isSuccess()) {
+                                        failure(new Throwable());
+                                        return;
+                                    }
+                                    List<String> comments = new LinkedList<>();
+                                    for (CommentView comment : result.getBody().getData()) {
+                                        comments.add(comment.getText());
+                                    }
+                                    msgsCallback.onReceiveMessages(comments);
+                                }
+                            };
+                            ES_TOPIC_COMMENTS.getTopicCommentsAsync(topichandle, auth, serviceCallbackComments);
+                            break;
+                        }
+                        case CreateOnly:
+                            return;
+                    }
+                }
+            }
+        };
+        ES_SEARCH.getTopicsAsync(title.toString(), auth, serviceCallback);
+    }
+    private void create_topic(final String auth, final Identifier title, ServiceCallback serviceCallback) {
+        try {
+            Thread.sleep((long) Math.random() * 100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Log.v(TAG, "Creating topic " + title);
         PostTopicRequest topicReq = new PostTopicRequest();
         topicReq.setPublisherType(PublisherType.USER);
         topicReq.setTitle(title.toString());
+        topicReq.setText(title.toString());
+        // sleep for some random time < 0.1s before sending
         ES_TOPICS.postTopicAsync(topicReq, auth, serviceCallback);
     }
     private void delete_topic(String topichandle, String auth, ServiceCallback<Object> serviceCallback) {
-        ES_TOPICS.deleteTopicAsync(topichandle,auth,serviceCallback);
-    }
-
-    protected void create_topic(final String auth, final Identifier title, final int retries) {
-        Log.v(TAG, "Creating topic " + title);
-        ServiceCallback<PostTopicResponse> serviceCallback = new ServiceCallback<PostTopicResponse>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "Posting topic failed");
-                if (retries < RETRIES) {
-                    create_topic(auth, title, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<PostTopicResponse> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                Log.v(TAG, "Created topic for EID " + title);
-            }
-        };
-        create_topic(auth, title, serviceCallback);
-    }
-
-    protected void get_encounter_msgs(final Identifier eid, final ESTask.MsgsCallback msgsCallback, final String auth, final int retries) {
-        final ServiceCallback<FeedResponseCommentView> serviceCallbackComments = new ServiceCallback<FeedResponseCommentView>() {
-            @Override
-            public void failure(Throwable t) {
-                if (retries < RETRIES) {
-                    get_encounter_msgs(eid, msgsCallback, auth, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<FeedResponseCommentView> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                List<String> comments = new LinkedList<>();
-                for (CommentView comment : result.getBody().getData()) {
-                    comments.add(comment.getText());
-                }
-                msgsCallback.onReceiveMessages(comments);
-            }
-        };
-
-        ServiceCallback<FeedResponseTopicView> serviceCallback = new ServiceCallback<FeedResponseTopicView>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "Topic Error");
-                if (retries < RETRIES) {
-                    get_encounter_msgs(eid, msgsCallback, auth, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<FeedResponseTopicView> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                List<TopicView> topics = result.getBody().getData();
-                if (topics.size() > 1) {
-                    Utils.myAssert(topics.size() == 2);
-                    String topichandle = (topics.get(0).getCreatedTime().compareTo(topics.get(1).getCreatedTime()) > 0)
-                            ? topics.get(0).getTopicHandle() : topics.get(1).getTopicHandle();
-                    Log.d(TAG, ">1 topic for this encounter " + eid.toString() + ", removing topichandle " + topichandle);
-                    removeTopicAndGetMsgs(auth, eid, topichandle, msgsCallback, 0);
-                    return;
-                }
-                // we need to try and create the topic, which calls send_msg again
-                if (topics.size() == 0) {
-                    createTopicAndGetMsgs(auth, eid, msgsCallback, 0);
-                    return;
-                }
-                if (topics.size() == 1) {
-                    ES_TOPIC_COMMENTS.getTopicCommentsAsync(topics.get(0).getTopicHandle(), auth, serviceCallbackComments);
-                }
-            }
-        };
-        // sleep for some random time < 0.1s before sending
-        try {
-            Thread.sleep((long) Math.random() * 100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        ES_SEARCH.getTopicsAsync(eid.toString(), auth, serviceCallback);
-    }
-
-    private void createTopicAndGetMsgs(final String auth, final Identifier eid, final ESTask.MsgsCallback callback, final int retries) {
-        ServiceCallback<PostTopicResponse> serviceCallback = new ServiceCallback<PostTopicResponse>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "createTopicAndGet Failure");
-                if (retries < RETRIES) {
-                    createTopicAndGetMsgs(auth, eid, callback, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<PostTopicResponse> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                get_encounter_msgs(eid, callback, auth, 0);
-            }
-        };
-        create_topic(auth, eid, serviceCallback);
-    }
-
-    private void removeTopicAndGetMsgs(final String auth, final Identifier eid, final String topichandle, final ESTask.MsgsCallback callback, final int retries) {
-        ServiceCallback<Object> serviceCallback = new ServiceCallback<Object>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "removeTopicAndSend Failure");
-                if (retries < RETRIES) {
-                    removeTopicAndGetMsgs(auth, eid, topichandle, callback, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<Object> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                get_encounter_msgs(eid, callback, auth, 0);
-            }
-        };
-        delete_topic(topichandle, auth, serviceCallback);
-    }
-
-    protected void send_msg(final String auth, final Identifier eid, final String msg, final int retries) {
-        final PostCommentRequest req = new PostCommentRequest();
-        req.setText(msg);
-        Log.v(TAG, "Sending message to " + eid.toString());
-        final ServiceCallback<FeedResponseTopicView> serviceCallback = new ServiceCallback<FeedResponseTopicView>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "Topic Error");
-                if (retries < RETRIES) {
-                    send_msg(auth, eid, msg, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<FeedResponseTopicView> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                List<TopicView> topics = result.getBody().getData();
-                // if there are duplicate topics with this name, delete the one created later and
-                // try to send the message again
-                if (topics.size() > 1) {
-                    Utils.myAssert(topics.size() == 2);
-                    String topichandle = (topics.get(0).getCreatedTime().compareTo(topics.get(1).getCreatedTime()) > 0)
-                            ? topics.get(0).getTopicHandle() : topics.get(1).getTopicHandle();
-                    Log.d(TAG, ">1 topic for this encounter " + eid.toString() + ", removing topichandle " + topichandle);
-                    removeTopicAndSendMsg(auth, msg, eid, topichandle, 0);
-                    return;
-                }
-                // we need to try and create the topic, which calls send_msg again
-                if (topics.size() == 0) {
-                    createTopicAndSendMsg(auth, msg, eid, 0);
-                    return;
-                }
-                if (topics.size() == 1) {
-                    postComment(eid.toString(), topics.get(0).getTopicHandle(), req, auth, 0);
-                }
-            }
-        };
-        // sleep for some random time < 0.1s before sending
-        try {
-            Thread.sleep((long) Math.random() * 100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        ES_SEARCH.getTopicsAsync(eid.toString(), auth, serviceCallback);
-    }
-
-    private void createTopicAndSendMsg(final String auth, final String msg, final Identifier eid, final int retries) {
-        ServiceCallback<PostTopicResponse> serviceCallback = new ServiceCallback<PostTopicResponse>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "createTopicAndSend Failure");
-                if (retries < RETRIES) {
-                    createTopicAndSendMsg(auth, msg, eid, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<PostTopicResponse> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                send_msg(auth, eid, msg, 0);
-            }
-        };
-        create_topic(auth, eid, serviceCallback);
-    }
-
-    private void removeTopicAndSendMsg(final String auth, final String msg, final Identifier eid, final String topichandle, final int retries) {
-        ServiceCallback<Object> serviceCallback = new ServiceCallback<Object>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "removeTopicAndSend Failure");
-                if (retries < RETRIES) {
-                    removeTopicAndSendMsg(auth, msg, eid, topichandle, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<Object> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                send_msg(auth, eid, msg, 0);
-            }
-        };
-        delete_topic(topichandle, auth, serviceCallback);
-    }
-
-    private void postComment(final String eid, final String topicHandle, final PostCommentRequest req, final String ESAuth, final int retries) {
-        ServiceCallback<PostCommentResponse> serviceCallback = new ServiceCallback<PostCommentResponse>() {
-            @Override
-            public void failure(Throwable t) {
-                Log.v(TAG, "PostComment to topic failed");
-                if (retries < RETRIES) {
-                    postComment(eid, topicHandle, req, ESAuth, retries + 1);
-                }
-            }
-
-            @Override
-            public void success(ServiceResponse<PostCommentResponse> result) {
-                if (!result.getResponse().isSuccess()) {
-                    failure(new Throwable());
-                    return;
-                }
-                Log.v(TAG, "Messages sent to EID " + eid + ": " + req.getText());
-            }
-        };
-        ES_TOPIC_COMMENTS.postCommentAsync(topicHandle, req, ESAuth, serviceCallback);
+        ES_TOPICS.deleteTopicAsync(topichandle, auth, serviceCallback);
     }
 }

@@ -28,6 +28,12 @@ public class SDDR_Core_Service extends Service {
     private static final String TAG = SDDR_Core_Service.class.getSimpleName();
     private SDDR_Core core;
     private Thread thread;
+    public boolean was_destroyed = false;
+
+    public void restart() {
+        was_destroyed = false;
+        check_and_start_core();
+    }
 
     private void check_and_start_core() {
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -58,7 +64,7 @@ public class SDDR_Core_Service extends Service {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate");
+        Log.d(TAG, "creating service");
         check_and_start_core();
     }
 
@@ -98,6 +104,7 @@ public class SDDR_Core_Service extends Service {
             core.should_run = false;
             core = null;
         }
+        was_destroyed = true;
     }
 
     /**

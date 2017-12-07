@@ -162,10 +162,10 @@ public class Scanner {
                 return;
             } else {
                 Map<ParcelUuid, byte[]> datamap = record.getServiceData();
-                /*if (datamap.size() != 1) {
+                if (datamap.size() != 1) {
                     Log.d(TAG, "Scan Result (not SDDR: not one service!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                     return;
-                }*/
+                }
 
                 for (ParcelUuid pu : datamap.keySet()) {
                     ByteBuffer bb = ByteBuffer.wrap(new byte[16]);

@@ -114,8 +114,8 @@ public class ESNotifs {
                        break;
                    }
                    Log.v(TAG, "New unread notification!");
-                   if (view.getActivityType() != ActivityType.COMMENT || view.getActivityType() != ActivityType.COMMENTPEER) {
-                       Log.v(TAG, "Not a Comment");
+                   if (view.getActivityType() != ActivityType.COMMENT) {
+                       Log.v(TAG, "Not a Comment, instead a " + view.getActivityType().toString());
                        continue; // ignore anything that isn't a comment for now
                    }
                    if (view.getActedOnContent().getContentType() != ContentType.TOPIC

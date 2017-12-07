@@ -44,7 +44,7 @@ public class ESUser {
     private SessionsOperations ES_SESSION;
 
     /* Public auth string (reset every time a new session is created */
-    public String auth;
+    public String AUTH;
 
     public ESUser(Retrofit retrofit, EmbeddedSocialClient esclient) {
         ES_USEROPS = new UsersOperationsImpl(retrofit, esclient);
@@ -137,22 +137,24 @@ public class ESUser {
                     failure(new Throwable());
                     return;
                 }
-                Log.v(TAG, "New session!");
                 USER_HANDLE = sResp.getBody().getUserHandle();
                 SESSION = sResp.getBody().getSessionToken();
                 SESSION_DATE = new Date();
+                AUTH = String.format(SESSION_TEMPLATE, SESSION);
+                Log.v(TAG, "New session! Auth set to " + AUTH);
             }
         };
         ES_SESSION.postSessionAsync(req, esAuth, serviceCallback);
-        auth = SESSION_TEMPLATE.format(SESSION);
     }
 
     protected boolean checkLoginStatus() {
-       if (SESSION == null) {
+        // TODO deal with session expiration
+       if (AUTH == null) {
             Log.v(TAG, "User not logged in");
             getnewsession(0);
-           return false;
-        }
-        return true;
+            return false;
+       }
+       Log.v(TAG, "User logged in");
+       return true;
     }
 }

@@ -138,7 +138,7 @@ public class ESTask {
                     return;
                 }
                 if (esUser.checkLoginStatus() == true) {
-                    esNotifs.get_notifications(esUser.auth, task.notificationCallback, 0);
+                    esNotifs.get_notifications(esUser.AUTH, task.notificationCallback, 0);
                 }
                 break;
             }
@@ -146,7 +146,7 @@ public class ESTask {
                 if (task.encounterID == null || task.msgsCallback == null)
                     return;
                 if (esUser.checkLoginStatus() == true) {
-                    esMsgTopics.get_encounter_msgs(task.encounterID, task.msgsCallback, esUser.auth, 0);
+                    esMsgTopics.get_encounter_msgs(task.encounterID, task.msgsCallback, esUser.AUTH, 0);
                 }
                 break;
             }
@@ -154,7 +154,8 @@ public class ESTask {
                 if (task.encounterID == null || task.msg == null)
                     return;
                 if (esUser.checkLoginStatus() == true) {
-                    esMsgTopics.send_msg(esUser.auth, task.encounterID, task.msg, 0);
+                    Log.d(TAG, "Sending message");
+                    esMsgTopics.send_msg(esUser.AUTH, task.encounterID, task.msg, 0);
                 }
                 break;
             }
@@ -173,7 +174,8 @@ public class ESTask {
                 if (task.encounterID == null)
                     return;
                 if (esUser.checkLoginStatus() == true) {
-                    esMsgTopics.create_topic(esUser.auth, task.encounterID, 0);
+                    Log.d(TAG, "Creating topic");
+                    esMsgTopics.create_topic(esUser.AUTH, task.encounterID, 0);
                 }
                 break;
             }

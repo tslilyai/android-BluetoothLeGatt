@@ -118,7 +118,6 @@ public class Advertiser {
      * Returns an AdvertiseSetParameters object
      */
     private AdvertiseSettings buildAdvertiseSettings() {
-        // TODO active scheme connectable or scannable
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
         settingsBuilder.setConnectable(false); // TODO
         settingsBuilder.setAdvertiseMode(ADVERTISE_MODE_BALANCED);

@@ -68,7 +68,9 @@ public class SDDR_API {
         List<MEncounter> encounters = new EncounterBridge(context).getEncountersFiltered(filter);
         List<Identifier> eids = new LinkedList<>();
         for (MEncounter e : encounters) {
-            eids.add(e.getEncounterIDs(context).get(0));
+            List<Identifier> receivedEids = e.getEncounterIDs(context);
+            if (receivedEids.size() > 0)
+                eids.add(e.getEncounterIDs(context).get(0));
         }
         return eids;
     }
@@ -91,6 +93,7 @@ public class SDDR_API {
         newTask.msg = msg;
         newTask.encounterID = encounterID;
         ESTask.addTask(newTask);
+        Log.d(TAG, "Adding send_msg task");
     }
 
     public static void get_msgs(Identifier encounterID, ESTask.MsgsCallback callback) {

@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.get_notifs).setOnClickListener(this);
+        findViewById(R.id.get_msgs).setOnClickListener(this);
         findViewById(R.id.SendMsg).setOnClickListener(this);
         findViewById(R.id.AddLink).setOnClickListener(this);
 
@@ -67,9 +68,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.SendMsg:
                 final EditText msg = (EditText) MainActivity.this.findViewById(R.id.Msg);
                 List<Identifier> encounters = SDDR_API.get_encounters(null);
-                Log.d(TAG, "Sending message " + msg.getText().toString() +  " for " + encounters.size() + " encounters");
-                if (encounters.size() > 0)
+                if (encounters.size() > 0) {
+                    Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.get(0).toString());
                     SDDR_API.send_msg(encounters.get(0), msg.getText().toString());
+                }
                 break;
             case R.id.sign_in_button:
                 if (GoogleToken.getToken() == null) {
