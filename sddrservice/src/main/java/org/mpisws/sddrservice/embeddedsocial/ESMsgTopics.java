@@ -57,6 +57,8 @@ public class ESMsgTopics {
         ES_SEARCH = new SearchOperationsImpl(RETROFIT, ESCLIENT);
         ES_TOPIC_COMMENTS = new TopicCommentsOperationsImpl(RETROFIT, ESCLIENT);
     }
+
+    /* Functions callable by ESTask */
     protected void create_topic(final String auth, final Identifier title) {
         Log.v(TAG, "Creating topic " + title);
         find_and_do_action_on_topic(auth, title, TopicAction.CreateOnly, null, null);
@@ -100,6 +102,7 @@ public class ESMsgTopics {
                 find_and_do_action_on_topic(auth, title, topicAction, msgsCallback, msg);
             }
         };
+        // callback for the actual search function
         ServiceCallback<FeedResponseTopicView> serviceCallback = new ServiceCallback<FeedResponseTopicView>() {
             @Override
             public void failure(Throwable t) {
@@ -123,55 +126,19 @@ public class ESMsgTopics {
                 }
                 // we need to try and create the topic, which calls send_msg again
                 if (topics.size() == 0) {
+                    Log.d(TAG, "0 topics for this encounter " + title.toString() + ", creating topic " + title);
                     create_topic(auth, title, createTopicCallback);
                     return;
                 }
                 if (topics.size() == 1) {
                     String topichandle = topics.get(0).getTopicHandle();
                     switch (topicAction) {
-                        case SendMsg: {
-                            PostCommentRequest req = new PostCommentRequest();
-                            req.setText(msg);
-                            ServiceCallback<PostCommentResponse> serviceCallback = new ServiceCallback<PostCommentResponse>() {
-                                @Override
-                                public void failure(Throwable t) {
-                                    Log.v(TAG, "PostComment to topic failed");
-                                }
-
-                                @Override
-                                public void success(ServiceResponse<PostCommentResponse> result) {
-                                    if (!result.getResponse().isSuccess()) {
-                                        failure(new Throwable());
-                                        return;
-                                    }
-                                    Log.v(TAG, "Messages sent to EID " + title.toString() + ": " + msg);
-                                }
-                            };
-                            ES_TOPIC_COMMENTS.postCommentAsync(topichandle, req, auth, serviceCallback);
+                        case SendMsg:
+                            post_comment(topichandle, msg, auth);
                             break;
-                        }
-                        case GetMsgs: {
-                            final ServiceCallback<FeedResponseCommentView> serviceCallbackComments = new ServiceCallback<FeedResponseCommentView>() {
-                                @Override
-                                public void failure(Throwable t) {
-                                }
-
-                                @Override
-                                public void success(ServiceResponse<FeedResponseCommentView> result) {
-                                    if (!result.getResponse().isSuccess()) {
-                                        failure(new Throwable());
-                                        return;
-                                    }
-                                    List<String> comments = new LinkedList<>();
-                                    for (CommentView comment : result.getBody().getData()) {
-                                        comments.add(comment.getText());
-                                    }
-                                    msgsCallback.onReceiveMessages(comments);
-                                }
-                            };
-                            ES_TOPIC_COMMENTS.getTopicCommentsAsync(topichandle, auth, serviceCallbackComments);
+                        case GetMsgs:
+                            get_msgs(topichandle, msgsCallback, auth);
                             break;
-                        }
                         case CreateOnly:
                             return;
                     }
@@ -179,6 +146,47 @@ public class ESMsgTopics {
             }
         };
         ES_SEARCH.getTopicsAsync(title.toString(), auth, serviceCallback);
+    }
+    private void post_comment(String topichandle, final String msg, String auth) {
+         PostCommentRequest req = new PostCommentRequest();
+         req.setText(msg);
+         ServiceCallback<PostCommentResponse> serviceCallback = new ServiceCallback<PostCommentResponse>() {
+            @Override
+            public void failure(Throwable t) {
+                Log.v(TAG, "PostComment to topic failed");
+            }
+
+            @Override
+            public void success(ServiceResponse<PostCommentResponse> result) {
+                if (!result.getResponse().isSuccess()) {
+                    failure(new Throwable());
+                    return;
+                }
+                Log.v(TAG, "Messages sent: " + msg);
+            }
+        };
+        ES_TOPIC_COMMENTS.postCommentAsync(topichandle, req, auth, serviceCallback);
+    }
+    private void get_msgs(String topichandle, final ESTask.MsgsCallback msgsCallback, String auth) {
+        final ServiceCallback<FeedResponseCommentView> serviceCallbackComments = new ServiceCallback<FeedResponseCommentView>() {
+            @Override
+            public void failure(Throwable t) {
+            }
+
+            @Override
+            public void success(ServiceResponse<FeedResponseCommentView> result) {
+                if (!result.getResponse().isSuccess()) {
+                    failure(new Throwable());
+                    return;
+                }
+                List<String> comments = new LinkedList<>();
+                for (CommentView comment : result.getBody().getData()) {
+                    comments.add(comment.getText());
+                }
+                msgsCallback.onReceiveMessages(comments);
+            }
+        };
+        ES_TOPIC_COMMENTS.getTopicCommentsAsync(topichandle, auth, serviceCallbackComments);
     }
     private void create_topic(final String auth, final Identifier title, ServiceCallback serviceCallback) {
         try {
