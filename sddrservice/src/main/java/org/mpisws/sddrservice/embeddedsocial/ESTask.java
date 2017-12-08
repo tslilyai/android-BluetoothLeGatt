@@ -1,12 +1,11 @@
 package org.mpisws.sddrservice.embeddedsocial;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.autorest.EmbeddedSocialClient;
 import com.microsoft.embeddedsocial.autorest.EmbeddedSocialClientImpl;
+import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 
-import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.lib.Identifier;
 
 import java.util.List;
