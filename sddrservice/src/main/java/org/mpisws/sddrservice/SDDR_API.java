@@ -5,17 +5,8 @@ import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
-import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.actions.Action;
-import com.microsoft.embeddedsocial.actions.ActionsLauncher;
-import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
-import com.microsoft.embeddedsocial.data.model.AccountData;
-import com.microsoft.embeddedsocial.data.model.CreateAccountData;
-import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
-
 import org.mpisws.sddrservice.embeddedsocial.ESCore;
-import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
-import org.mpisws.sddrservice.embeddedsocial.ESTask;
+import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
@@ -26,8 +17,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.mpisws.sddrservice.embeddedsocial.ESTask.Typ.*;
-
 /**
  * Created by tslilyai on 11/6/17.
  */
@@ -35,8 +24,8 @@ import static org.mpisws.sddrservice.embeddedsocial.ESTask.Typ.*;
 public class SDDR_API {
     private static final String TAG = SDDR_API.class.getSimpleName();
     private static Context context;
-    private static int msging_enabled = 0;
     private static ESCore esCore;
+
     /* Set when the SDDR service is started. No API call other than start_service can be
         made when this boolean is false.
      */
@@ -57,6 +46,7 @@ public class SDDR_API {
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.start_sddr_service", 0);
         context.startService(serviceIntent);
+        esCore = new ESCore(context);
         SDDR_API.isRunning = true;
     }
 
@@ -64,7 +54,6 @@ public class SDDR_API {
         if (!isRunning) return;
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.add_linkid", linkID);
-
         // note that if we change the mode to listen-only, this is the same as retroactive linking
         serviceIntent.putExtra("Mode", LinkabilityEntryMode.AdvertiseAndListen);
         Log.v(TAG, "Adding linkID " + linkID);
@@ -101,37 +90,34 @@ public class SDDR_API {
 
     public static void send_msg(Identifier encounterID, String msg) {
         if (!isRunning) return;
-        esCore.find_and_act_on_topic(encounterID.toString(), new ESCore.TopicAction(ESCore.TopicAction.TATyp.SendMsg, msg));
+        esCore.send_msg(encounterID.toString(), msg);
     }
 
-    public static void get_msgs(Identifier encounterID, ESTask.MsgsCallback callback) {
+    public static void get_msgs(Identifier encounterID, ESMsgs.MsgsCallback callback) {
         if (!isRunning) return;
-        esCore.find_and_act_on_topic(encounterID.toString(), new ESCore.TopicAction(ESCore.TopicAction.TATyp.GetMsgs, callback));
+        esCore.get_msgs(encounterID.toString(), callback);
     }
 
     public static void enable_msging() {
         if (!isRunning) return;
-        if (msging_enabled > 0) {
-            msging_enabled++;
-            return;
-        }
-        ESTask newTask = new ESTask(MESSAGING_ON_DEFAULT);
-        ESTask.addTask(newTask);
+        esCore.setDefaultCreateMsgChannels();
     }
 
     public static void disable_msging() {
         if (!isRunning) return;
-        msging_enabled--;
-        if (msging_enabled == 0) {
-            ESTask newTask = new ESTask(MESSAGING_OFF_DEFAULT);
-            ESTask.addTask(newTask);
-        }
+        esCore.unsetDefaultCreateMsgChannels();
     }
 
+    public static void create_topic(Identifier eid) {
+        if (!isRunning) return;
+        esCore.create_topic(eid.toString());
+    }
+
+    /*
     public static void get_notifs(ESTask.NotificationCallback callback) {
         if (!isRunning) return;
         ESTask newTask = new ESTask(GET_NOTIFICATIONS);
         newTask.notificationCallback = callback;
         ESTask.addTask(newTask);
-    }
+    }*/
 }
