@@ -20,5 +20,6 @@ public enum TopicFeedType {
 	MY_RECENT,
 	MY_POPULAR,
 	MY_LIKED,
-	FEATURED
+	FEATURED,
+	ALL
 }

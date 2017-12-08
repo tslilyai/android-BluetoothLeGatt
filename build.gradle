@@ -15,9 +15,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven {
-            url "http://dl.bintray.com/acrowntest/test"
-            }
+        maven { url "http://dl.bintray.com/acrowntest/test" }
         maven { url "https://maven.google.com" }
     }
 }

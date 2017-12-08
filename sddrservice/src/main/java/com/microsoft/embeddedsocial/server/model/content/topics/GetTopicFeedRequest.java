@@ -48,6 +48,9 @@ public final class GetTopicFeedRequest extends FeedUserRequest {
 		int limit = getBatchSize();
 		try {
 			switch (topicFeedType) {
+				case ALL:
+					serviceResponse = TOPICS.getTopics(authorization, null, null);
+					break;
 				case USER_RECENT:
 					// {userHandle}/topics
 					serviceResponse = USER_TOPICS.getTopics(query, authorization, cursor, limit);

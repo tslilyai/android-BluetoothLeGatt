@@ -5,6 +5,15 @@ import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
+import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.actions.Action;
+import com.microsoft.embeddedsocial.actions.ActionsLauncher;
+import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
+import com.microsoft.embeddedsocial.data.model.AccountData;
+import com.microsoft.embeddedsocial.data.model.CreateAccountData;
+import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
+
+import org.mpisws.sddrservice.embeddedsocial.ESCore;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.embeddedsocial.ESTask;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
@@ -27,6 +36,7 @@ public class SDDR_API {
     private static final String TAG = SDDR_API.class.getSimpleName();
     private static Context context;
     private static int msging_enabled = 0;
+    private static ESCore esCore;
     /* Set when the SDDR service is started. No API call other than start_service can be
         made when this boolean is false.
      */
@@ -42,13 +52,12 @@ public class SDDR_API {
 
     public static void start_service(Context context) {
         SDDR_API.context = context;
-        ESTask.initialize_static_vars();
 
         // start the service
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.start_sddr_service", 0);
         context.startService(serviceIntent);
-        isRunning = true;
+        SDDR_API.isRunning = true;
     }
 
     public static void add_linkid(String linkID) {
@@ -77,31 +86,27 @@ public class SDDR_API {
 
     public static void register_user(String googletoken, String firstname, String lastname) {
         if (!isRunning) return;
-        ESTask newTask1 = new ESTask(LOGIN_GOOGLE);
-        newTask1.googletoken = googletoken;
-        ESTask.addTask(newTask1);
+        esCore.register_user_details(googletoken, firstname, lastname);
+    }
 
-        ESTask newTask2 = new ESTask(REGISTER_USER);
-        newTask2.firstname = firstname;
-        newTask2.lastname = lastname;
-        ESTask.addTask(newTask2);
+    public static void sign_in(String googletoken) {
+        if (!isRunning) return;
+        esCore.sign_in();
+    }
+
+    public static void sign_out() {
+        if (!isRunning) return;
+        esCore.sign_out();
     }
 
     public static void send_msg(Identifier encounterID, String msg) {
         if (!isRunning) return;
-        ESTask newTask = new ESTask(SEND_MSG);
-        newTask.msg = msg;
-        newTask.encounterID = encounterID;
-        ESTask.addTask(newTask);
-        Log.d(TAG, "Adding send_msg task");
+        esCore.find_and_act_on_topic(encounterID.toString(), new ESCore.TopicAction(ESCore.TopicAction.TATyp.SendMsg, msg));
     }
 
     public static void get_msgs(Identifier encounterID, ESTask.MsgsCallback callback) {
         if (!isRunning) return;
-        ESTask newTask = new ESTask(GET_MSGS);
-        newTask.encounterID = encounterID;
-        newTask.msgsCallback = callback;
-        ESTask.addTask(newTask);
+        esCore.find_and_act_on_topic(encounterID.toString(), new ESCore.TopicAction(ESCore.TopicAction.TATyp.GetMsgs, callback));
     }
 
     public static void enable_msging() {

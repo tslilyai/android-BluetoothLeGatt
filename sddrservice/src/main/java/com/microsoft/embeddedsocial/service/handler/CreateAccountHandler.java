@@ -69,9 +69,7 @@ public class CreateAccountHandler extends ActionHandler {
         try {
             AuthenticationResponse createUserResponse = accountService.createUser(createUserRequest);
             handleSuccessfulResult(action, createUserResponse);
-
-            uploadPhoto(createAccountData.getPhotoUri());
-        } catch (IOException | NetworkRequestException e) {
+        } catch (NetworkRequestException e) {
             DebugLog.logException(e);
             UserAccount.getInstance().onCreateUserFailed();
             action.fail();
@@ -93,20 +91,7 @@ public class CreateAccountHandler extends ActionHandler {
         }
     }
 
-    /**
-     * Uploads the profile photo
-     */
-    private void uploadPhoto(Uri photoUri) throws IOException, NetworkRequestException {
-        // TODO this is a separate call which could fail and leave the wrong public access
-        if (photoUri != null) {
-            AccountDataDifference difference = new AccountDataDifference();
-            difference.setNewPhoto(photoUri);
-            ActionsLauncher.updateAccount(context, difference);
-        }
-    }
-
     @Override
     public void dispose() {
-
     }
 }
