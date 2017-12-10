@@ -1,13 +1,34 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+}
+
 apply plugin: 'com.android.library'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
 
 repositories {
+    jcenter()
     maven {
         url "http://dl.bintray.com/acrowntest/test"
     }
 }
 
 android {
-    compileSdkVersion 26
+   signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+        }
+    }
+    resourcePrefix 'es_'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    compileSdkVersion 24
     buildToolsVersion "26.0.2"
     defaultConfig {
         minSdkVersion 21
@@ -18,16 +39,40 @@ android {
         manifestPlaceholders = [
                 'appAuthRedirectScheme': 'org.mpisws.sddrapp'
         ]
-    }
+        buildConfigField "com.microsoft.embeddedsocial.server.ServerConfig", "SERVER", "com.microsoft.embeddedsocial.server.ServerConfig.STAGING"
+        signingConfig signingConfigs.debug
 
+    }
 
     buildTypes {
+        debug {
+            buildConfigField "boolean", "STANDALONE_APP", "false"
+            signingConfig signingConfigs.debug
+        }
         release {
-            minifyEnabled false
+            buildConfigField "boolean", "STANDALONE_APP", "false"
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debugStandalone.initWith(buildTypes.debug)
+        debugStandalone {
+            buildConfigField "boolean", "STANDALONE_APP", "true"
+            signingConfig signingConfigs.debug
+        }
+        releaseStandalone.initWith(buildTypes.release)
+        releaseStandalone {
+            buildConfigField "boolean", "STANDALONE_APP", "true"
+        }
     }
-    sourceSets.main.jni.srcDirs = []
+    lintOptions {
+        abortOnError false
+    }
+    sourceSets {
+        main {
+            res.srcDirs 'src/main/res', 'src/main/res-public'
+            jni.srcDirs = []
+        }
+    }
 
     task buildNDK(type: Exec) {
         workingDir 'src/main/jni'
@@ -38,21 +83,41 @@ android {
         compileTask -> compileTask.dependsOn buildNDK
     }
 }
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
-    compile 'com.squareup.okhttp3:okhttp:3.1.2'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
-    compile 'com.acrowntest.test:autorest:0.0.8'
     compile 'net.openid:appauth:0.3.0'
-    compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.google.android.gms:play-services-location:11.6.0'
-
     testCompile 'junit:junit:4.12'
     compile files('libs/protobuf-java-3.4.1.jar')
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.6.2'
+    compile 'com.google.android.gms:play-services-gcm:9.4.0'
+    compile 'com.google.android.gms:play-services-auth:9.4.0'
+    compile 'net.openid:appauth:0.3.0'
+    compile 'com.squareup:otto:1.3.6'
+    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
+    compile 'com.squareup.okhttp3:okhttp:3.1.2'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:recyclerview-v7:24.2.1'
+    compile 'com.android.support:cardview-v7:24.2.1'
+    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:support-v4:24.2.1'
+    compile 'com.android.support:support-annotations:23.4.0'
+    compile 'de.hdodenhof:circleimageview:1.2.2'
+    compile 'com.facebook.android:facebook-android-sdk:4.0.0'
+    compile 'com.j256.ormlite:ormlite-android:4.48'
+    compile 'com.floreysoft:jmte:3.1.1'
+    compile 'com.github.chrisbanes.photoview:library:1.2.3'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+    compile 'com.acrowntest.test:autorest:0.0.6'
+}
+
+retrolambda {
+    jvmArgs '-noverify'
 }
 
 version = '0.0.0'

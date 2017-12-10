@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.event.content.GetReplyEvent;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyButtonListener;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyViewHolder;
 import com.microsoft.embeddedsocial.actions.ActionsLauncher;

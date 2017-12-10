@@ -20,7 +20,7 @@ import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.model.CreateAccountData;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.IAccountService;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 import com.microsoft.embeddedsocial.server.model.UserRequest;
@@ -69,7 +69,9 @@ public class CreateAccountHandler extends ActionHandler {
         try {
             AuthenticationResponse createUserResponse = accountService.createUser(createUserRequest);
             handleSuccessfulResult(action, createUserResponse);
-        } catch (NetworkRequestException e) {
+
+            uploadPhoto(createAccountData.getPhotoUri());
+        } catch (IOException | NetworkRequestException e) {
             DebugLog.logException(e);
             UserAccount.getInstance().onCreateUserFailed();
             action.fail();
@@ -91,7 +93,20 @@ public class CreateAccountHandler extends ActionHandler {
         }
     }
 
+    /**
+     * Uploads the profile photo
+     */
+    private void uploadPhoto(Uri photoUri) throws IOException, NetworkRequestException {
+        // TODO this is a separate call which could fail and leave the wrong public access
+        if (photoUri != null) {
+            AccountDataDifference difference = new AccountDataDifference();
+            difference.setNewPhoto(photoUri);
+            ActionsLauncher.updateAccount(context, difference);
+        }
+    }
+
     @Override
     public void dispose() {
+
     }
 }

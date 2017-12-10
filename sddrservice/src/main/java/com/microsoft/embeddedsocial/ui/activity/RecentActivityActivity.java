@@ -10,7 +10,7 @@ import android.support.v4.view.PagerAdapter;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.ui.fragment.UserActivityFeedFragment;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseTabsActivity;
 import com.microsoft.embeddedsocial.ui.fragment.FollowingActivityFeedFragment;
 import com.microsoft.embeddedsocial.ui.util.SimplePagerAdapter;

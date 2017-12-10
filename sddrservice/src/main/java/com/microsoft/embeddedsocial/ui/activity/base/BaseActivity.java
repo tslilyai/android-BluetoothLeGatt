@@ -33,11 +33,11 @@ import android.widget.LinearLayout;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.event.click.NavigationItemClickedEvent;
-import com.microsoft.embeddedsocial.sdk.BuildConfig;
+import org.mpisws.sddrservice.BuildConfig;
 import com.microsoft.embeddedsocial.sdk.IDrawerState;
 import com.microsoft.embeddedsocial.sdk.INavigationDrawerHandler;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.sdk.ui.ToolbarColorizer;
 import com.microsoft.embeddedsocial.ui.fragment.NavigationFragment;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;

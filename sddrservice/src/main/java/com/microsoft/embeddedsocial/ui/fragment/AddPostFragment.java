@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import com.microsoft.embeddedsocial.base.utils.BitmapUtils;
 import com.microsoft.embeddedsocial.base.utils.ObjectUtils;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;

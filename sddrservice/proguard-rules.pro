@@ -32,3 +32,43 @@
     public static int d(...);
     public static int e(...);
 }
+
+# for Java lambdas
+-dontwarn java.lang.invoke.**
+
+-keep class org.mpisws.sddrservice.** { *; }
+
+# for extending BaseActivity
+-keepclasseswithmembers class com.microsoft.embeddedsocial.ui.activity.base.BaseActivity {
+  public <methods>;
+}
+
+# for error reporting
+-keepclasseswithmembers class com.microsoft.embeddedsocial.server.model.view.TopicView {
+  public <methods>;
+}
+
+# for exception types
+-keep class com.microsoft.embeddedsocial.server.exception.** { *; }
+
+# for search
+-keep public class com.microsoft.embeddedsocial.provider.AbstractEmbeddedSocialSearchSuggestionProvider { *; }
+
+# dont obfuscate enums
+-keepclassmembers enum com.microsoft.embeddedsocial.** { *; }
+
+# for xml
+-keepattributes Signature
+-keepnames class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.databind.**
+-keep class org.codehaus.** { *; }
+-keepclassmembers public final enum org.codehaus.jackson.annotate.JsonAutoDetect$Visibility {
+    public static final org.codehaus.jackson.annotate.JsonAutoDetect$Visibility *;
+}
+
+# for otto event bus
+-keepattributes *Annotation*
+-keepclassmembers class ** {
+    @com.squareup.otto.Subscribe public *;
+    @com.squareup.otto.Produce public *;
+}

@@ -19,7 +19,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.microsoft.embeddedsocial.base.utils.ConnectionUtils;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 

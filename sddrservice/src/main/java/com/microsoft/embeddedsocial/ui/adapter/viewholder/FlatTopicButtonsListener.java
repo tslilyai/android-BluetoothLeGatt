@@ -16,7 +16,7 @@ import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.event.ScrollPositionEvent;
 import com.microsoft.embeddedsocial.event.click.ViewCoverImageEvent;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.util.menu.TopicContextMenu;
 

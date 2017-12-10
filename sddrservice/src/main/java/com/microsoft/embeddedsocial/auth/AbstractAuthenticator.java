@@ -11,7 +11,7 @@ import android.support.v4.app.Fragment;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.base.IDisposable;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 /**

@@ -19,7 +19,7 @@ import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.image.CoverLoader;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
 import com.microsoft.embeddedsocial.ui.theme.ThemeAttributes;

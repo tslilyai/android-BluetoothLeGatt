@@ -10,7 +10,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.microsoft.embeddedsocial.event.data.SearchTextChangedEvent;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.fragment.base.Module;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.ObjectUtils;

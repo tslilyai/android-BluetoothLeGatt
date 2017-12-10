@@ -23,14 +23,11 @@ import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.SDDR_API;
-import org.mpisws.sddrservice.embeddedsocial.ESMsgTopics;
-import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
-import org.mpisws.sddrservice.embeddedsocial.ESTask;
+import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
 
 import java.util.List;
-import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "SDDR_API: " + MainActivity.class.getSimpleName();
@@ -44,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!requestBT() || !request_permissions()) {
             return;
         }
-
         SDDR_API.start_service(this);
         SDDR_API.enable_msging();
 
@@ -62,11 +58,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.AddLink:
-                EditText linkID = (EditText) MainActivity.this.findViewById(R.id.linkID);
+                EditText linkID = MainActivity.this.findViewById(R.id.linkID);
                 SDDR_API.add_linkid(linkID.getText().toString());
                 break;
             case R.id.SendMsg:
-                final EditText msg = (EditText) MainActivity.this.findViewById(R.id.Msg);
+                final EditText msg = MainActivity.this.findViewById(R.id.Msg);
                 List<Identifier> encounters = SDDR_API.get_encounters(null);
                 if (encounters.size() > 0) {
                     Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.get(0).toString());
@@ -82,36 +78,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.get_notifs:
                 Log.d(TAG, "Getting notifs");
-                ESTask.NotificationCallback callback = new ESTask.NotificationCallback() {
+                ESMsgs.NotificationCallback callback = new ESMsgs.NotificationCallback() {
                     @Override
-                    public void onReceiveNotifs(final Queue<ESNotifs.Notif> notifs) {
+                    public void onReceiveNotifs(final List<String> notifs) {
                         handler.post(new Runnable() {
                             public void run() {
                                 final TextView text = MainActivity.this.findViewById(R.id.new_notifs);
-                                for (ESNotifs.Notif notif : notifs) {
-                                    text.append(notif.getEid().toString() + ": ");
-                                    text.append(notif.getMsg() + " (" + notif.getTimestamp().toString() + ")\n");
+                                for (String notif : notifs) {
+                                    //text.append(notif.getEid().toString() + ": ");
+                                    //text.append(notif.getMsg() + " (" + notif.getTimestamp().toString() + ")\n");
                                 }
                             }
                         });
                     }
                 };
-                SDDR_API.get_notifs(callback);
+                //SDDR_API.get_notifs(callback);
                 break;
             case R.id.get_msgs:
                 Log.d(TAG, "Getting messages");
                 final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
                 Log.d(TAG, "Getting messages for " + encounters2.size() + " encounters");
                 if (encounters2.size() > 0) {
-                    ESTask.MsgsCallback callback2 = new ESTask.MsgsCallback() {
+                    ESMsgs.MsgsCallback callback2 = new ESMsgs.MsgsCallback() {
                         @Override
-                        public void onReceiveMessages(final List<String> messages) {
+                        public void onReceiveMessages(final List<ESMsgs.Msg> messages) {
                             handler.post(new Runnable() {
                                 public void run() {
                                     final TextView text = MainActivity.this.findViewById(R.id.new_messages);
-                                    for (String msg : messages) {
+                                    for (ESMsgs.Msg msg : messages) {
                                         text.append(encounters2.get(0).toString() + ": ");
-                                        text.append(msg);
+                                        //text.append(msg.);
                                         text.append("\n");
                                     }
                                 }

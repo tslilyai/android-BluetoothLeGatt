@@ -11,7 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 /**
  * Extension of {@link SwipeRefreshLayout} working if {@link RecyclerView} is not a direct child of it.

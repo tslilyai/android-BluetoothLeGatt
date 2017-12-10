@@ -8,7 +8,7 @@ package com.microsoft.embeddedsocial.ui.activity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.fragment.ReportFragment;

@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.event.click.OnTrendingHashtagSelectedEvent;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.BaseViewHolder;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.TrendingHashtagsRenderer.ViewHolder;
 

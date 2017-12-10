@@ -28,7 +28,7 @@ import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.event.signin.SignInWithThirdPartyFailedEvent;
 import com.microsoft.embeddedsocial.event.signin.UserSignedInEvent;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.fragment.module.SlowConnectionMessageModule;
 import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.auth.FacebookAuthenticator;

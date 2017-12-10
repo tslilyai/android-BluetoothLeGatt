@@ -24,7 +24,7 @@ import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.event.dialog.OnDialogItemSelectedEvent;
 import com.microsoft.embeddedsocial.event.dialog.OnNegativeButtonClickedEvent;
 import com.microsoft.embeddedsocial.event.dialog.OnPositiveButtonClickedEvent;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 
 /**

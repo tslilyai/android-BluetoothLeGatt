@@ -18,7 +18,7 @@ import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.BlockedUsersActivity;
 import com.microsoft.embeddedsocial.ui.activity.FollowRequestsActivity;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.ProfileInfoRenderer;

@@ -30,7 +30,7 @@ import com.microsoft.embeddedsocial.base.utils.BitmapUtils;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.data.storage.ImageStorage;
 import com.microsoft.embeddedsocial.event.dialog.OnDialogItemSelectedEvent;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.dialog.AlertDialogFragment;
 import com.microsoft.embeddedsocial.ui.fragment.base.Module;
 import com.microsoft.embeddedsocial.base.event.EventBus;

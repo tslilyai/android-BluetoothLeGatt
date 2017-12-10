@@ -15,7 +15,7 @@ import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.data.model.DiscussionItem;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.FlatTopicButtonsListener;

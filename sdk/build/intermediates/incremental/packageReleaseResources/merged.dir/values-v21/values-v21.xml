@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="es_card_list_padding_hor">@dimen/es_padding_card_horizontal</dimen>
+    <dimen name="es_card_shadow_size">@dimen/es_padding_small</dimen>
+    <dimen name="es_card_shadow_space">@dimen/es_padding_small</dimen>
+    <dimen name="es_padding_card_horizontal">3dp</dimen>
+    <dimen name="es_padding_card_vertical">@dimen/es_padding_small</dimen>
+    <style name="EmbeddedSocialSdkAppTheme.Dark" parent="EmbeddedSocialSdkAppTheme.Dark.Base">
+		<item name="es_navigationItemBackground">@drawable/es_navigation_item_background</item>
+		<item name="android:statusBarColor">@color/es_status_bar</item>
+	</style>
+    <style name="EmbeddedSocialSdkAppTheme.Light" parent="EmbeddedSocialSdkAppTheme.LightBase">
+		<item name="es_navigationItemBackground">@drawable/es_navigation_item_background</item>
+		<item name="android:statusBarColor">@color/es_status_bar</item>
+	</style>
+    <style name="EmbeddedSocialSdkThemeOverlayBaseFragment">
+		<item name="es_listItemBackground">?attr/es_buttonBackground</item>
+	</style>
+</resources>

@@ -8,7 +8,7 @@ package com.microsoft.embeddedsocial.ui.util.menu;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 
 /**

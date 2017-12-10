@@ -32,7 +32,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 /**
  * To be used with ViewPager to provide a tab indicator component which give constant feedback as to

@@ -18,7 +18,7 @@ import com.microsoft.embeddedsocial.event.sync.PostUploadFailedEvent;
 import com.microsoft.embeddedsocial.event.sync.PostUploadedEvent;
 import com.microsoft.embeddedsocial.event.sync.PushNotificationReceivedEvent;
 import com.microsoft.embeddedsocial.base.event.EventBus;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.RecentActivityActivity;
 import com.squareup.otto.Subscribe;
 

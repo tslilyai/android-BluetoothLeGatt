@@ -11,7 +11,7 @@ import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.IAuthenticationService;
 import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
 import com.microsoft.embeddedsocial.autorest.models.GetRequestTokenResponse;

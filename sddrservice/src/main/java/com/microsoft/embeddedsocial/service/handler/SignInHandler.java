@@ -19,7 +19,7 @@ import com.microsoft.embeddedsocial.ui.activity.CreateProfileActivity;
 import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.IAccountService;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 import com.microsoft.embeddedsocial.server.model.UserRequest;
@@ -54,7 +54,7 @@ public class SignInHandler extends ActionHandler {
 
 	@Override
 	protected void handleAction(Action action, ServiceAction serviceAction, Intent intent) {
-		signinWithThirdParty(action, (SocialNetworkAccount)intent.getParcelableExtra(IntentExtras.THIRD_PARTY_ACCOUNT));
+		signinWithThirdParty(action, intent.getParcelableExtra(IntentExtras.THIRD_PARTY_ACCOUNT));
 		intent.removeExtra(IntentExtras.SOCIAL_NETWORK_ACCOUNT);
 	}
 

@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 public class WebPageHelper {
     public static void openPrivacyPolicy(Context context) {

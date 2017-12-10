@@ -33,7 +33,7 @@ import com.microsoft.embeddedsocial.event.click.OnTrendingHashtagSelectedEvent;
 import com.microsoft.embeddedsocial.event.data.SearchTextChangedEvent;
 import com.microsoft.embeddedsocial.provider.AbstractEmbeddedSocialSearchSuggestionProvider;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseTabsActivity;
 import com.microsoft.embeddedsocial.ui.fragment.FeedViewMenuListenerFragment;
 import com.microsoft.embeddedsocial.ui.fragment.search.SearchPagerAdapter;

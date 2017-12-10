@@ -7,7 +7,7 @@ package com.microsoft.embeddedsocial.ui.util;
 
 import android.content.Context;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.view.TextInput;
 
 /**

@@ -27,7 +27,7 @@ import com.microsoft.embeddedsocial.fetcher.base.FetchableRecyclerView;
 import com.microsoft.embeddedsocial.fetcher.base.FetcherState;
 import com.microsoft.embeddedsocial.fetcher.base.ViewState;
 import com.microsoft.embeddedsocial.fetcher.base.ViewStateListener;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.NetworkAvailability;
 import com.microsoft.embeddedsocial.ui.fragment.module.SlowConnectionMessageModule;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;

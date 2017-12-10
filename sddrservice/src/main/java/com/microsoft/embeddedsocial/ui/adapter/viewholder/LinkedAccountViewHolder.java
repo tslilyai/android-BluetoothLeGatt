@@ -13,7 +13,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.server.model.view.ThirdPartyAccountView;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 /**
  * Init linked account layout.

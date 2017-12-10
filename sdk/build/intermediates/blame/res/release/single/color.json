@@ -1,0 +1,110 @@
+[
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/switch_thumb_material_dark.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/switch_thumb_material_dark.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/design_tint_password_toggle.xml",
+        "source": "/home/tslilyai/.android/build-cache/97068832b98c44179c7e8824445f0d6ca397c847/output/res/color/design_tint_password_toggle.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/switch_thumb_material_light.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/switch_thumb_material_light.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/design_error.xml",
+        "source": "/home/tslilyai/.android/build-cache/97068832b98c44179c7e8824445f0d6ca397c847/output/res/color/design_error.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/common_google_signin_btn_text_dark.xml",
+        "source": "/home/tslilyai/.android/build-cache/b7537002ccbf9f687a4fe7e1c4e904d1bf707295/output/res/color/common_google_signin_btn_text_dark.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/es_button_green_completed.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/color/es_button_green_completed.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_primary_text_disable_only_material_light.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_primary_text_disable_only_material_light.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/common_plus_signin_btn_text_dark.xml",
+        "source": "/home/tslilyai/.android/build-cache/b7537002ccbf9f687a4fe7e1c4e904d1bf707295/output/res/color/common_plus_signin_btn_text_dark.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_tint_default.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_tint_default.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/common_google_signin_btn_text_light.xml",
+        "source": "/home/tslilyai/.android/build-cache/b7537002ccbf9f687a4fe7e1c4e904d1bf707295/output/res/color/common_google_signin_btn_text_light.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/es_menu_item_color.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/color/es_menu_item_color.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_tint_switch_thumb.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_tint_switch_thumb.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/es_button_text_green.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/color/es_button_text_green.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_btn_colored_borderless_text_material.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_btn_colored_borderless_text_material.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_primary_text_disable_only_material_dark.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_primary_text_disable_only_material_dark.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/common_plus_signin_btn_text_light.xml",
+        "source": "/home/tslilyai/.android/build-cache/b7537002ccbf9f687a4fe7e1c4e904d1bf707295/output/res/color/common_plus_signin_btn_text_light.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_secondary_text_material_light.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_secondary_text_material_light.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_tint_btn_checkable.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_tint_btn_checkable.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_primary_text_material_dark.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_primary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_tint_edittext.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_tint_edittext.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_primary_text_material_light.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_primary_text_material_light.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_search_url_text.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_search_url_text.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_tint_seek_thumb.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_tint_seek_thumb.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_secondary_text_material_dark.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_secondary_text_material_dark.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/es_button_text_gray.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/color/es_button_text_gray.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_tint_switch_track.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_tint_switch_track.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/color/abc_tint_spinner.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/color/abc_tint_spinner.xml"
+    }
+]

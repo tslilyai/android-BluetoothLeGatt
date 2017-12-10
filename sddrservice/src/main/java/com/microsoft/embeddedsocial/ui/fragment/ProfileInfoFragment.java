@@ -15,7 +15,7 @@ import com.microsoft.embeddedsocial.event.relationship.UserFollowedStateChangedE
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.adapter.ProfileInfoAdapter;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseListContentFragment;

@@ -7,7 +7,7 @@ package com.microsoft.embeddedsocial.ui.util;
 
 import android.content.res.Resources;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 import java.util.concurrent.TimeUnit;
 

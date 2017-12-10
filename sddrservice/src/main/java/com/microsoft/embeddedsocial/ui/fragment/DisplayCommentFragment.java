@@ -18,7 +18,7 @@ import com.microsoft.embeddedsocial.event.content.CommentRemovedEvent;
 import com.microsoft.embeddedsocial.event.content.GetCommentEvent;
 import com.microsoft.embeddedsocial.fetcher.base.ViewState;
 import com.microsoft.embeddedsocial.fetcher.base.ViewStateListener;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.ui.activity.TopicActivity;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentViewHolder;

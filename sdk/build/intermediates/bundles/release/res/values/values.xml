@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="es_report_reasons_array">
+		<item>Threats, cyberbullying, harassment</item>
+		<item>Child endangerment or exploitation</item>
+		<item>Offensive content</item>
+		<item>Virus/Spyware/Malware</item>
+		<item>Content infringement</item>
+		<item>Other</item>
+	</string-array>
+    <bool name="es_isLandscape">false</bool>
+    <bool name="es_isTablet">false</bool>
+    <color name="es_black">#F000</color>
+    <color name="es_button_base_gray">#ff999999</color>
+    <color name="es_button_color_light">@color/es_lime_A400</color>
+    <color name="es_button_completed_text">@android:color/white</color>
+    <color name="es_button_text">@color/es_green_500</color>
+    <color name="es_comment_background">@android:color/transparent</color>
+    <color name="es_default_card_background">@android:color/white</color>
+    <color name="es_drawer_background">@color/es_gray_900</color>
+    <color name="es_feed_background_light">#EEEDED</color>
+    <color name="es_gray_300">#E0E0E0</color>
+    <color name="es_gray_900">#212121</color>
+    <color name="es_green_500">#4CAF50</color>
+    <color name="es_image_holder">@color/es_gray_300</color>
+    <color name="es_info_message_background">@color/es_pink_500</color>
+    <color name="es_info_message_text">@color/es_white</color>
+    <color name="es_lightblue_50">#E1F5FE</color>
+    <color name="es_lime_A400">#C6FF00</color>
+    <color name="es_orange_500">#FF9800</color>
+    <color name="es_pink_500">#E91E63</color>
+    <color name="es_placeholder">#06000000</color>
+    <color name="es_progressbar">@color/es_lime_A400</color>
+    <color name="es_red_50">#ffebee</color>
+    <color name="es_reply_background">@android:color/transparent</color>
+    <color name="es_sign_in_facebook">#3b5997</color>
+    <color name="es_sign_in_google">#4285f4</color>
+    <color name="es_sign_in_microsoft">#2a79d9</color>
+    <color name="es_sign_in_twitter">#1da1f2</color>
+    <color name="es_status_bar">@color/es_text_secondary_light</color>
+    <color name="es_tab_bottom_line">@color/es_lime_A400</color>
+    <color name="es_tab_text_active">@android:color/white</color>
+    <color name="es_tab_text_not_active">#bdbdbd</color>
+    <color name="es_teal_500">#009688</color>
+    <color name="es_text_green">@color/es_green_500</color>
+    <color name="es_text_hint_dark">#42FFFFFF</color>
+    <color name="es_text_hint_light">#42000000</color>
+    <color name="es_text_link_color">@color/es_green_500</color>
+    <color name="es_text_primary_dark">#DFFFFFFF</color>
+    <color name="es_text_primary_light">#DF000000</color>
+    <color name="es_text_secondary_dark">#AAFFFFFF</color>
+    <color name="es_text_secondary_light">#8A000000</color>
+    <color name="es_toolbar_background">@color/es_gray_900</color>
+    <color name="es_white">#FFFFFF</color>
+    <color name="es_window_background_dark">#606060</color>
+    <color name="es_window_background_light">@color/es_white</color>
+    <color name="es_yellow_50">#FFFDE7</color>
+    <declare-styleable name="es_AppTheme"><attr format="reference" name="es_navigationItemStyle"/><attr format="reference|color" name="es_buttonBackground"/><attr format="reference" name="es_listItemBackground"/><attr format="reference" name="es_navigationItemBackground"/><attr format="reference" name="es_tabIndicatorBackground"/><attr format="color" name="es_tabIndicatorTextColorActive"/><attr format="color" name="es_tabIndicatorTextColorNotActive"/><attr format="reference" name="es_listIndicator"/><attr format="reference" name="es_galleryIndicator"/><attr format="color" name="es_cardBackground"/><attr format="color" name="es_contentBackground"/><attr format="color" name="es_topicFeedBackground"/><attr format="color" name="es_galleryItemBackground"/><attr format="color" name="es_topicCoverBackground"/><attr format="reference" name="es_contextMenuIcon"/><attr format="reference" name="es_userNoPhotoIcon"/><attr format="reference" name="es_toolbarStyle"/><attr format="color" name="es_photoPlaceholder"/><attr format="color" name="es_textColorPrimary"/><attr format="color" name="es_textColorSecondary"/><attr format="color" name="es_textColorHint"/><attr format="color" name="es_uploadingItemColor"/><attr format="color" name="es_dividerColor"/><attr format="reference" name="es_cursorDrawable"/><attr format="reference" name="es_largeLogo"/><attr format="color" name="es_tabsBottomLineColor"/></declare-styleable>
+    <declare-styleable name="es_AspectRatioImageView"><attr format="float" name="es_aspectRatio"/></declare-styleable>
+    <declare-styleable name="es_NavigationItemView"><attr format="reference" name="es_icon_normal"/><attr format="reference" name="es_icon_highlight"/><attr format="string" name="es_name"/></declare-styleable>
+    <declare-styleable name="es_ThemeOverlay"><attr format="reference" name="es_recyclerViewBackground"/><attr format="reference" name="es_baseContentLayout"/><attr format="reference" name="es_baseContentViewId"/></declare-styleable>
+    <dimen name="es_activity_horizontal_margin">16dp</dimen>
+    <dimen name="es_add_post_edit_text_width">360dp</dimen>
+    <dimen name="es_add_post_photo_height">200dp</dimen>
+    <dimen name="es_button_base_size">40dp</dimen>
+    <dimen name="es_button_corner_radius">2dp</dimen>
+    <dimen name="es_button_icon_size">24dp</dimen>
+    <dimen name="es_card_cover_image_height">200dp</dimen>
+    <dimen name="es_card_cover_image_width">360dp</dimen>
+    <dimen name="es_card_list_padding_hor">6dp</dimen>
+    <dimen name="es_card_list_padding_ver">4dp</dimen>
+    <dimen name="es_card_shadow_size">@dimen/es_padding_small</dimen>
+    <dimen name="es_card_shadow_space">@dimen/es_padding_base</dimen>
+    <dimen name="es_compensate_drawable_size">-10dp</dimen>
+    <dimen name="es_counter_drawable_padding">4dp</dimen>
+    <dimen name="es_drawer_width">304dp</dimen>
+    <dimen name="es_grid_cell_size">174dp</dimen>
+    <dimen name="es_grid_half_padding">2dp</dimen>
+    <dimen name="es_info_message_text_size">12dp</dimen>
+    <dimen name="es_list_default_height">48dp</dimen>
+    <dimen name="es_load_more_height">50dp</dimen>
+    <dimen name="es_navigation_hor_padding">16dp</dimen>
+    <dimen name="es_notification_icon_size">24dp</dimen>
+    <dimen name="es_notification_num_text_size">14dp</dimen>
+    <dimen name="es_notification_num_text_size_small">12dp</dimen>
+    <dimen name="es_padding_base">8dp</dimen>
+    <dimen name="es_padding_card_horizontal">2dp</dimen>
+    <dimen name="es_padding_card_vertical">0dp</dimen>
+    <dimen name="es_padding_large">16dp</dimen>
+    <dimen name="es_padding_options_horizontal">2dp</dimen>
+    <dimen name="es_padding_small">4dp</dimen>
+    <dimen name="es_padding_xlarge">24dp</dimen>
+    <dimen name="es_profile_button_padding">2dp</dimen>
+    <dimen name="es_profile_margin_text">16dp</dimen>
+    <dimen name="es_profile_row_margin">22dp</dimen>
+    <dimen name="es_replies_button_image_size">12dp</dimen>
+    <dimen name="es_sign_in_button_height">60dp</dimen>
+    <dimen name="es_sign_in_button_radius">2dp</dimen>
+    <dimen name="es_tab_width">120dp</dimen>
+    <dimen name="es_text_body2">14dp</dimen>
+    <dimen name="es_text_caption">12dp</dimen>
+    <dimen name="es_text_head">20dp</dimen>
+    <dimen name="es_text_subhead">16dp</dimen>
+    <dimen name="es_user_icon_size">40dp</dimen>
+    <dimen name="es_user_pic_large_size">100dp</dimen>
+    <dimen name="es_user_pic_table_size">150dp</dimen>
+    <dimen name="es_users_list_vertical_padding">8dp</dimen>
+    <dimen name="es_users_list_vertical_padding_large">16dp</dimen>
+    <item name="es_keyComment" type="id"/>
+    <item name="es_keyFollowerStatus" type="id"/>
+    <item name="es_keyHandle" type="id"/>
+    <item name="es_keyIsAdd" type="id"/>
+    <item name="es_keyIsOwnContent" type="id"/>
+    <item name="es_keyPosition" type="id"/>
+    <item name="es_keyReply" type="id"/>
+    <item name="es_keyTopic" type="id"/>
+    <item name="es_keyUser" type="id"/>
+    <item name="es_recyclerView" type="id"/>
+    <plurals name="es_button_followers">
+		<item quantity="one">1 Follower</item>
+		<item quantity="other">%d Followers</item>
+	</plurals>
+    <plurals name="es_topic_comments_pattern">
+		<item quantity="one">%1$d comment</item>
+		<item quantity="other">%1$d comments</item>
+	</plurals>
+    <plurals name="es_topic_likes_pattern">
+		<item quantity="one">%1$d like</item>
+		<item quantity="other">%1$d likes</item>
+	</plurals>
+    <plurals name="es_topic_replies_pattern">
+		<item quantity="one">%1$d reply</item>
+		<item quantity="other">%1$d replies</item>
+	</plurals>
+    <string name="es_account_deleted">Account deleted</string>
+    <string name="es_account_header">Account</string>
+    <string name="es_account_info_header">Account information</string>
+    <string name="es_account_link_conflict">Linked account already exists.</string>
+    <string name="es_account_link_error">Error when linking your account.</string>
+    <string name="es_account_unlink_error">Error when unlinking your account.</string>
+    <string name="es_action_cover_photo">Cover photo</string>
+    <string name="es_action_upload_photo">Upload photo</string>
+    <string name="es_activity_feed">Activity feed</string>
+    <string name="es_activity_feed_following">Following</string>
+    <string name="es_activity_feed_user">You</string>
+    <string name="es_activity_following_child_comment">%1$s replied to comment \"%2$s\"</string>
+    <string name="es_activity_following_child_peer_comment">%1$s added a new reply to comment \"%2$s\"</string>
+    <string name="es_activity_following_child_peer_topic">%1$s added a new comment to topic \"%2$s\"</string>
+    <string name="es_activity_following_child_topic">%1$s commented on topic \"%2$s\"</string>
+    <string name="es_activity_following_following">%1$s started following %2$s</string>
+    <string name="es_activity_following_like_comment">%1$s liked comment \"%2$s\"</string>
+    <string name="es_activity_following_like_reply">%1$s liked reply \"%2$s\"</string>
+    <string name="es_activity_following_like_topic">%1$s liked topic \"%2$s\"</string>
+    <string name="es_activity_following_mention_comment">%1$s mentioned %2$ in a comment \"%3$s\"</string>
+    <string name="es_activity_following_mention_reply">%1$s mentioned %2$ in a reply \"%3$s\"</string>
+    <string name="es_activity_following_mention_topic">%1$s mentioned %2$s in a topic \"%3$s\"</string>
+    <string name="es_activity_you_child_comment">%1$s replied to your comment \"%2$s\"</string>
+    <string name="es_activity_you_child_peer_comment">%1$s added a new reply to comment \"%2$s\"</string>
+    <string name="es_activity_you_child_peer_topic">%1$s added a new comment to topic \"%2$s\"</string>
+    <string name="es_activity_you_child_topic">%1$s commented on your topic \"%2$s\"</string>
+    <string name="es_activity_you_follow_accepted">%s accepted your follow request</string>
+    <string name="es_activity_you_follow_request">%s sent you a follow request</string>
+    <string name="es_activity_you_following">%s started following you</string>
+    <string name="es_activity_you_like_comment">%1$s liked your comment \"%2$s\"</string>
+    <string name="es_activity_you_like_reply">%1$s liked your reply \"%2$s\"</string>
+    <string name="es_activity_you_like_topic">%1$s liked your topic \"%2$s\"</string>
+    <string name="es_activity_you_mention_comment">%1$s mentioned you in a comment \"%2$s\"</string>
+    <string name="es_activity_you_mention_reply">%1$s mentioned you in a reply \"%2$s\"</string>
+    <string name="es_activity_you_mention_topic">%1$s mentioned you in a topic \"%2$s\"</string>
+    <string name="es_add_picture_suggestion">Tap here to add a picture</string>
+    <string name="es_additional_app_terms">The application you are using may have additional terms.</string>
+    <string name="es_app_name">Embedded Social</string>
+    <string name="es_applications_header">Applications</string>
+    <string name="es_blocked_users_header">Blocked users</string>
+    <string name="es_button_block">Block</string>
+    <string name="es_button_delete_account">Delete account</string>
+    <string name="es_button_delete_search_history">Delete search history</string>
+    <string name="es_button_edit_profile">Edit profile</string>
+    <string name="es_button_find_friends_facebook">Find Facebook friends</string>
+    <string name="es_button_find_friends_google_plus">Find Google+ friends</string>
+    <string name="es_button_find_friends_microsoft">Find Microsoft contacts</string>
+    <string name="es_button_find_friends_other_apps">Find friends from other Embedded Social apps</string>
+    <string name="es_button_follow">@string/es_follow</string>
+    <string name="es_button_following">%1$d following</string>
+    <string name="es_button_linked_accounts">Linked accounts</string>
+    <string name="es_button_open_comment">Open comment</string>
+    <string name="es_button_open_topic">Open topic</string>
+    <string name="es_button_post_topic">@string/es_post</string>
+    <string name="es_button_privacy_policy">Privacy policy</string>
+    <string name="es_button_sign_in">Sign in</string>
+    <string name="es_button_sign_out">Sign out</string>
+    <string name="es_button_terms_and_conditions">Terms and conditions</string>
+    <string name="es_button_unblock">Unblock</string>
+    <string name="es_cancel">Cancel</string>
+    <string name="es_close">Close</string>
+    <string name="es_close_side_menu">Close side menu</string>
+    <string name="es_comment">Comment</string>
+    <string name="es_content_removed_comment">Comment removed</string>
+    <string name="es_content_removed_reply">Reply removed</string>
+    <string name="es_content_removed_topic">Post removed</string>
+    <string name="es_delete">Delete</string>
+    <string name="es_delete_account_warning">This action will permanently delete your account and all associated information. The account deletion cannot be undone.\n\nDo you really want to do it?</string>
+    <string name="es_description_cover_photo">Portrait view only</string>
+    <string name="es_dialog_title_add_post">Add new post</string>
+    <string name="es_elapsed_time_days_pattern">%1$dd</string>
+    <string name="es_elapsed_time_hours_pattern">%1$dh</string>
+    <string name="es_elapsed_time_minutes_pattern">%1$dm</string>
+    <string name="es_elapsed_time_seconds_pattern">%1$ds</string>
+    <string name="es_elapsed_time_weeks_pattern">%1$dw</string>
+    <string name="es_facebook">Sign in with Facebook</string>
+    <string name="es_follow">Follow</string>
+    <string name="es_following">Following</string>
+    <string name="es_google">Sign in with Google</string>
+    <string name="es_google_auth_response">com.microsoft.embeddedsocial.HANDLE_AUTHORIZATION_RESPONSE</string>
+    <string name="es_header_about">About</string>
+    <string name="es_header_follow">Follow people</string>
+    <string name="es_hint_add_comment">Type here to comment?</string>
+    <string name="es_hint_add_reply">Type here to reply?</string>
+    <string name="es_hint_bio">Bio (optional)</string>
+    <string name="es_hint_description">Description</string>
+    <string name="es_hint_first_name">First name</string>
+    <string name="es_hint_last_name">Last name</string>
+    <string name="es_hint_search_people">Search people</string>
+    <string name="es_hint_search_topics">Search topics</string>
+    <string name="es_hint_title">Title (optional)</string>
+    <string name="es_last_account_text">You must have at least one account linked to your profile.</string>
+    <string name="es_last_account_title">Inaccessible action</string>
+    <string name="es_lib_name">Embedded Social SDK</string>
+    <string name="es_lib_title">Microsoft Embedded Social</string>
+    <string name="es_load_more_comments">View previous comments?</string>
+    <string name="es_load_more_replies">View previous replies?</string>
+    <string name="es_load_more_retry_button">Loading failed. Tap here to retry.</string>
+    <string name="es_load_more_suggestion">Load more</string>
+    <string name="es_many_persons">%1$s, %2$s and %3$d other people </string>
+    <string name="es_menu_add_post">@string/es_screen_title_add_post</string>
+    <string name="es_menu_all_time">All time</string>
+    <string name="es_menu_block_user">Block user</string>
+    <string name="es_menu_choose_photo">Choose existing photo</string>
+    <string name="es_menu_done">Done</string>
+    <string name="es_menu_edit_post">Edit post</string>
+    <string name="es_menu_follow">@string/es_follow</string>
+    <string name="es_menu_gallery">Gallery</string>
+    <string name="es_menu_hide_post">Hide post</string>
+    <string name="es_menu_list">List</string>
+    <string name="es_menu_month">This month</string>
+    <string name="es_menu_new_photo">Take new photo</string>
+    <string name="es_menu_popular">Popular</string>
+    <string name="es_menu_recent">@string/es_recent</string>
+    <string name="es_menu_remove_comment">Remove comment</string>
+    <string name="es_menu_remove_photo">Remove photo</string>
+    <string name="es_menu_remove_post">Remove post</string>
+    <string name="es_menu_remove_reply">Remove reply</string>
+    <string name="es_menu_report_comment">Report comment</string>
+    <string name="es_menu_report_custom">Report problem</string>
+    <string name="es_menu_report_post">Report post</string>
+    <string name="es_menu_report_reply">Report reply</string>
+    <string name="es_menu_report_user">Report user</string>
+    <string name="es_menu_today">Today</string>
+    <string name="es_menu_unblock_user">@string/es_button_unblock</string>
+    <string name="es_menu_unfollow">@string/es_unfollow</string>
+    <string name="es_menu_week">This week</string>
+    <string name="es_message_add_post_confirm_quit">Going back to the feed will delete the content of this draft, are you sure you want to go back?</string>
+    <string name="es_message_cant_complete_action">Can\'t complete this action</string>
+    <string name="es_message_cant_get_profile">can\'t get profile</string>
+    <string name="es_message_cant_login">can\'t login</string>
+    <string name="es_message_correct_input">Please correct the errors in your profile</string>
+    <string name="es_message_enter_description">Please enter a description</string>
+    <string name="es_message_facebook_error_pattern">Facebook error: %1$s.</string>
+    <string name="es_message_facebook_login_cancel">Facebook login cancel</string>
+    <string name="es_message_failed_to_load_comment">Can\'t load comment</string>
+    <string name="es_message_failed_to_load_data">Failed to load data</string>
+    <string name="es_message_failed_to_load_reply">Can\'t load reply</string>
+    <string name="es_message_failed_to_publish_post">Failed to publish some of pending posts</string>
+    <string name="es_message_failed_to_refresh_topic">Topic does not exist or is not visible to the user</string>
+    <string name="es_message_failed_to_remove_comment">Failed to remove comment</string>
+    <string name="es_message_failed_to_remove_reply">Failed to remove reply</string>
+    <string name="es_message_failed_to_search_data">Failed to search data</string>
+    <string name="es_message_field_cant_be_empty">This field is required</string>
+    <string name="es_message_ms_live_error_pattern">Microsoft Live error: %1$s</string>
+    <string name="es_message_network_error">Network error</string>
+    <string name="es_message_no_connection">You can still post while offline.</string>
+    <string name="es_message_no_data">No content</string>
+    <string name="es_message_no_internet_connection">No internet connection</string>
+    <string name="es_message_no_likes">No likes</string>
+    <string name="es_message_no_people">No people</string>
+    <string name="es_message_no_permission">Can\'t complete this action without having a corresponding permission</string>
+    <string name="es_message_no_search_data_pattern">No results found for \"%1$s\"</string>
+    <string name="es_message_private_user">This user is private</string>
+    <string name="es_message_slow_connection">Connection appears to be slow. Stand by.</string>
+    <string name="es_message_wait_until_account_created">Wait until account is created</string>
+    <string name="es_message_wait_until_account_updated">Wait until account is updated</string>
+    <string name="es_microsoft">Sign in with Microsoft</string>
+    <string name="es_microsoft_agreement">By creating an Embedded Social account, I agree to the Microsoft</string>
+    <string name="es_msg_couldnt_access_google_profile">Couldn\'t get access to Google profile</string>
+    <string name="es_msg_general_create_user_error">An error has occurred during user creation</string>
+    <string name="es_msg_general_create_user_success">Creating account</string>
+    <string name="es_msg_general_operation_error">An error occurred during this operation</string>
+    <string name="es_msg_general_signin_cancelled">Sign-in attempt was cancelled</string>
+    <string name="es_msg_general_signin_error">An error has occurred during sign-in</string>
+    <string name="es_msg_general_signin_success">Signing in</string>
+    <string name="es_msg_google_signin_failed">Sign-in with Google failed</string>
+    <string name="es_muted_apps">Muted applications</string>
+    <string name="es_navigation_activity_feed">@string/es_activity_feed</string>
+    <string name="es_navigation_home">Home</string>
+    <string name="es_navigation_options">Options</string>
+    <string name="es_navigation_pins">My pins</string>
+    <string name="es_navigation_popular">Popular</string>
+    <string name="es_navigation_search">Search</string>
+    <string name="es_no_blocked_users">No blocked users</string>
+    <string name="es_no_image">No image</string>
+    <string name="es_one_person">%s</string>
+    <string name="es_open_side_menu">Open side menu</string>
+    <string name="es_option_add_post_leave">Leave post</string>
+    <string name="es_pending">Pending</string>
+    <string name="es_post">Post</string>
+    <string name="es_privacy_and_cookies_title">Privacy &amp; cookies</string>
+    <string name="es_privacy_description">Only approved followers can see my posts &amp; comments</string>
+    <string name="es_privacy_header">Privacy</string>
+    <string name="es_privacy_policy_url">http://go.microsoft.com/fwlink/?LinkId=521839</string>
+    <string name="es_privacy_statement">Privacy Statement</string>
+    <string name="es_profile">Profile</string>
+    <string name="es_recent">Recent</string>
+    <string name="es_remove_follower">Remove</string>
+    <string name="es_removed_follower">Removed</string>
+    <string name="es_reply">Reply</string>
+    <string name="es_report_question_comment">comment</string>
+    <string name="es_report_question_pattern">What\'s the problem with this %1$s?</string>
+    <string name="es_report_question_post">post</string>
+    <string name="es_report_question_reply">reply</string>
+    <string name="es_report_question_user">user</string>
+    <string name="es_report_result_text">Thank you for reporting your concern to us. We review these submissions very carefully and will take appropriate steps to address this issue. Because of legal and privacy concerns, we may not provide you any additional updates about this submission. Thank you again for contacting us.</string>
+    <string name="es_report_result_title">Report submitted</string>
+    <string name="es_report_title">Report an issue</string>
+    <string name="es_report_user">Report %s</string>
+    <string name="es_screen_title_activity">@string/es_activity_feed</string>
+    <string name="es_screen_title_add_post">Add post</string>
+    <string name="es_screen_title_comment">Comment</string>
+    <string name="es_screen_title_create_profile">Create profile</string>
+    <string name="es_screen_title_delete_account">@string/es_button_delete_account</string>
+    <string name="es_screen_title_display_comment">@string/es_comment</string>
+    <string name="es_screen_title_display_reply">@string/es_reply</string>
+    <string name="es_screen_title_edit_post">Edit post</string>
+    <string name="es_screen_title_edit_profile">Edit profile</string>
+    <string name="es_screen_title_follow_requests">Follow requests</string>
+    <string name="es_screen_title_followers">Followers</string>
+    <string name="es_screen_title_following">@string/es_tab_title_following</string>
+    <string name="es_screen_title_likes">Likes</string>
+    <string name="es_screen_title_linked_accounts">@string/es_button_linked_accounts</string>
+    <string name="es_screen_title_my_pins">My pins</string>
+    <string name="es_screen_title_options">@string/es_navigation_options</string>
+    <string name="es_screen_title_popular">@string/es_menu_popular</string>
+    <string name="es_screen_title_privacy_policy">@string/es_button_privacy_policy</string>
+    <string name="es_screen_title_signin">@string/es_sign_in</string>
+    <string name="es_screen_title_terms">@string/es_button_terms_and_conditions</string>
+    <string name="es_screen_title_topic">@string/es_post</string>
+    <string name="es_search_history_deleted">Search history deleted</string>
+    <string name="es_sign_in">Sign in</string>
+    <string name="es_sign_in_with">Sign in with:</string>
+    <string name="es_suggested_users">Suggested users</string>
+    <string name="es_tab_people">People</string>
+    <string name="es_tab_title_following">Following</string>
+    <string name="es_tab_topics">Topics</string>
+    <string name="es_terms">By using Microsoft Embedded Social, you agree to the %1$s and %2$s.</string>
+    <string name="es_terms_link_title">Terms of use</string>
+    <string name="es_terms_of_use">Terms of Use</string>
+    <string name="es_terms_url">http://go.microsoft.com/fwlink/?LinkID=206977</string>
+    <string name="es_three_persons">%1$s, %2$s and 1 other person</string>
+    <string name="es_title_add_post_confirm_quit">Return to feed?</string>
+    <string name="es_title_follow_requests">New follow requests</string>
+    <string name="es_trending_hashtags">Trending hashtags</string>
+    <string name="es_twitter">Sign in with Twitter</string>
+    <string name="es_two_persons">%1$s and %2$s</string>
+    <string name="es_unfollow">Unfollow</string>
+    <style name="EmbeddedSocialSdkAppTheme.Dark" parent="EmbeddedSocialSdkAppTheme.Dark.Base">
+		<item name="es_navigationItemBackground">?attr/es_buttonBackground</item>
+	</style>
+    <style name="EmbeddedSocialSdkAppTheme.Dark.Base" parent="Theme.AppCompat.NoActionBar">
+		<item name="es_buttonBackground">@android:color/transparent</item>
+		<item name="colorButtonNormal">#FF4CAF50</item>
+		<item name="android:windowBackground">@color/es_window_background_dark</item>
+		<item name="colorControlNormal">@color/es_text_hint_dark</item>
+		<item name="android:editTextStyle">@style/EmbeddedSocialSdkEditTextStyle</item>
+		<item name="textAppearanceLargePopupMenu">@style/EmbeddedSocialSdkMenuTextStyle.Dark</item>
+		<item name="searchViewStyle">@style/EmbeddedSocialSdkSearchViewStyle</item>
+		<item name="es_navigationItemStyle">@style/EmbeddedSocialSdkNavigationItem</item>
+		<item name="es_tabIndicatorBackground">@drawable/es_toolbar_background</item>
+		<item name="es_tabIndicatorTextColorActive">@color/es_tab_text_active</item>
+		<item name="es_tabsBottomLineColor">@color/es_tab_bottom_line</item>
+		<item name="es_tabIndicatorTextColorNotActive">@color/es_tab_text_not_active</item>
+		<item name="es_listIndicator">@drawable/es_list</item>
+		<item name="es_galleryIndicator">@drawable/es_gallery</item>
+		<item name="es_cardBackground">#303030</item>
+		<item name="es_contentBackground">#303030</item>
+		<item name="es_topicFeedBackground">#404040</item>
+		<item name="es_galleryItemBackground">?attr/es_cardBackground</item>
+		<item name="es_topicCoverBackground">#353535</item>
+		<item name="es_contextMenuIcon">@drawable/es_ic_more_dark</item>
+		<item name="es_userNoPhotoIcon">@drawable/es_user_no_pic_white</item>
+		<item name="es_toolbarStyle">@style/EmbeddedSocialSdkToolbarStyleDark</item>
+		<item name="es_photoPlaceholder">@drawable/es_photo_placeholder_dark</item>
+		<item name="es_textColorPrimary">@color/es_text_primary_dark</item>
+		<item name="es_textColorSecondary">@color/es_text_secondary_dark</item>
+		<item name="es_textColorHint">@color/es_text_hint_dark</item>
+		<item name="es_uploadingItemColor">@color/es_teal_500</item>
+		<item name="es_dividerColor">@color/es_text_hint_dark</item>
+		<item name="es_cursorDrawable">@drawable/es_cursor_dark</item>
+		<item name="es_largeLogo">@drawable/es_logo_white</item>
+		<item name="colorAccent">?attr/colorButtonNormal</item>
+	</style>
+    <style name="EmbeddedSocialSdkAppTheme.Light" parent="EmbeddedSocialSdkAppTheme.LightBase">
+		<item name="es_navigationItemBackground">?attr/es_buttonBackground</item>
+	</style>
+    <style name="EmbeddedSocialSdkAppTheme.Light.Search">
+		<item name="es_tabIndicatorBackground">@color/es_white</item>
+		<item name="es_tabIndicatorTextColorActive">#212121</item>
+		<item name="es_tabIndicatorTextColorNotActive">#bdbdbd</item>
+		<item name="android:colorForeground">#42000000</item>
+		<item name="es_listIndicator">@drawable/es_list_dark</item>
+		<item name="es_galleryIndicator">@drawable/es_gallery_dark</item>
+		<item name="es_toolbarStyle">@style/EmbeddedSocialSdkToolbarStyleLightSearch</item>
+	</style>
+    <style name="EmbeddedSocialSdkAppTheme.LightBase" parent="Theme.AppCompat.Light.NoActionBar">
+		<item name="es_buttonBackground">@android:color/transparent</item>
+		<item name="colorButtonNormal">@color/es_button_color_light</item>
+		<item name="android:windowBackground">@color/es_window_background_light</item>
+		<item name="colorControlNormal">#42000000</item>
+		<item name="android:editTextStyle">@style/EmbeddedSocialSdkEditTextStyle</item>
+		<item name="textAppearanceLargePopupMenu">@style/EmbeddedSocialSdkMenuTextStyle.Light</item>
+		<item name="searchViewStyle">@style/EmbeddedSocialSdkSearchViewStyle</item>
+		<item name="es_navigationItemStyle">@style/EmbeddedSocialSdkNavigationItem</item>
+		<item name="es_tabIndicatorBackground">@drawable/es_toolbar_background</item>
+		<item name="es_tabIndicatorTextColorActive">@color/es_tab_text_active</item>
+		<item name="es_tabsBottomLineColor">@color/es_tab_bottom_line</item>
+		<item name="es_tabIndicatorTextColorNotActive">@color/es_tab_text_not_active</item>
+		<item name="es_listIndicator">@drawable/es_list</item>
+		<item name="es_galleryIndicator">@drawable/es_gallery</item>
+		<item name="es_cardBackground">@color/es_default_card_background</item>
+		<item name="es_contentBackground">@color/es_white</item>
+		<item name="es_topicFeedBackground">@color/es_feed_background_light</item>
+		<item name="es_galleryItemBackground">@color/es_placeholder</item>
+		<item name="es_topicCoverBackground">@color/es_image_holder</item>
+		<item name="es_contextMenuIcon">@drawable/es_ic_more_light</item>
+		<item name="es_userNoPhotoIcon">@drawable/es_user_no_pic_black</item>
+		<item name="es_toolbarStyle">@style/EmbeddedSocialSdkToolbarStyleLight</item>
+		<item name="es_photoPlaceholder">@drawable/es_photo_placeholder_light</item>
+		<item name="es_textColorPrimary">@color/es_text_primary_light</item>
+		<item name="es_textColorSecondary">@color/es_text_secondary_light</item>
+		<item name="es_textColorHint">@color/es_text_hint_light</item>
+		<item name="es_uploadingItemColor">@color/es_lightblue_50</item>
+		<item name="es_dividerColor">@color/es_text_hint_light</item>
+		<item name="es_cursorDrawable">@drawable/es_cursor_light</item>
+		<item name="es_largeLogo">@drawable/es_logo</item>
+	</style>
+    <style name="EmbeddedSocialSdkAppTheme.Stub" parent="Theme.AppCompat.NoActionBar">
+		<item name="android:windowActionBar">false</item>
+		<item name="android:windowNoTitle">true</item>
+	</style>
+    <style name="EmbeddedSocialSdkBottomButton" parent="Widget.AppCompat.Button.Borderless">
+		<item name="android:textColor">@color/es_text_green</item>
+	</style>
+    <style name="EmbeddedSocialSdkBoundedButton" parent="EmbeddedSocialSdkTextCaption.Green">
+		<item name="android:gravity">center</item>
+		<item name="android:minWidth">82dp</item>
+		<item name="android:minHeight">32dp</item>
+		<item name="android:layout_marginLeft">10dp</item>
+	</style>
+    <style name="EmbeddedSocialSdkBoundedButton.Completed">
+		<item name="android:background">@drawable/es_button_green_completed</item>
+		<item name="android:textColor">@color/es_button_completed_text</item>
+	</style>
+    <style name="EmbeddedSocialSdkBoundedButton.Green">
+		<item name="android:background">@drawable/es_button_green</item>
+		<item name="android:textColor">@color/es_button_text_green</item>
+	</style>
+    <style name="EmbeddedSocialSdkBoundedButton.Small">
+		<item name="android:minHeight">22dp</item>
+	</style>
+    <style name="EmbeddedSocialSdkButton" parent="EmbeddedSocialSdkTextCaption.Green">
+		<item name="android:gravity">center</item>
+		<item name="android:background">?attr/es_buttonBackground</item>
+		<item name="android:paddingBottom">12dp</item>
+		<item name="android:paddingTop">12dp</item>
+		<item name="android:paddingLeft">10dp</item>
+		<item name="android:paddingRight">10dp</item>
+	</style>
+    <style name="EmbeddedSocialSdkButton.Large">
+		<item name="android:textSize">16dp</item>
+		<item name="android:textStyle">normal</item>
+	</style>
+    <style name="EmbeddedSocialSdkCardViewStyle">
+		<item name="android:layout_marginBottom">@dimen/es_padding_card_vertical</item>
+		<item name="android:layout_marginLeft">@dimen/es_padding_card_horizontal</item>
+		<item name="android:layout_marginRight">@dimen/es_padding_card_horizontal</item>
+		<item name="android:layout_marginTop">@dimen/es_padding_card_vertical</item>
+		<item name="cardCornerRadius">1dp</item>
+		<item name="cardElevation">@dimen/es_card_shadow_size</item>
+		<item name="cardBackgroundColor">?attr/es_cardBackground</item>
+	</style>
+    <style name="EmbeddedSocialSdkContentErrorMessage">
+		<item name="android:textColor">?attr/es_textColorSecondary</item>
+		<item name="android:textSize">14dp</item>
+		<item name="android:padding">16dp</item>
+	</style>
+    <style name="EmbeddedSocialSdkDivider">
+		<item name="android:layout_width">match_parent</item>
+		<item name="android:layout_height">1px</item>
+		<item name="android:background">?attr/es_dividerColor</item>
+	</style>
+    <style name="EmbeddedSocialSdkDivider.List">
+		<item name="android:visibility">gone</item>
+	</style>
+    <style name="EmbeddedSocialSdkDivider.Tablet">
+		<item name="android:layout_width">0dp</item>
+		<item name="android:layout_weight">1</item>
+	</style>
+    <style name="EmbeddedSocialSdkEditTextStyle" parent="Base.Widget.AppCompat.EditText">
+		<item name="android:textColor">?attr/es_textColorPrimary</item>
+		<item name="android:textColorHint">?attr/es_textColorHint</item>
+		<item name="android:cursorVisible">true</item>
+		<item name="android:textCursorDrawable">?attr/es_cursorDrawable</item>
+	</style>
+    <style name="EmbeddedSocialSdkGreenTextStyle">
+		<item name="android:textColor">@color/es_text_green</item>
+		<item name="android:textSize">16dp</item>
+	</style>
+    <style name="EmbeddedSocialSdkMenuTextStyle.Dark" parent="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large">
+		<item name="android:textColor">@color/es_white</item>
+	</style>
+    <style name="EmbeddedSocialSdkMenuTextStyle.Light" parent="@style/TextAppearance.AppCompat.Widget.PopupMenu.Large">
+		<item name="android:textColor">@color/es_menu_item_color</item>
+	</style>
+    <style name="EmbeddedSocialSdkNavigationItem">
+		<item name="android:minHeight">48dp</item>
+		<item name="android:background">?attr/es_navigationItemBackground</item>
+		<item name="android:gravity">center_vertical</item>
+		<item name="android:paddingLeft">@dimen/es_navigation_hor_padding</item>
+		<item name="android:paddingRight">@dimen/es_navigation_hor_padding</item>
+	</style>
+    <style name="EmbeddedSocialSdkOptionsHeader" parent="EmbeddedSocialSdkGreenTextStyle">
+		<item name="android:textColor">@color/es_text_green</item>
+		<item name="android:textSize">14dp</item>
+		<item name="android:layout_marginRight">@dimen/es_profile_margin_text</item>
+		<item name="android:layout_marginTop">@dimen/es_profile_row_margin</item>
+		<item name="android:layout_marginBottom">@dimen/es_padding_base</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+    <style name="EmbeddedSocialSdkOptionsHeader.Phone">
+		<item name="android:layout_marginLeft">@dimen/es_profile_margin_text</item>
+	</style>
+    <style name="EmbeddedSocialSdkOptionsItem">
+		<item name="android:singleLine">true</item>
+		<item name="android:layout_width">0dp</item>
+		<item name="android:background">?attr/es_listItemBackground</item>
+		<item name="android:layout_height">58dp</item>
+		<item name="android:textSize">16dp</item>
+		<item name="android:textColor">?attr/es_textColorSecondary</item>
+		<item name="android:gravity">center_vertical</item>
+	</style>
+    <style name="EmbeddedSocialSdkOptionsItem.Phone">
+		<item name="android:layout_width">match_parent</item>
+		<item name="android:paddingRight">@dimen/es_profile_margin_text</item>
+		<item name="android:paddingLeft">@dimen/es_profile_margin_text</item>
+	</style>
+    <style name="EmbeddedSocialSdkSearchViewStyle" parent="Widget.AppCompat.SearchView">
+		<item name="queryBackground">@null</item>
+		<item name="submitBackground">@null</item>
+		<item name="searchHintIcon">@null</item>
+		<item name="defaultQueryHint">@string/abc_search_hint</item>
+		<item name="searchIcon">@null</item>
+		<item name="layout">@layout/abc_search_view</item>
+		<item name="closeIcon">@drawable/abc_ic_clear_material</item>
+		<item name="goIcon">@drawable/abc_ic_go_search_api_material</item>
+		<item name="voiceIcon">@drawable/abc_ic_voice_search_api_material</item>
+		<item name="commitIcon">@drawable/abc_ic_commit_search_api_mtrl_alpha</item>
+		<item name="suggestionRowLayout">@layout/abc_search_dropdown_item_icons_2line</item>
+	</style>
+    <style name="EmbeddedSocialSdkSecondaryTextStyle">
+		<item name="android:textColor">?attr/es_textColorHint</item>
+		<item name="android:textSize">16dp</item>
+	</style>
+    <style name="EmbeddedSocialSdkSignInButton">
+		<item name="android:orientation">horizontal</item>
+		<item name="android:layout_gravity">center_horizontal</item>
+		<item name="android:padding">4dp</item>
+		<item name="android:layout_margin">5dp</item>
+	</style>
+    <style name="EmbeddedSocialSdkSignInButtonsLayout">
+		<item name="android:layout_width">match_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+	</style>
+    <style name="EmbeddedSocialSdkTabsStyle">
+		<item name="android:colorForeground">?attr/es_tabsBottomLineColor</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextAddPhotoCaption">
+		<item name="android:background">?attr/es_topicCoverBackground</item>
+		<item name="android:gravity">center</item>
+		<item name="android:textColor">?attr/es_textColorPrimary</item>
+		<item name="android:textSize">@dimen/es_text_subhead</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextAppearance.Widget.Toolbar.Title.Dark" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textSize">20dp</item>
+		<item name="android:textColor">@color/es_white</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextAppearance.Widget.Toolbar.Title.Light" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+		<item name="android:textStyle">normal</item>
+		<item name="android:textSize">20dp</item>
+		<item name="android:textColor">@color/es_white</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextBody2">
+		<item name="android:textSize">@dimen/es_text_body2</item>
+		<item name="android:textColor">?attr/es_textColorSecondary</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextCaption">
+		<item name="android:textSize">@dimen/es_text_caption</item>
+		<item name="android:textColor">?attr/es_textColorSecondary</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextCaption.Green">
+		<item name="android:textColor">@color/es_text_green</item>
+		<item name="android:textAllCaps">true</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:paddingLeft">@dimen/es_padding_base</item>
+		<item name="android:paddingRight">@dimen/es_padding_base</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextHead">
+		<item name="android:textColor">?attr/es_textColorPrimary</item>
+		<item name="android:textSize">@dimen/es_text_head</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextSubhead">
+		<item name="android:textSize">@dimen/es_text_subhead</item>
+		<item name="android:textColor">?attr/es_textColorPrimary</item>
+	</style>
+    <style name="EmbeddedSocialSdkTextSubhead.Green">
+		<item name="android:textSize">@dimen/es_text_body2</item>
+		<item name="android:textColor">@color/es_text_green</item>
+	</style>
+    <style name="EmbeddedSocialSdkThemeOverlayBaseFragment">
+		<item name="es_listItemBackground">?attr/es_buttonBackground</item>
+	</style>
+    <style name="EmbeddedSocialSdkThemeOverlayContentFragment">
+		<item name="es_recyclerViewBackground">?attr/es_contentBackground</item>
+		<item name="es_baseContentLayout">@layout/es_content_view</item>
+		<item name="es_baseContentViewId">@id/es_recyclerView</item>
+	</style>
+    <style name="EmbeddedSocialSdkThemeOverlayFeed">
+		<item name="es_recyclerViewBackground">?attr/es_topicFeedBackground</item>
+	</style>
+    <style name="EmbeddedSocialSdkThemeOverlayTopic"/>
+    <style name="EmbeddedSocialSdkToolbarStyleDark">
+		<item name="popupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
+		<item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+		<item name="titleTextAppearance">@style/EmbeddedSocialSdkTextAppearance.Widget.Toolbar.Title.Dark</item>
+		<item name="android:background">@drawable/es_toolbar_background</item>
+		<item name="textAppearanceLargePopupMenu">@style/EmbeddedSocialSdkMenuTextStyle.Dark</item>
+	</style>
+    <style name="EmbeddedSocialSdkToolbarStyleImage">
+		<item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+		<item name="android:background">@android:color/transparent</item>
+	</style>
+    <style name="EmbeddedSocialSdkToolbarStyleLight">
+		<item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+		<item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+		<item name="titleTextAppearance">@style/EmbeddedSocialSdkTextAppearance.Widget.Toolbar.Title.Light</item>
+		<item name="android:background">@drawable/es_toolbar_background</item>
+	</style>
+    <style name="EmbeddedSocialSdkToolbarStyleLightSearch">
+		<item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+		<item name="android:background">@color/es_white</item>
+		<item name="titleTextAppearance">@style/EmbeddedSocialSdkTextAppearance.Widget.Toolbar.Title.Light</item>
+	</style>
+    <style name="EmbeddedSocialSignInImage">
+		<item name="android:layout_margin">4dp</item>
+	</style>
+    <style name="EmbeddedSocialSignInText">
+		<item name="android:layout_width">150dp</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:textSize">14dp</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:layout_margin">8dp</item>
+		<item name="android:textColor">@color/es_white</item>
+		<item name="android:gravity">center_vertical</item>
+	</style>
+</resources>

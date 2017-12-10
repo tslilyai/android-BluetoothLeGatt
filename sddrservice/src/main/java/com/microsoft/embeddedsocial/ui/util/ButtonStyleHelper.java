@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 /**
  * Helps to apply styles to buttons.

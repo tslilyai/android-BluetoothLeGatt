@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.LikesActivity;
 import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.service.IntentExtras;

@@ -10,7 +10,6 @@ import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 import com.microsoft.embeddedsocial.server.NetworkAvailability;
 import com.microsoft.embeddedsocial.server.RequestInfoProvider;
-import com.microsoft.embeddedsocial.ui.notification.NotificationController;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 /**
@@ -18,10 +17,11 @@ import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
  */
 
 public class ESCore {
-    private Context context;
-    private UserAccount userAccount;
+    private final Context context;
+    private final UserAccount userAccount;
+    private final ESMsgs esMsgs;
+
     private SocialNetworkAccount socialNetworkAccount;
-    private ESMsgs esMsgs;
     private int defaultCreateMsgChannels;
 
     public ESCore(Context context) {
@@ -36,7 +36,6 @@ public class ESCore {
         GlobalObjectRegistry.addObject(new Preferences(context));
         GlobalObjectRegistry.addObject(new RequestInfoProvider(context));
         GlobalObjectRegistry.addObject(new UserAccount(context));
-        GlobalObjectRegistry.addObject(new NotificationController(context));
         NetworkAvailability networkAccessibility = new NetworkAvailability();
         networkAccessibility.startMonitoring(context);
         GlobalObjectRegistry.addObject(networkAccessibility);

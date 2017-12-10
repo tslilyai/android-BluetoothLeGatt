@@ -35,7 +35,7 @@ import com.microsoft.embeddedsocial.event.ScrollPositionEvent;
 import com.microsoft.embeddedsocial.event.relationship.UserFollowedStateChangedEvent;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableRecyclerView;
 import com.microsoft.embeddedsocial.fetcher.base.ViewState;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.ui.adapter.DiscussionFeedAdapter;

@@ -78,7 +78,7 @@ public class ESNotifs {
         doneCount = new AtomicInteger(0);
     }
 
-    protected void get_notifications(final String auth, final ESTask.NotificationCallback notificationCallback) {
+    protected void get_notifications(final String auth, final ESMsgs.NotificationCallback notificationCallback) {
         Log.v(TAG, "Getting notifications");
         failed = false;
         notifQueue.clear();
@@ -144,7 +144,7 @@ public class ESNotifs {
                    // try again
                   get_notifications(auth, notificationCallback);
                }
-               notificationCallback.onReceiveNotifs(notifQueue);
+               //notificationCallback.onReceiveNotifs(notifQueue);
                if (sawUnread && readActivityHandle != null) {
                    updateReadNotifs(readActivityHandle, auth);
                } else {

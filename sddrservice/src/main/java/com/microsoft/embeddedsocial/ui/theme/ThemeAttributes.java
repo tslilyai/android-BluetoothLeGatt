@@ -8,7 +8,7 @@ package com.microsoft.embeddedsocial.ui.theme;
 import android.content.Context;
 import android.content.res.TypedArray;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 /**
  * Helper class for getting attributes from style.

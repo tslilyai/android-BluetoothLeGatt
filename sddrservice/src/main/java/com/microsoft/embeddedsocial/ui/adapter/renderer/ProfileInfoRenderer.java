@@ -27,7 +27,7 @@ import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
 import com.microsoft.embeddedsocial.image.UserPhotoLoader;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.EditProfileActivity;
 import com.microsoft.embeddedsocial.ui.activity.FollowingActivity;

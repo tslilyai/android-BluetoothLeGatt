@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.Renderer;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.SingleViewHolder;
 

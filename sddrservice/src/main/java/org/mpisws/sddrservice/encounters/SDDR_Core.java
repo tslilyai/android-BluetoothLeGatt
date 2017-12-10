@@ -14,7 +14,6 @@ import android.util.Log;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import org.mpisws.sddrservice.embeddedsocial.ESTask;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
@@ -143,22 +142,6 @@ public class SDDR_Core implements Runnable {
                         TODO Deal with active/hybrid schemes
                         TODO Deal with different levels of connectivity due to hybrid/active
                     */
-
-                    // handle all ES tasks requested of SDDR_API
-                    if (hasConnectivity()) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                            while (true) {
-                                ESTask t = ESTask.getTask();
-                                if (t == null) {
-                                    return;
-                                }
-                                ESTask.exec_task(t);
-                            }
-                            }
-                        }.start();
-                    }
                     break;
                 default:
                     throw new RuntimeException("Unknown Action Type");

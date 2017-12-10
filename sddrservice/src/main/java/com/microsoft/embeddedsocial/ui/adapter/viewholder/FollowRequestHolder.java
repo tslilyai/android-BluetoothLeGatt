@@ -8,7 +8,7 @@ package com.microsoft.embeddedsocial.ui.adapter.viewholder;
 import android.view.View;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 /**
  * View holder for follow requests.

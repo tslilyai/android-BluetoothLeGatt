@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.UserRenderer;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseUsersListFragment;

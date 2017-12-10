@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
 import com.microsoft.embeddedsocial.ui.util.ButtonStyleHelper;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.ui.theme.ThemeAttributes;
 

@@ -17,7 +17,7 @@ import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.event.dialog.OnNegativeButtonClickedEvent;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.dialog.AlertDialogFragment;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.FieldNotEmptyValidator;

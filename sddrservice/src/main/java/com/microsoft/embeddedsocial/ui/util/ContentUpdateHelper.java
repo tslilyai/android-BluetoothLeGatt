@@ -36,7 +36,7 @@ import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
 import com.microsoft.embeddedsocial.pending.PendingLike;
 import com.microsoft.embeddedsocial.pending.PendingPin;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;

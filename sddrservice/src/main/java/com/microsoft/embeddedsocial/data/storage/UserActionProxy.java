@@ -16,7 +16,7 @@ import com.microsoft.embeddedsocial.data.model.RemoveContentData;
 import com.microsoft.embeddedsocial.event.content.CommentAddedEvent;
 import com.microsoft.embeddedsocial.event.content.CommentRemovedEvent;
 import com.microsoft.embeddedsocial.event.content.ReplyAddedEvent;
-import com.microsoft.embeddedsocial.sdk.BuildConfig;
+import org.mpisws.sddrservice.BuildConfig;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.WorkerService;

@@ -27,7 +27,7 @@ import com.microsoft.embeddedsocial.image.CoverLoader;
 import com.microsoft.embeddedsocial.image.ImageLoader;
 import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragmentWithProgress;
 import com.microsoft.embeddedsocial.ui.fragment.module.PhotoProviderModule;

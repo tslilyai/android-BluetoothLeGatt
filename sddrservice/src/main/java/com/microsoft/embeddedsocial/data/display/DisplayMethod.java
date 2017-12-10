@@ -7,7 +7,7 @@ package com.microsoft.embeddedsocial.data.display;
 
 import android.content.Context;
 
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 
 
 /**

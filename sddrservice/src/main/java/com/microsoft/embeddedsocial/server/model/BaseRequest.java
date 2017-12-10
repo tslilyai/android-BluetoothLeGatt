@@ -7,7 +7,7 @@ package com.microsoft.embeddedsocial.server.model;
 
 import android.text.TextUtils;
 
-import com.microsoft.embeddedsocial.sdk.BuildConfig;
+import org.mpisws.sddrservice.BuildConfig;
 import com.microsoft.embeddedsocial.autorest.CommentLikesOperations;
 import com.microsoft.embeddedsocial.autorest.CommentLikesOperationsImpl;
 import com.microsoft.embeddedsocial.autorest.CommentRepliesOperations;

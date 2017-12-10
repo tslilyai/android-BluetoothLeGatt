@@ -10,7 +10,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.adapter.FetchableListAdapter;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.FollowRequestRenderer;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseListContentFragment;

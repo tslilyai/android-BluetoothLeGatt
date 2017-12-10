@@ -1,0 +1,66 @@
+[
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_user_unfollow.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_user_unfollow.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_feed_display_method.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_feed_display_method.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_report_custom.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_report_custom.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_user_unblock.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_user_unblock.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_user_follow.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_user_follow.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_user_block.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_user_block.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_user_report.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_user_report.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_topic_own.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_topic_own.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_topic_hide.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_topic_hide.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_topic_pending.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_topic_pending.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_topic.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_topic.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_reply_own.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_reply_own.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_my_profile.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_my_profile.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_reply.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_reply.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_comment_own.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_comment_own.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/menu/es_comment.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/menu/es_comment.xml"
+    }
+]

@@ -12,7 +12,7 @@ import android.view.View;
 import com.microsoft.embeddedsocial.ui.util.VerticalPaddingDecoration;
 import com.microsoft.embeddedsocial.data.display.DisplayMethod;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 
 /**

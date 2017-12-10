@@ -7,7 +7,7 @@ package com.microsoft.embeddedsocial.ui.fragment.search;
 
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.adapter.FetchableListAdapter;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.TrendingHashtagsRenderer;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseListContentFragment;

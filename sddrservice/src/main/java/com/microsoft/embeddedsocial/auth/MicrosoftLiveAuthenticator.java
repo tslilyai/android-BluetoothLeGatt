@@ -25,7 +25,7 @@ import com.microsoft.embeddedsocial.base.utils.ConnectionUtils;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.socialnetwork.MicrosoftLiveProfile;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 import java.util.Arrays;

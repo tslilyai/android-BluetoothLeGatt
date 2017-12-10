@@ -18,7 +18,7 @@ import com.microsoft.embeddedsocial.event.ScrollPositionEvent;
 import com.microsoft.embeddedsocial.event.click.OpenCommentEvent;
 import com.microsoft.embeddedsocial.event.click.ViewCommentCoverImageEvent;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.LikesActivity;

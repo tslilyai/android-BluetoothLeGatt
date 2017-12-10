@@ -15,7 +15,7 @@ import android.text.format.DateUtils;
 import com.microsoft.embeddedsocial.server.NetworkAvailability;
 import com.microsoft.embeddedsocial.ui.fragment.base.Module;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
 
 /**

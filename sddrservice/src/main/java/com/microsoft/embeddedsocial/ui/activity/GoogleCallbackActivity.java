@@ -14,7 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.microsoft.embeddedsocial.auth.GoogleNativeAuthenticator;
 import com.microsoft.embeddedsocial.auth.SocialNetworkTokens;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 

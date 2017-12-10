@@ -20,7 +20,7 @@ import android.view.View;
 import com.microsoft.embeddedsocial.data.display.DisplayMethod;
 import com.microsoft.embeddedsocial.event.sync.PostUploadedEvent;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.FetchableListAdapter;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.CardViewRenderer;

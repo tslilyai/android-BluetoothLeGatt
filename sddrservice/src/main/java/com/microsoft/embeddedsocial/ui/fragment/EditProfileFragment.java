@@ -27,7 +27,7 @@ import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.data.model.AccountDataDifference;
 import com.microsoft.embeddedsocial.image.ImageLoader;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.fragment.base.ActionListener;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragmentWithProgress;

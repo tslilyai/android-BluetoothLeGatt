@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="es_padding_options_horizontal">240dp</dimen>
+    <style name="EmbeddedSocialSdkThemeOverlayTopic">
+		<item name="es_baseContentLayout">@layout/es_topic_content_tablet</item>
+		<item name="es_baseContentViewId">@id/es_contentView</item>
+	</style>
+</resources>

@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/drawable-v21/abc_btn_colored_material.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/drawable-v21/abc_btn_colored_material.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/drawable-v21/abc_edit_text_material.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/drawable-v21/abc_edit_text_material.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/drawable-v21/es_button_background.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/drawable-v21/es_button_background.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/drawable-v21/abc_action_bar_item_background_material.xml",
+        "source": "/home/tslilyai/.android/build-cache/f2f8666c8ee1104987417e0317d01ae41b793246/output/res/drawable-v21/abc_action_bar_item_background_material.xml"
+    },
+    {
+        "merged": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/build/intermediates/res/merged/release/drawable-v21/es_navigation_item_background.xml",
+        "source": "/home/tslilyai/AndroidStudioProjects/SDDR_UserSpace/sdk/src/main/res/drawable-v21/es_navigation_item_background.xml"
+    }
+]

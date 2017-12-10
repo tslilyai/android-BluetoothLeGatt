@@ -25,7 +25,7 @@ import com.microsoft.embeddedsocial.auth.TwitterWebAuthenticator;
 import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
 import com.microsoft.embeddedsocial.event.LinkUserThirdPartyAccountEvent;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;

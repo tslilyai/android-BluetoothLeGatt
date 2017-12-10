@@ -18,7 +18,7 @@ import android.view.View;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import com.microsoft.embeddedsocial.sdk.R;
+import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
 import com.microsoft.embeddedsocial.ui.util.CommonBehaviorEventListener;
 import com.microsoft.embeddedsocial.account.AuthorizationCause;
