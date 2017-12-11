@@ -6,6 +6,8 @@
 <resources>
 	<string name="read_perm">Read Perm</string>
 	<string name="write_perm">Write Perm</string>
+	<string name="es_api_key">2e5a1cc8-5eab-4dbd-8d6d-6a84eab23374</string>
+	<string name="es_server_url">https://ppe.embeddedsocial.microsoft.com/</string>
 
 	<string name="es_app_name">Embedded Social</string>
 	<string name="es_lib_name">Embedded Social SDK</string>

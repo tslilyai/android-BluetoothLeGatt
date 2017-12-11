@@ -7,6 +7,7 @@ import android.util.Log;
 
 import org.mpisws.sddrservice.embeddedsocial.ESCore;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
+import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
@@ -113,11 +114,8 @@ public class SDDR_API {
         esCore.create_topic(eid.toString());
     }
 
-    /*
-    public static void get_notifs(ESTask.NotificationCallback callback) {
+    public static void get_notifs(ESNotifs.NotificationCallback callback) {
         if (!isRunning) return;
-        ESTask newTask = new ESTask(GET_NOTIFICATIONS);
-        newTask.notificationCallback = callback;
-        ESTask.addTask(newTask);
-    }*/
+        esCore.get_notifs(callback);
+    }
 }

@@ -6,6 +6,7 @@
 package com.microsoft.embeddedsocial.sdk;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
 
@@ -15,42 +16,28 @@ import java.util.List;
 /**
  * Embedded Social library options.
  */
-@SuppressWarnings("FieldCanBeLocal")
-public final class Options {
+public class Options {
 
-	private Application application = null;
-	private SocialNetworks socialNetworks = null;
+	private Application application;
+	private SocialNetworks socialNetworks;
 	private DrawTheme theme = null;
 
-	private Options() {
+	public Options(String esapikey, String esserverurl) {
+		this.application = new Application(esapikey, esserverurl);
 	}
 
-	void verify() {
+	private Options() {}
+
+	public void verify() {
 		checkValueIsNotNull("application", application);
-		checkValueIsNotNull("socialNetworks", socialNetworks);
-		checkValueIsNotNull("name", theme);
-		checkValueIsNotNull("socialNetworks.facebook", socialNetworks.facebook);
-		checkValueIsNotNull("socialNetworks.twitter", socialNetworks.twitter);
-		checkValueIsNotNull("socialNetworks.google", socialNetworks.google);
-		checkValueIsNotNull("socialNetworks.microsoft", socialNetworks.microsoft);
 		checkValueIsNotEmpty("application.serverUrl", application.serverUrl);
 		checkValueIsNotEmpty("application.appKey", application.appKey);
-		checkValueIsNotEmpty("socialNetworks.facebook.clientId", socialNetworks.facebook.clientId);
-		checkValueIsNotEmpty("socialNetworks.microsoft.clientId", socialNetworks.microsoft.clientId);
-		checkValueIsNotEmpty("socialNetworks.google.clientId", socialNetworks.google.clientId);
-		checkValueIsNotNull("theme.accentColor", theme.accentColor);
 
 		if (application.numberOfCommentsToShow <= 0) {
 			throwInvalidConfigException("application.numberOfCommentsToShow must be greater then 0");
 		}
 		if (application.numberOfRepliesToShow <= 0) {
 			throwInvalidConfigException("application.numberOfRepliesToShow must be greater then 0");
-		}
-		if (!(socialNetworks.facebook.loginEnabled
-			|| socialNetworks.google.loginEnabled
-			|| socialNetworks.microsoft.loginEnabled
-			|| socialNetworks.twitter.loginEnabled)) {
-			throwInvalidConfigException("login via at least one social network must be enabled");
 		}
 	}
 
@@ -145,8 +132,7 @@ public final class Options {
 	/**
 	 * General application's options.
 	 */
-	private static class Application {
-
+	private class Application {
 		private static final int DEFAULT_NUMBER_OF_DISCUSSION_ITEMS = 20;
 
 		private String serverUrl = null;
@@ -158,6 +144,12 @@ public final class Options {
 		private List<String> disableNavigationDrawerForActivities = new ArrayList<>();
 		private int numberOfCommentsToShow = DEFAULT_NUMBER_OF_DISCUSSION_ITEMS;
 		private int numberOfRepliesToShow = DEFAULT_NUMBER_OF_DISCUSSION_ITEMS;
+
+		public Application(String apikey, String serverUrl) {
+			this.appKey = apikey;
+			this.serverUrl = serverUrl;
+		}
+
 	}
 
 	/**

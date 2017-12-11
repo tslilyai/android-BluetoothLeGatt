@@ -31,9 +31,9 @@ import java.util.List;
  */
 
 public class ESMsgs {
-    UserAccount userAccount;
-    public ESMsgs(UserAccount user) {
-        userAccount = user;
+    private final UserAccount userAccount;
+    public ESMsgs() {
+        userAccount = GlobalObjectRegistry.getObject(UserAccount.class);
     }
 
     public static class TopicAction {
@@ -46,7 +46,6 @@ public class ESMsgs {
     TATyp typ;
     String msg;
     MsgsCallback msgsCallback;
-    NotificationCallback notificationCallback;
 
     public TopicAction(TATyp typ, String msg) {
         Utils.myAssert(typ == TATyp.SendMsg);
@@ -64,18 +63,12 @@ public class ESMsgs {
         Utils.myAssert(typ == TATyp.CreateOnly);
         this.typ = typ;
     }
-
-    /*TopicAction(TATyp typ, ESTask.NotificationCallback notificationCallback) {
-        Utils.myAssert(typ == TATyp.);
-        this.typ = typ;
-        this.notificationCallback = notificationCallback;
-    }*/
 }
 
     public static class Msg {
-        private String msg;
+        public String msg;
         private boolean fromMe;
-        private long timestamp;
+        public long timestamp;
 
         Msg(String msg, boolean fromMe, long timestamp) {
             this.msg = msg;
@@ -84,9 +77,6 @@ public class ESMsgs {
         }
     }
 
-    public interface NotificationCallback {
-        void onReceiveNotifs(List<String> notifs);
-    }
 
     public interface MsgsCallback {
         void onReceiveMessages(List<Msg> messages);
@@ -95,7 +85,7 @@ public class ESMsgs {
     public void find_and_act_on_topic(String eid, final TopicAction ta) {
         IContentService contentService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
         SearchTopicsRequest getreq = new SearchTopicsRequest(eid);
-        TopicsListResponse topics = null;
+        TopicsListResponse topics;
 
         ISearchService searchService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getSearchService();
         try {
@@ -144,15 +134,15 @@ public class ESMsgs {
     }
 
     private void do_action(TopicAction ta, TopicView topic, List<Object> comments) {
-        final boolean is_my_topic = (userAccount.getUserHandle() == topic.getUser().getHandle()) ? true : false;
+        final boolean is_my_topic = userAccount.isCurrentUser(topic.getUser().getHandle()) ? true : false;
         IContentService contentService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
 
         /* Find the comment that acts as the "response" thread for the user that did not create the topic */
         CommentView reply_comment = null;
         for (Object obj : comments) {
             CommentView comment = (CommentView) obj;
-            if (is_my_topic && comment.getUser().getHandle() != userAccount.getUserHandle()
-                    || !is_my_topic && comment.getUser().getHandle() == userAccount.getUserHandle())
+            if (is_my_topic && !userAccount.isCurrentUser(comment.getUser().getHandle())
+                    || !is_my_topic && userAccount.isCurrentUser(comment.getUser().getHandle()))
             {
                 Utils.myAssert(comment.getCommentText() == "ReplyComment");
                 reply_comment = comment;
@@ -168,7 +158,7 @@ public class ESMsgs {
                 case SendMsg: {
                     // we add the reply comment if there is none and we're not the topic owner
                     if (!is_my_topic && reply_comment == null) {
-                        contentService.addComment(new AddCommentRequest(topic.getHandle(), "ReplyComment"));
+                        contentService.addComment(new AddCommentRequest(topic.getHandle(), topic.getTopicText()));
                     }
                     // if either (1) there is no reply comment and we're the topic owner
                     // or (2) we're not the topic owner, then post a comment
@@ -183,7 +173,7 @@ public class ESMsgs {
                 }
                 case CreateOnly: {
                     if (!is_my_topic || reply_comment == null) {
-                        contentService.addComment(new AddCommentRequest(topic.getHandle(), "ReplyComment"));
+                        contentService.addComment(new AddCommentRequest(topic.getHandle(), topic.getTopicText()));
                     }
                     break;
                 }
@@ -201,7 +191,7 @@ public class ESMsgs {
             if (comment != reply_comment) {
                 msgmap.add(new Msg(
                         comment.getCommentText(),
-                        comment.getUser().getHandle() == userAccount.getUserHandle(),
+                        userAccount.isCurrentUser(comment.getUser().getHandle()),
                         comment.getElapsedSeconds()
                 ));
             }
@@ -220,7 +210,7 @@ public class ESMsgs {
                             ReplyView reply = (ReplyView) obj;
                             msgmap.add(new Msg(
                                     reply.getReplyText(),
-                                    reply.getUser().getHandle() == userAccount.getUserHandle(),
+                                    userAccount.isCurrentUser(reply.getUser().getHandle()),
                                     reply.getElapsedSeconds()
                             ));
                         }

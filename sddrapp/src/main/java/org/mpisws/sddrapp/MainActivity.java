@@ -24,6 +24,7 @@ import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.SDDR_API;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
+import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
 
@@ -74,25 +75,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "Not registered with Google yet");
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();
+                } else {
+                    SDDR_API.sign_in(GoogleToken.getToken());
                 }
                 break;
             case R.id.get_notifs:
                 Log.d(TAG, "Getting notifs");
-                ESMsgs.NotificationCallback callback = new ESMsgs.NotificationCallback() {
+                ESNotifs.NotificationCallback callback = new ESNotifs.NotificationCallback() {
                     @Override
-                    public void onReceiveNotifs(final List<String> notifs) {
+                    public void onReceiveNotif(final ESNotifs.Notif notif) {
                         handler.post(new Runnable() {
                             public void run() {
                                 final TextView text = MainActivity.this.findViewById(R.id.new_notifs);
-                                for (String notif : notifs) {
-                                    //text.append(notif.getEid().toString() + ": ");
-                                    //text.append(notif.getMsg() + " (" + notif.getTimestamp().toString() + ")\n");
-                                }
+                                text.append(notif.getEid().toString() + ": ");
+                                text.append(notif.getMsg() + " (" + notif.getTimestamp() + ")\n");
                             }
                         });
                     }
                 };
-                //SDDR_API.get_notifs(callback);
+                SDDR_API.get_notifs(callback);
                 break;
             case R.id.get_msgs:
                 Log.d(TAG, "Getting messages");
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     final TextView text = MainActivity.this.findViewById(R.id.new_messages);
                                     for (ESMsgs.Msg msg : messages) {
                                         text.append(encounters2.get(0).toString() + ": ");
-                                        //text.append(msg.);
+                                        text.append(msg.msg);
                                         text.append("\n");
                                     }
                                 }

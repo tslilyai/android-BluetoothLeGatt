@@ -86,12 +86,6 @@ public class SDDR_Core_Service extends Service {
             core.addNewLink(new Identifier(ID.getBytes()), LinkabilityEntryMode.AdvertiseAndListen);
             return START_STICKY;
         }
-        else if (intent.getExtras().containsKey("@string.send_msg"))
-        {
-            Log.d(TAG, "Got Send_Msg Intent");
-            // TODO
-            return START_STICKY;
-        }
         else {
             Log.d(TAG, "Unknown intent");
             return START_STICKY;
