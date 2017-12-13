@@ -29,7 +29,6 @@ public class EncounterUpdatedEvent extends EncounterEvent {
         i.putExtra("encounterEvent", this);
         context.sendBroadcast(i);
     }
-
     @Override
     public void persistIntoDatabase(Context context) { // TODO applybatch for all events
         final ContentValues values = toContentValues(context, false);

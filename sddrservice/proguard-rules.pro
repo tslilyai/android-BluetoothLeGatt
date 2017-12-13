@@ -37,6 +37,7 @@
 -dontwarn java.lang.invoke.**
 
 -keep class org.mpisws.sddrservice.** { *; }
+-keep class com.google.protobuf.** { *; }
 
 # for extending BaseActivity
 -keepclasseswithmembers class com.microsoft.embeddedsocial.ui.activity.base.BaseActivity {

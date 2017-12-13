@@ -178,6 +178,7 @@ public abstract class EncounterEvent implements Serializable {
         }
     }
 
+
     private void insertBloomFilters(final Context context, final List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms) {
         Log.d(TAG, "BLOOMS: Inserting " + blooms.size() + " blooms for encounterPKID " + pkid);
         for (SDDR_Proto.Event.RetroactiveInfo.BloomInfo bloom : blooms) {

@@ -4216,7 +4216,7 @@ public final class SDDR_Proto {
         private BloomInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
           super(builder);
         }
-        private BloomInfo() {
+        BloomInfo() {
           prefixBytes_ = com.google.protobuf.ByteString.EMPTY;
           prefixSize_ = 0;
           pFalse_ = 0F;
