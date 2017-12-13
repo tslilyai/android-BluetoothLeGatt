@@ -8,16 +8,12 @@ package com.microsoft.embeddedsocial.service.handler;
 import android.content.Context;
 import android.content.Intent;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.microsoft.embeddedsocial.base.service.IServiceIntentHandler;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.gcm.GcmTokenHolder;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.service.ServiceAction;
-
-import java.io.IOException;
+import com.microsoft.embeddedsocial.service.WorkerService;
 
 /**
  * Registers the app with Google Cloud Messaging framework.

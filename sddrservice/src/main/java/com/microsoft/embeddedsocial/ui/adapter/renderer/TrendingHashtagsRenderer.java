@@ -13,9 +13,10 @@ import android.widget.TextView;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.event.click.OnTrendingHashtagSelectedEvent;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.BaseViewHolder;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.TrendingHashtagsRenderer.ViewHolder;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.BaseViewHolder;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Renders trending hashtags.

@@ -14,13 +14,14 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
 
+import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.event.sync.PostUploadFailedEvent;
 import com.microsoft.embeddedsocial.event.sync.PostUploadedEvent;
 import com.microsoft.embeddedsocial.event.sync.PushNotificationReceivedEvent;
-import com.microsoft.embeddedsocial.base.event.EventBus;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.RecentActivityActivity;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

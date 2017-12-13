@@ -1,6 +1,5 @@
 package org.mpisws.sddrservice.lib;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;

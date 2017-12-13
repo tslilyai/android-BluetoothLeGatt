@@ -10,12 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.UserListItemHolder;
 import com.microsoft.embeddedsocial.ui.util.ButtonStyleHelper;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.ProfileOpenHelper;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.UserListItemHolder;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Base implementation of renderer for user list item.

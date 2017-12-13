@@ -9,12 +9,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
-import com.microsoft.embeddedsocial.ui.fragment.base.BaseUsersListFragment;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.BlockedUsersRenderer;
+import com.microsoft.embeddedsocial.ui.fragment.base.BaseUsersListFragment;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Shows the list of blocked users.

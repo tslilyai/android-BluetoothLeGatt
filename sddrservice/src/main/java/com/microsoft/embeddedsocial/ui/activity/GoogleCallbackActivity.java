@@ -12,17 +12,17 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.microsoft.embeddedsocial.auth.GoogleNativeAuthenticator;
-import com.microsoft.embeddedsocial.auth.SocialNetworkTokens;
-import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
+import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
+import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.TokenResponse;
+
+import org.mpisws.sddrservice.R;
 
 public class GoogleCallbackActivity extends SignInActivity {
 

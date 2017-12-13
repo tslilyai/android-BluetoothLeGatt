@@ -11,11 +11,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ViewGroup;
 
+import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.event.click.NavigationItemClickedEvent;
 import com.microsoft.embeddedsocial.sdk.IDrawerState;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 public abstract class EmbeddedSocialNavigationActivity extends EmbeddedSocialActivity implements IDrawerState {
 	protected static final String DISPLAY_MENU_EXTRA = "DISPLAY_MENU_EXTRA";

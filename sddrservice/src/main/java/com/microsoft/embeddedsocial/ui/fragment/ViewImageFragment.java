@@ -14,9 +14,10 @@ import android.widget.ProgressBar;
 
 import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
+
+import org.mpisws.sddrservice.R;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 

@@ -21,12 +21,13 @@ import com.microsoft.embeddedsocial.event.content.ReplyPostedToBackendEvent;
 import com.microsoft.embeddedsocial.event.content.ReplyRemovedEvent;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
-import com.microsoft.embeddedsocial.ui.adapter.DiscussionFeedAdapter;
 import com.microsoft.embeddedsocial.service.IntentExtras;
+import com.microsoft.embeddedsocial.ui.adapter.DiscussionFeedAdapter;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 public class ReplyFeedFragment extends DiscussionFeedFragment {
 

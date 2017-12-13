@@ -17,13 +17,14 @@ import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.event.dialog.OnNegativeButtonClickedEvent;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.image.UserPhotoLoader;
 import com.microsoft.embeddedsocial.ui.dialog.AlertDialogFragment;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.FieldNotEmptyValidator;
 import com.microsoft.embeddedsocial.ui.view.TextInput;
-import com.microsoft.embeddedsocial.image.UserPhotoLoader;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Base class for Add post / Edit post fragments.

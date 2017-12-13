@@ -5,17 +5,15 @@
 
 package com.microsoft.embeddedsocial.actions;
 
-import android.app.Notification;
 import android.content.Context;
 import android.os.Bundle;
 
 import com.microsoft.embeddedsocial.data.model.AccountDataDifference;
-import com.microsoft.embeddedsocial.data.storage.NotificationServiceCachingWrapper;
+import com.microsoft.embeddedsocial.data.model.CreateAccountData;
+import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
-import com.microsoft.embeddedsocial.data.model.CreateAccountData;
-import com.microsoft.embeddedsocial.service.IntentExtras;
 
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 

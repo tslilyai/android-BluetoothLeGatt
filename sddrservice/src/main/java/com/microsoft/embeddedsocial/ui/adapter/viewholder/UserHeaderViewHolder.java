@@ -12,11 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.sdk.ui.AppProfile;
-import com.microsoft.embeddedsocial.server.model.view.TopicView;
-import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
-import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
@@ -24,8 +19,14 @@ import com.microsoft.embeddedsocial.data.Preferences;
 import com.microsoft.embeddedsocial.event.click.OpenUserProfileEvent;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
 import com.microsoft.embeddedsocial.image.UserPhotoLoader;
+import com.microsoft.embeddedsocial.sdk.ui.AppProfile;
 import com.microsoft.embeddedsocial.server.model.view.ReplyView;
+import com.microsoft.embeddedsocial.server.model.view.TopicView;
+import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
+import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.TimeUtils;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * ViewHolder part with user info layout

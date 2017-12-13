@@ -9,8 +9,14 @@ import android.content.Context;
 import android.os.ConditionVariable;
 import android.support.v4.app.Fragment;
 
-import com.microsoft.embeddedsocial.base.utils.JsonUtils;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
+import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
+import com.microsoft.embeddedsocial.base.utils.ConnectionUtils;
+import com.microsoft.embeddedsocial.base.utils.JsonUtils;
+import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
+import com.microsoft.embeddedsocial.data.socialnetwork.MicrosoftLiveProfile;
+import com.microsoft.embeddedsocial.sdk.Options;
+import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 import com.microsoft.live.LiveAuthClient;
 import com.microsoft.live.LiveAuthException;
 import com.microsoft.live.LiveAuthListener;
@@ -20,13 +26,8 @@ import com.microsoft.live.LiveOperation;
 import com.microsoft.live.LiveOperationException;
 import com.microsoft.live.LiveOperationListener;
 import com.microsoft.live.LiveStatus;
-import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.base.utils.ConnectionUtils;
-import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import com.microsoft.embeddedsocial.data.socialnetwork.MicrosoftLiveProfile;
-import com.microsoft.embeddedsocial.sdk.Options;
+
 import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 import java.util.Arrays;
 import java.util.List;

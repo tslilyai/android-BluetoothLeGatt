@@ -15,10 +15,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.base.utils.BitmapUtils;
 import com.microsoft.embeddedsocial.base.utils.ObjectUtils;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
@@ -26,7 +26,8 @@ import com.microsoft.embeddedsocial.ui.fragment.base.BaseEditPostFragment;
 import com.microsoft.embeddedsocial.ui.fragment.module.PhotoProviderModule;
 import com.microsoft.embeddedsocial.ui.util.FitWidthSizeSpec;
 import com.microsoft.embeddedsocial.ui.util.TextHelper;
-import com.microsoft.embeddedsocial.autorest.models.PublisherType;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Fragment for adding a new post.

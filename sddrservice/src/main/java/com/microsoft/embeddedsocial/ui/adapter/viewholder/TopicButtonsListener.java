@@ -9,10 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.activity.LikesActivity;
 import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.service.IntentExtras;
+import com.microsoft.embeddedsocial.ui.activity.LikesActivity;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Click listener for all topic buttons.

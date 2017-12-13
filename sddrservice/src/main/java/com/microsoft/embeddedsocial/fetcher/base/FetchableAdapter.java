@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 
 import com.microsoft.embeddedsocial.base.function.Predicate;
+
 import org.mpisws.sddrservice.R;
 
 /**

@@ -14,15 +14,14 @@ import android.view.ViewGroup;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.event.click.NavigationItemClickedEvent;
-import com.microsoft.embeddedsocial.sdk.Options;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.data.Preferences;
+import com.microsoft.embeddedsocial.event.click.NavigationItemClickedEvent;
 import com.microsoft.embeddedsocial.event.data.ProfileDataUpdatedEvent;
 import com.microsoft.embeddedsocial.event.data.UpdateNotificationCountEvent;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
 import com.microsoft.embeddedsocial.sdk.NavigationProfileHelper;
+import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.ui.activity.HomeActivity;
 import com.microsoft.embeddedsocial.ui.activity.OptionsActivity;
 import com.microsoft.embeddedsocial.ui.activity.PinsActivity;
@@ -35,6 +34,8 @@ import com.microsoft.embeddedsocial.ui.util.NavigationIntentUtils;
 import com.microsoft.embeddedsocial.ui.util.NotificationCountChecker;
 import com.microsoft.embeddedsocial.ui.view.NavigationItemView;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Navigation menu.

@@ -5,10 +5,10 @@
 
 package com.microsoft.embeddedsocial.server.model;
 
-import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.autorest.models.FeedResponseUserCompactView;
 import com.microsoft.embeddedsocial.autorest.models.FeedResponseUserProfileView;
 import com.microsoft.embeddedsocial.autorest.models.UserProfileView;
+import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 
 import java.util.ArrayList;
 import java.util.List;

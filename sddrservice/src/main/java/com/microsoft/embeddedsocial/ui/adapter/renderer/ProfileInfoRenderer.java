@@ -17,23 +17,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.data.model.AccountData;
-import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.ui.activity.FollowersActivity;
-import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
-import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
 import com.microsoft.embeddedsocial.image.UserPhotoLoader;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.EditProfileActivity;
+import com.microsoft.embeddedsocial.ui.activity.FollowersActivity;
 import com.microsoft.embeddedsocial.ui.activity.FollowingActivity;
+import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.BaseViewHolder;
 import com.microsoft.embeddedsocial.ui.theme.ThemeAttributes;
 import com.microsoft.embeddedsocial.ui.util.ButtonStyleHelper;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Renderer for {@link AccountData}.

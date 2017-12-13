@@ -12,8 +12,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.fragment.NavigationFragment;
+
+import org.mpisws.sddrservice.R;
 
 public class TabbedDrawerHandler extends DrawerHandler implements TabLayout.OnTabSelectedListener {
 	private TabLayout.Tab hostingAppMenuTab;

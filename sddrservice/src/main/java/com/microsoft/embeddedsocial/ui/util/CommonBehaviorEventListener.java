@@ -1,5 +1,9 @@
 package com.microsoft.embeddedsocial.ui.util;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.app.Fragment;
+
 import com.microsoft.embeddedsocial.account.AuthorizationCause;
 import com.microsoft.embeddedsocial.base.utils.EnumUtils;
 import com.microsoft.embeddedsocial.event.RequestSignInEvent;
@@ -14,10 +18,6 @@ import com.microsoft.embeddedsocial.ui.activity.SignInActivity;
 import com.microsoft.embeddedsocial.ui.activity.TopicActivity;
 import com.microsoft.embeddedsocial.ui.activity.ViewImageActivity;
 import com.squareup.otto.Subscribe;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.support.v4.app.Fragment;
 
 /**
  * Event listener for common actions in the SDK

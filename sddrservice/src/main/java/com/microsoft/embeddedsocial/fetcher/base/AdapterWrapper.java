@@ -16,8 +16,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.SingleViewHolder;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.ArrayList;
 import java.util.List;

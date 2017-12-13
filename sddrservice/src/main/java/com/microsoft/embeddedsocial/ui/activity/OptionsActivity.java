@@ -5,9 +5,10 @@
 
 package com.microsoft.embeddedsocial.ui.activity;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.fragment.OptionsFragment;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Shows settings.

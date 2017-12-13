@@ -11,23 +11,24 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
+import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.data.model.DiscussionItem;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.server.model.UniqueItem;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
+import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentButtonListener;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentViewHolder;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.FlatTopicButtonsListener;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyButtonListener;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyViewHolder;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.TopicFlatViewHolder;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.UserHeaderViewHolder;
-import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
-import com.microsoft.embeddedsocial.server.model.UniqueItem;
-import com.microsoft.embeddedsocial.server.model.view.ReplyView;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentButtonListener;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentViewHolder;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.List;
 

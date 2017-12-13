@@ -7,8 +7,9 @@ package com.microsoft.embeddedsocial.image;
 
 import android.widget.ImageView;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.theme.ThemeAttributes;
+
+import org.mpisws.sddrservice.R;
 
 
 /**

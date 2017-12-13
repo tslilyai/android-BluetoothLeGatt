@@ -11,12 +11,13 @@ import android.view.View;
 
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.ui.adapter.FetchableListAdapter;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.UserRenderer;
-import com.microsoft.embeddedsocial.ui.util.VerticalPaddingDecoration;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseListContentFragment;
+import com.microsoft.embeddedsocial.ui.util.VerticalPaddingDecoration;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Shows popular users.

@@ -6,6 +6,7 @@
 package com.microsoft.embeddedsocial.ui.theme;
 
 import com.google.gson.annotations.SerializedName;
+
 import org.mpisws.sddrservice.R;
 
 import java.util.HashMap;

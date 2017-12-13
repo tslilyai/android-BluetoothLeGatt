@@ -14,9 +14,9 @@ import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.storage.ActivityCache;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
 import com.microsoft.embeddedsocial.data.storage.UserActionCache;
+import com.microsoft.embeddedsocial.data.storage.UserCache;
 import com.microsoft.embeddedsocial.gcm.GcmTokenHolder;
 import com.microsoft.embeddedsocial.server.sync.DataSynchronizer;
-import com.microsoft.embeddedsocial.data.storage.UserCache;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;

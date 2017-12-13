@@ -15,10 +15,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
+import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.ui.activity.GoogleCallbackActivity;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
@@ -28,6 +27,8 @@ import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.ResponseTypeValues;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.Arrays;
 import java.util.List;

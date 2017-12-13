@@ -11,6 +11,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
+import com.microsoft.embeddedsocial.data.storage.exception.FatalDatabaseException;
 import com.microsoft.embeddedsocial.data.storage.model.UserAccountBinding;
 import com.microsoft.embeddedsocial.data.storage.model.UserFeedRelation;
 import com.microsoft.embeddedsocial.data.storage.model.UserRelationOperation;
@@ -26,7 +27,6 @@ import com.microsoft.embeddedsocial.server.model.view.UserAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.server.model.view.UserProfileView;
 import com.microsoft.embeddedsocial.server.sync.ISynchronizable;
-import com.microsoft.embeddedsocial.data.storage.exception.FatalDatabaseException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

@@ -10,8 +10,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.ui.activity.base.BaseProfileActivity;
 import com.microsoft.embeddedsocial.service.IntentExtras;
+import com.microsoft.embeddedsocial.ui.activity.base.BaseProfileActivity;
 
 /**
  * Shows another user's profile.

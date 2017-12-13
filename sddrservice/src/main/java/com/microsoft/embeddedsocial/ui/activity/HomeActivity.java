@@ -9,9 +9,10 @@ package com.microsoft.embeddedsocial.ui.activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseFeedActivity;
 import com.microsoft.embeddedsocial.ui.fragment.FollowingFeedFragment;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Activity to show feeds and profile.

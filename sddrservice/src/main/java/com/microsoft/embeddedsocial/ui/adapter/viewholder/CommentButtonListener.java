@@ -12,21 +12,22 @@ import android.view.View;
 
 import com.microsoft.embeddedsocial.account.AuthorizationCause;
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.autorest.models.ContentType;
+import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.event.ScrollPositionEvent;
 import com.microsoft.embeddedsocial.event.click.OpenCommentEvent;
 import com.microsoft.embeddedsocial.event.click.ViewCommentCoverImageEvent;
 import com.microsoft.embeddedsocial.sdk.Options;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.LikesActivity;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.menu.CommentContextMenuClickListener;
 import com.microsoft.embeddedsocial.ui.util.menu.UserContextMenuHelper;
-import com.microsoft.embeddedsocial.autorest.models.ContentType;
-import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Clock listener for all comment buttons.

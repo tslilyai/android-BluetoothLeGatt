@@ -7,8 +7,9 @@ package com.microsoft.embeddedsocial.ui.util;
 
 import android.content.Context;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.view.TextInput;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Checks that the field is not empty.

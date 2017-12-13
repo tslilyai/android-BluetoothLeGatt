@@ -9,9 +9,10 @@ import android.content.Context;
 import android.view.ViewGroup;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.UserListItemHolder;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Renders blocked users.

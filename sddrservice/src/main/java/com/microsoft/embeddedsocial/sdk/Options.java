@@ -6,7 +6,6 @@
 package com.microsoft.embeddedsocial.sdk;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
 

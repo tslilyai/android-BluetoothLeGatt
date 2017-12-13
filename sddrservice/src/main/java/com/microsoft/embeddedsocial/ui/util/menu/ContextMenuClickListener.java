@@ -10,8 +10,9 @@ import android.support.v7.widget.PopupMenu;
 import android.view.MenuItem;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Context menu for any content

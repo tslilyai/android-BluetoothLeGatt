@@ -13,6 +13,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.server.model.view.ThirdPartyAccountView;
+
 import org.mpisws.sddrservice.R;
 
 /**

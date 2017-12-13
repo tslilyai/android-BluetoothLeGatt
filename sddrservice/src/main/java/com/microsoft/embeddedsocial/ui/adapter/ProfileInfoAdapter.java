@@ -13,18 +13,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.sdk.Options;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.BlockedUsersActivity;
 import com.microsoft.embeddedsocial.ui.activity.FollowRequestsActivity;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.ProfileInfoRenderer;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.SingleViewHolder;
-import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.Renderer;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.SingleViewHolder;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.ArrayList;
 

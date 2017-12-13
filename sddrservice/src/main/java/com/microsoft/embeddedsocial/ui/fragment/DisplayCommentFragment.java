@@ -13,20 +13,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.event.content.CommentRemovedEvent;
 import com.microsoft.embeddedsocial.event.content.GetCommentEvent;
 import com.microsoft.embeddedsocial.fetcher.base.ViewState;
 import com.microsoft.embeddedsocial.fetcher.base.ViewStateListener;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
-import com.microsoft.embeddedsocial.ui.activity.TopicActivity;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentViewHolder;
-import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.service.IntentExtras;
+import com.microsoft.embeddedsocial.ui.activity.TopicActivity;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentButtonListener;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.CommentViewHolder;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Fragment to display single comment.

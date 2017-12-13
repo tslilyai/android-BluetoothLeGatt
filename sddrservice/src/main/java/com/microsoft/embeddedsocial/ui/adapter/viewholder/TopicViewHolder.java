@@ -15,15 +15,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.image.CoverLoader;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
 import com.microsoft.embeddedsocial.ui.theme.ThemeAttributes;
 import com.microsoft.embeddedsocial.ui.util.ButtonStyleHelper;
+import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Init topic view layout.

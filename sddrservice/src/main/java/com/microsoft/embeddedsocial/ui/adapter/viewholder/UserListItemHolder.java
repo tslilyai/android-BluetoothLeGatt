@@ -11,8 +11,9 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.image.UserPhotoLoader;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * View holder for user list item.

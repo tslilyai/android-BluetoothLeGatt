@@ -11,8 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.fragment.ViewImageFragment;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Activity for detailed view single image.

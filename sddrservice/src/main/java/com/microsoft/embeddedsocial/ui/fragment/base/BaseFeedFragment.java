@@ -17,21 +17,22 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Display;
 import android.view.View;
 
+import com.microsoft.embeddedsocial.data.Preferences;
 import com.microsoft.embeddedsocial.data.display.DisplayMethod;
+import com.microsoft.embeddedsocial.event.click.DisplayMethodChangedEvent;
 import com.microsoft.embeddedsocial.event.sync.PostUploadedEvent;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.FetchableListAdapter;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.CardViewRenderer;
-import com.microsoft.embeddedsocial.ui.fragment.module.CommonTopicFeedBehaviorModule;
-import com.microsoft.embeddedsocial.data.Preferences;
-import com.microsoft.embeddedsocial.event.click.DisplayMethodChangedEvent;
-import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.GridRenderer;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.Renderer;
+import com.microsoft.embeddedsocial.ui.fragment.module.CommonTopicFeedBehaviorModule;
 import com.microsoft.embeddedsocial.ui.util.DisplayParams;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Base class for fragments showing topic feed.

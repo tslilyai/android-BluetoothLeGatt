@@ -11,26 +11,27 @@ import android.os.ConditionVariable;
 import android.support.annotation.Nullable;
 
 import com.microsoft.embeddedsocial.auth.AbstractAuthenticator;
-import com.microsoft.embeddedsocial.auth.GoogleNativeAuthenticator;
-import com.microsoft.embeddedsocial.auth.MicrosoftLiveAuthenticator;
-import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
-import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
-import com.microsoft.embeddedsocial.social.AuthorizationRequest;
-import com.microsoft.embeddedsocial.social.exception.SocialNetworkException;
-import com.microsoft.embeddedsocial.ui.adapter.renderer.UserRenderer;
-import com.microsoft.embeddedsocial.ui.fragment.base.BaseUsersListFragment;
-import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
-import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.auth.FacebookAuthenticator;
+import com.microsoft.embeddedsocial.auth.GoogleNativeAuthenticator;
 import com.microsoft.embeddedsocial.auth.IAuthenticationCallback;
+import com.microsoft.embeddedsocial.auth.MicrosoftLiveAuthenticator;
+import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.base.utils.EnumUtils;
 import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
+import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
+import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
+import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.service.IntentExtras;
+import com.microsoft.embeddedsocial.social.AuthorizationRequest;
+import com.microsoft.embeddedsocial.social.exception.SocialNetworkException;
 import com.microsoft.embeddedsocial.ui.activity.FriendlistActivity;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.Renderer;
+import com.microsoft.embeddedsocial.ui.adapter.renderer.UserRenderer;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.UserListItemHolder;
+import com.microsoft.embeddedsocial.ui.fragment.base.BaseUsersListFragment;
+import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Search users from social networks.

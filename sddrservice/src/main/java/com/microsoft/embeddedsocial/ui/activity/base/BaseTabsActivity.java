@@ -10,8 +10,9 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.base.view.SlidingTabLayout;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Base class for activities with tabs.

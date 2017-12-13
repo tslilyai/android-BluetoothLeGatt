@@ -11,9 +11,10 @@ import android.support.annotation.StringRes;
 import android.view.View;
 import android.widget.TextView;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Shows a text.

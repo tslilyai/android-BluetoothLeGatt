@@ -12,11 +12,12 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.text.format.DateUtils;
 
-import com.microsoft.embeddedsocial.server.NetworkAvailability;
-import com.microsoft.embeddedsocial.ui.fragment.base.Module;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.server.NetworkAvailability;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
+import com.microsoft.embeddedsocial.ui.fragment.base.Module;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Display message about slow connection.

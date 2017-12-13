@@ -17,12 +17,12 @@ import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.autorest.models.Reason;
 import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.event.dialog.OnPositiveButtonClickedEvent;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
-import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.dialog.AlertDialogFragment;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Fragment for reporting content or user.

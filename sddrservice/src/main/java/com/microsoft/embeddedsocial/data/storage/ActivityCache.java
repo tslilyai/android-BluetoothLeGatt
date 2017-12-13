@@ -13,7 +13,6 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
-import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.storage.exception.FatalDatabaseException;
@@ -23,6 +22,7 @@ import com.microsoft.embeddedsocial.server.model.activity.ActivityFeedResponse;
 import com.microsoft.embeddedsocial.server.model.notification.GetNotificationFeedResponse;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 import com.microsoft.embeddedsocial.server.model.view.AppCompactView;
+import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.server.sync.ISynchronizable;
 
 import java.sql.SQLException;

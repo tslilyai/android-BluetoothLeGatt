@@ -20,10 +20,11 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
 import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.ui.theme.Theme;
+import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Navigation item view.

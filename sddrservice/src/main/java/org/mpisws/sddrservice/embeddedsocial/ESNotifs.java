@@ -6,25 +6,14 @@ import android.util.Log;
 
 import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.autorest.models.ActivityType;
-import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.data.storage.ActivityCache;
-import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.fetcher.base.FetcherState;
-import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
-import com.microsoft.embeddedsocial.server.IContentService;
-import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
-import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentRequest;
-import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentResponse;
-import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRequest;
-import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyResponse;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 
 import org.mpisws.sddrservice.lib.Identifier;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**

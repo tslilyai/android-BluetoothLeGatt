@@ -11,17 +11,18 @@ import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.server.IAuthenticationService;
-import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
 import com.microsoft.embeddedsocial.autorest.models.GetRequestTokenResponse;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
+import com.microsoft.embeddedsocial.server.IAuthenticationService;
+import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
 import com.microsoft.embeddedsocial.server.model.auth.GetRequestTokenRequest;
 import com.microsoft.embeddedsocial.ui.activity.WebAuthenticationActivity;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

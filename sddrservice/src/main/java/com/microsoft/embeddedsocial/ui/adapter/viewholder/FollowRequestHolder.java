@@ -8,6 +8,7 @@ package com.microsoft.embeddedsocial.ui.adapter.viewholder;
 import android.view.View;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
+
 import org.mpisws.sddrservice.R;
 
 /**

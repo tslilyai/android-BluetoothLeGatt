@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.sdk.Options;
+
 import org.mpisws.sddrservice.R;
 
 /**

@@ -8,13 +8,13 @@ package com.microsoft.embeddedsocial.ui.fragment;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.microsoft.embeddedsocial.base.utils.EnumUtils;
 import com.microsoft.embeddedsocial.data.model.TopicFeedType;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import com.microsoft.embeddedsocial.ui.fragment.base.BaseFeedFragment;
-import com.microsoft.embeddedsocial.base.utils.EnumUtils;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.IntentExtras;
+import com.microsoft.embeddedsocial.ui.fragment.base.BaseFeedFragment;
 
 /**
  * Fragment showing the popular feed.

@@ -10,17 +10,18 @@ import android.content.Intent;
 import android.support.v7.widget.PopupMenu;
 import android.view.View;
 
-import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
+import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.LikesActivity;
+import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.menu.ReplyContextMenuClickListener;
 import com.microsoft.embeddedsocial.ui.util.menu.UserContextMenuHelper;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Click listener for all reply buttons.

@@ -11,8 +11,9 @@ import android.support.v4.app.Fragment;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.base.IDisposable;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Base class for all authenticators allowing to use 3rd party accounts to log in to Embedded Social.

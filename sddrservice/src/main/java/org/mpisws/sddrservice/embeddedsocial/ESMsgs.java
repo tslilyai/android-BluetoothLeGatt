@@ -20,7 +20,6 @@ import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
 import org.mpisws.sddrservice.lib.Utils;
-import org.w3c.dom.Comment;
 
 import java.sql.SQLException;
 import java.util.LinkedList;

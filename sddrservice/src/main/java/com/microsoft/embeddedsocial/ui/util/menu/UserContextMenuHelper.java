@@ -8,8 +8,9 @@ package com.microsoft.embeddedsocial.ui.util.menu;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Helper for work with user context menu.

@@ -5,9 +5,10 @@
 
 package com.microsoft.embeddedsocial.ui.activity;
 
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseFeedActivity;
 import com.microsoft.embeddedsocial.ui.fragment.PinsFragment;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Shows pinned topics.

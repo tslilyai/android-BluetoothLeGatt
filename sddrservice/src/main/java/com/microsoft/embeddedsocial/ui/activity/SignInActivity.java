@@ -6,10 +6,11 @@
 package com.microsoft.embeddedsocial.ui.activity;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.fragment.SignInFragment;
-import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Activity for sign-in.

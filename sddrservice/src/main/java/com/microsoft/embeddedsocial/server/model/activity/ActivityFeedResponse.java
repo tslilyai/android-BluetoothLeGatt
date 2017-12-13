@@ -5,10 +5,10 @@
 
 package com.microsoft.embeddedsocial.server.model.activity;
 
-import com.microsoft.embeddedsocial.server.model.ListResponse;
-import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 import com.microsoft.embeddedsocial.autorest.models.FeedResponseActivityView;
 import com.microsoft.embeddedsocial.server.model.FeedUserResponse;
+import com.microsoft.embeddedsocial.server.model.ListResponse;
+import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 
 import java.util.ArrayList;
 import java.util.List;

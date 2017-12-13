@@ -16,11 +16,12 @@ import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.image.CoverLoader;
 import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
+import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseEditPostFragment;
 import com.microsoft.embeddedsocial.ui.util.TextHelper;
-import com.microsoft.embeddedsocial.service.IntentExtras;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Post editing.

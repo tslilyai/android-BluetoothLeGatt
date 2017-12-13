@@ -20,25 +20,26 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.auth.AbstractAuthenticator;
+import com.microsoft.embeddedsocial.auth.FacebookAuthenticator;
 import com.microsoft.embeddedsocial.auth.GoogleNativeAuthenticator;
+import com.microsoft.embeddedsocial.auth.IAuthenticationCallback;
 import com.microsoft.embeddedsocial.auth.MicrosoftLiveAuthenticator;
 import com.microsoft.embeddedsocial.auth.TwitterWebAuthenticator;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
+import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
 import com.microsoft.embeddedsocial.event.signin.SignInWithThirdPartyFailedEvent;
 import com.microsoft.embeddedsocial.event.signin.UserSignedInEvent;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.fragment.module.SlowConnectionMessageModule;
-import com.microsoft.embeddedsocial.actions.Action;
-import com.microsoft.embeddedsocial.auth.FacebookAuthenticator;
-import com.microsoft.embeddedsocial.auth.IAuthenticationCallback;
-import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
 import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
+import com.microsoft.embeddedsocial.ui.fragment.module.SlowConnectionMessageModule;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 import com.microsoft.embeddedsocial.ui.util.WebPageHelper;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Sign-in fragment.

@@ -16,14 +16,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.image.CoverLoader;
+import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
 import com.microsoft.embeddedsocial.ui.theme.ThemeAttributes;
 import com.microsoft.embeddedsocial.ui.util.ButtonStyleHelper;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
-import com.microsoft.embeddedsocial.image.CoverLoader;
-import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Init comment view layout.

@@ -13,18 +13,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.event.content.GetReplyEvent;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyButtonListener;
-import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyViewHolder;
-import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.event.content.ReplyRemovedEvent;
 import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.DisplayNoteActivity;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyButtonListener;
+import com.microsoft.embeddedsocial.ui.adapter.viewholder.ReplyViewHolder;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Fragment to display single reply.

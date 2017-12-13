@@ -10,11 +10,11 @@ import android.support.v7.widget.RecyclerView;
 import com.microsoft.embeddedsocial.data.model.TopicFeedType;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
+import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.CardViewRenderer;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.Renderer;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.TopicRenderOptions;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFeedFragment;
-import com.microsoft.embeddedsocial.server.model.view.TopicView;
 
 /**
  * Fragment showing the following feed.

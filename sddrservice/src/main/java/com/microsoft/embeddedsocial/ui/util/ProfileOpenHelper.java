@@ -9,11 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
-import com.microsoft.embeddedsocial.ui.activity.MyProfileActivity;
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
+import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.AnotherUserProfileActivity;
+import com.microsoft.embeddedsocial.ui.activity.MyProfileActivity;
 
 /**
  * Open user profile from any place.

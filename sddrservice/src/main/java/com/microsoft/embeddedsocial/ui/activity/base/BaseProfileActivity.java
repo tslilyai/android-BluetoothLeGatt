@@ -15,21 +15,22 @@ import android.view.MenuItem;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.data.model.AccountData;
-import org.mpisws.sddrservice.BuildConfig;
-import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.ui.fragment.ProfileInfoFragment;
-import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.function.Producer;
+import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.data.model.TopicFeedType;
 import com.microsoft.embeddedsocial.event.data.ProfileDataUpdatedEvent;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.ui.activity.AddPostActivity;
 import com.microsoft.embeddedsocial.ui.fragment.FeedViewMenuListenerFragment;
 import com.microsoft.embeddedsocial.ui.fragment.ProfileFeedFragment;
+import com.microsoft.embeddedsocial.ui.fragment.ProfileInfoFragment;
+import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.SimplePagerAdapter;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.BuildConfig;
+import org.mpisws.sddrservice.R;
 
 /**
  * Base class for activities showing a profile.

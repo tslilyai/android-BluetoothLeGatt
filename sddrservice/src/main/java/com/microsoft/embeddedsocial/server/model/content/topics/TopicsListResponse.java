@@ -5,9 +5,9 @@
 
 package com.microsoft.embeddedsocial.server.model.content.topics;
 
-import com.microsoft.embeddedsocial.server.model.ListResponse;
 import com.microsoft.embeddedsocial.autorest.models.FeedResponseTopicView;
 import com.microsoft.embeddedsocial.server.model.FeedUserResponse;
+import com.microsoft.embeddedsocial.server.model.ListResponse;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 
 import java.util.ArrayList;

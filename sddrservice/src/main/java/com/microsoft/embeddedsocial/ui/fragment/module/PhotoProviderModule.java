@@ -26,18 +26,19 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.microsoft.embeddedsocial.base.IDisposable;
+import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.BitmapUtils;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import com.microsoft.embeddedsocial.data.storage.ImageStorage;
-import com.microsoft.embeddedsocial.event.dialog.OnDialogItemSelectedEvent;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.dialog.AlertDialogFragment;
-import com.microsoft.embeddedsocial.ui.fragment.base.Module;
-import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
+import com.microsoft.embeddedsocial.data.storage.ImageStorage;
 import com.microsoft.embeddedsocial.event.PermissionRequestResultEvent;
+import com.microsoft.embeddedsocial.event.dialog.OnDialogItemSelectedEvent;
+import com.microsoft.embeddedsocial.ui.dialog.AlertDialogFragment;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
+import com.microsoft.embeddedsocial.ui.fragment.base.Module;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 import java.io.File;
 

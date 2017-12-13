@@ -6,9 +6,9 @@
 package com.microsoft.embeddedsocial.ui.fragment;
 
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
+import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFeedFragment;
-import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 
 /**
  * Shows pinned topics.

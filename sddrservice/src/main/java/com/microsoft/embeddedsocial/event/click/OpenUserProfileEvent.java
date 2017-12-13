@@ -7,8 +7,8 @@ package com.microsoft.embeddedsocial.event.click;
 
 import com.microsoft.embeddedsocial.base.event.AbstractEvent;
 import com.microsoft.embeddedsocial.base.event.HandlingThread;
-import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 import com.microsoft.embeddedsocial.base.event.ThreadType;
+import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
 
 /**
  * Open selected user profile.

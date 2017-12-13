@@ -8,13 +8,14 @@ package com.microsoft.embeddedsocial.ui.activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 
-import com.microsoft.embeddedsocial.ui.fragment.FeedViewMenuFragment;
 import com.microsoft.embeddedsocial.base.function.Producer;
 import com.microsoft.embeddedsocial.data.model.TopicFeedType;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseTabsActivity;
+import com.microsoft.embeddedsocial.ui.fragment.FeedViewMenuFragment;
 import com.microsoft.embeddedsocial.ui.fragment.PopularFeedFragment;
 import com.microsoft.embeddedsocial.ui.util.SimplePagerAdapter;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Activity showing popular feeds.

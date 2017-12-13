@@ -12,13 +12,14 @@ import android.text.TextUtils;
 import android.view.Menu;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.sdk.Options;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
+import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.sdk.IReportHandler;
+import com.microsoft.embeddedsocial.sdk.Options;
+import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.TopicRenderOptions;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Contains common methods for topic context menus.

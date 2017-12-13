@@ -8,6 +8,7 @@ package com.microsoft.embeddedsocial.data.storage;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.microsoft.embeddedsocial.autorest.models.CountResponse;
 import com.microsoft.embeddedsocial.data.Preferences;
 import com.microsoft.embeddedsocial.data.storage.request.wrapper.AbstractBatchRequestWrapper;
 import com.microsoft.embeddedsocial.server.INotificationService;
@@ -21,7 +22,6 @@ import com.microsoft.embeddedsocial.server.model.notification.UpdateNotification
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
-import com.microsoft.embeddedsocial.autorest.models.CountResponse;
 
 import java.sql.SQLException;
 

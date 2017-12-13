@@ -12,8 +12,8 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.service.ServiceAction;
+import com.microsoft.embeddedsocial.service.WorkerService;
 
 /**
  * Periodically updates notification count.

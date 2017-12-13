@@ -8,9 +8,9 @@ package com.microsoft.embeddedsocial.ui.fragment;
 import android.text.TextUtils;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.UserRenderer;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseUsersListFragment;
-import com.microsoft.embeddedsocial.service.IntentExtras;
 
 /**
  * Base functionality for following/followers fragments.

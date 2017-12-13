@@ -9,8 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.microsoft.embeddedsocial.base.service.IServiceIntentHandler;
-import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.service.ServiceAction;
+import com.microsoft.embeddedsocial.service.WorkerService;
 
 public class BackgroundInitializationHandler implements IServiceIntentHandler<ServiceAction> {
 

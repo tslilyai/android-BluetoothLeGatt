@@ -9,16 +9,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.MenuItem;
 
+import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.sdk.IReportHandler;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
+import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.EditPostActivity;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
-import com.microsoft.embeddedsocial.autorest.models.ContentType;
-import com.microsoft.embeddedsocial.sdk.IReportHandler;
-import com.microsoft.embeddedsocial.service.IntentExtras;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Menu listener for the topic layout

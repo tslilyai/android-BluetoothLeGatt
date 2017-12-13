@@ -16,6 +16,7 @@ import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentResp
 import com.microsoft.embeddedsocial.server.model.content.comments.RemoveCommentRequest;
 import com.microsoft.embeddedsocial.server.model.content.replies.AddReplyRequest;
 import com.microsoft.embeddedsocial.server.model.content.replies.AddReplyResponse;
+import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyFeedRequest;
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyFeedResponse;
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRequest;
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyResponse;
@@ -39,7 +40,6 @@ import com.microsoft.embeddedsocial.server.model.like.RemoveLikeRequest;
 import com.microsoft.embeddedsocial.server.model.pin.AddPinRequest;
 import com.microsoft.embeddedsocial.server.model.pin.GetPinFeedRequest;
 import com.microsoft.embeddedsocial.server.model.pin.RemovePinRequest;
-import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyFeedRequest;
 
 import retrofit2.Response;
 

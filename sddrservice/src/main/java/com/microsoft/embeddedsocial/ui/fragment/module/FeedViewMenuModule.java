@@ -16,11 +16,12 @@ import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.data.Preferences;
 import com.microsoft.embeddedsocial.data.display.DisplayMethod;
 import com.microsoft.embeddedsocial.event.click.DisplayMethodChangedEvent;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.sdk.ui.ToolbarColorizer;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
 import com.microsoft.embeddedsocial.ui.fragment.base.Module;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Adds gallery/list switch to the options menu.

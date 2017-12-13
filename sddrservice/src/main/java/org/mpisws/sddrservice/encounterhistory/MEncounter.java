@@ -2,15 +2,14 @@ package org.mpisws.sddrservice.encounterhistory;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.location.Location;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.mpisws.sddrservice.dbplatform.AbstractMemoryObject;
 import org.mpisws.sddrservice.encounters.SDDR_Native;
 import org.mpisws.sddrservice.encounters.SDDR_Proto;
-import org.mpisws.sddrservice.dbplatform.AbstractMemoryObject;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.FacebookEventStatus;
 import org.mpisws.sddrservice.lib.Identifier;

@@ -8,8 +8,8 @@ package com.microsoft.embeddedsocial.account;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
+import com.microsoft.embeddedsocial.data.model.AccountData;
 
 /**
  * Stores {@link AccountData} permanently.

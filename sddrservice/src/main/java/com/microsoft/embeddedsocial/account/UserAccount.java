@@ -9,15 +9,15 @@ import android.content.Context;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.TextUtils;
 
-import com.microsoft.embeddedsocial.actions.OngoingActions;
-import com.microsoft.embeddedsocial.data.model.AccountData;
-import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.actions.ActionsLauncher;
+import com.microsoft.embeddedsocial.actions.OngoingActions;
 import com.microsoft.embeddedsocial.auth.SocialNetworkTokens;
+import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.data.Preferences;
+import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.data.storage.DatabaseHelper;
 import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.event.RequestSignInEvent;

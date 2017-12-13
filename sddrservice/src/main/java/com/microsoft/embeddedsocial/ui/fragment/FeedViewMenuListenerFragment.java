@@ -7,8 +7,8 @@ package com.microsoft.embeddedsocial.ui.fragment;
 
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.sdk.Options;
-import com.microsoft.embeddedsocial.ui.fragment.module.FeedViewMenuModule;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
+import com.microsoft.embeddedsocial.ui.fragment.module.FeedViewMenuModule;
 
 /**
  * This fragment listens to the menu actions for list/gallery switch.

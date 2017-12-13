@@ -7,9 +7,9 @@ package com.microsoft.embeddedsocial.server.model.view;
 
 import android.text.TextUtils;
 
-import com.microsoft.embeddedsocial.base.function.Predicate;
 import com.microsoft.embeddedsocial.autorest.models.ActivityType;
 import com.microsoft.embeddedsocial.autorest.models.ContentType;
+import com.microsoft.embeddedsocial.base.function.Predicate;
 
 import java.util.HashMap;
 import java.util.List;

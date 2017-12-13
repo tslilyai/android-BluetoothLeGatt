@@ -12,9 +12,10 @@ import android.net.Uri;
 import android.os.ConditionVariable;
 import android.widget.ImageView;
 
-import org.mpisws.sddrservice.BuildConfig;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import org.mpisws.sddrservice.BuildConfig;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;

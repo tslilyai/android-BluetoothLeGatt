@@ -15,16 +15,15 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.sdk.Options;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.EnumUtils;
 import com.microsoft.embeddedsocial.data.Preferences;
 import com.microsoft.embeddedsocial.data.storage.DatabaseHelper;
+import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
+import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.ui.activity.DeleteAccountActivity;
 import com.microsoft.embeddedsocial.ui.activity.FriendlistActivity;
 import com.microsoft.embeddedsocial.ui.activity.LinkedAccountsActivity;
@@ -32,6 +31,8 @@ import com.microsoft.embeddedsocial.ui.activity.SignInActivity;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
 import com.microsoft.embeddedsocial.ui.util.WebPageHelper;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Settings fragment.

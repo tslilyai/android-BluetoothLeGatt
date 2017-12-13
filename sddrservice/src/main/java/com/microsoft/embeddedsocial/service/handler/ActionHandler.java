@@ -7,9 +7,9 @@ package com.microsoft.embeddedsocial.service.handler;
 
 import android.content.Intent;
 
+import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.actions.OngoingActions;
 import com.microsoft.embeddedsocial.base.service.IServiceIntentHandler;
-import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;

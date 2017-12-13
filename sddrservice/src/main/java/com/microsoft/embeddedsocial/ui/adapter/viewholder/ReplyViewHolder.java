@@ -11,11 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
-import com.microsoft.embeddedsocial.ui.util.ButtonStyleHelper;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.ReplyView;
+import com.microsoft.embeddedsocial.ui.adapter.QuantityStringUtils;
 import com.microsoft.embeddedsocial.ui.theme.ThemeAttributes;
+import com.microsoft.embeddedsocial.ui.util.ButtonStyleHelper;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Init reply view layout.

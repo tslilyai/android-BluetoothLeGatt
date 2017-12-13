@@ -14,15 +14,15 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.model.AddPostData;
+import com.microsoft.embeddedsocial.data.storage.exception.FatalDatabaseException;
 import com.microsoft.embeddedsocial.data.storage.model.UserRelationOperation;
 import com.microsoft.embeddedsocial.data.storage.trigger.ISqlTrigger;
 import com.microsoft.embeddedsocial.server.model.view.AppCompactView;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
+import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.server.model.view.UserAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
-import com.microsoft.embeddedsocial.data.storage.exception.FatalDatabaseException;
-import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.server.model.view.UserProfileView;
 
 import java.sql.SQLException;

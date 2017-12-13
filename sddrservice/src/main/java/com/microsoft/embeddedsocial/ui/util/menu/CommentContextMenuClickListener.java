@@ -8,10 +8,11 @@ package com.microsoft.embeddedsocial.ui.util.menu;
 import android.content.Context;
 import android.view.MenuItem;
 
-import org.mpisws.sddrservice.R;
+import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
-import com.microsoft.embeddedsocial.autorest.models.ContentType;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Menu listener for the comment layout

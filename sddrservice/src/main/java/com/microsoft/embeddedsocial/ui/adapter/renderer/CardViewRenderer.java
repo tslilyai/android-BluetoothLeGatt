@@ -14,13 +14,14 @@ import android.view.ViewGroup;
 import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.event.click.OpenTopicEvent;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.TopicButtonsListener;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.TopicRenderOptions;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.TopicViewHolder;
 import com.microsoft.embeddedsocial.ui.util.ContentUpdateHelper;
 import com.microsoft.embeddedsocial.ui.util.menu.TopicContextMenu;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Renders a topic as CardView.

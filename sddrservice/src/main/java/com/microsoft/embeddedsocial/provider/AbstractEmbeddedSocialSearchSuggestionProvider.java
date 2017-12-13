@@ -18,12 +18,13 @@ import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.model.SearchType;
 import com.microsoft.embeddedsocial.data.storage.SearchHistory;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.server.ISearchService;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
+import com.microsoft.embeddedsocial.server.ISearchService;
 import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
-import com.microsoft.embeddedsocial.server.model.search.GetAutocompletedHashtagsRequest;
 import com.microsoft.embeddedsocial.server.model.search.AutocompletedHashtagsResponse;
+import com.microsoft.embeddedsocial.server.model.search.GetAutocompletedHashtagsRequest;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.List;
 

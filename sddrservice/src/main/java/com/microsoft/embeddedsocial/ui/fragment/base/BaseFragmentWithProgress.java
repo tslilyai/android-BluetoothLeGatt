@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
+
 import org.mpisws.sddrservice.R;
 
 /**

@@ -29,14 +29,15 @@ import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.actions.ActionFilter;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
+import com.microsoft.embeddedsocial.event.action.ActionCompletedEvent;
 import com.microsoft.embeddedsocial.event.action.ActionStartedEvent;
-import org.mpisws.sddrservice.BuildConfig;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.PopularActivity;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseActivity;
-import com.microsoft.embeddedsocial.event.action.ActionCompletedEvent;
 import com.microsoft.embeddedsocial.ui.util.CommonBehaviorEventListener;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.BuildConfig;
+import org.mpisws.sddrservice.R;
 
 import java.util.LinkedList;
 import java.util.List;

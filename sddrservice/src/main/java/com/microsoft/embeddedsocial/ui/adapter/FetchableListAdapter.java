@@ -13,9 +13,10 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.adapter.renderer.Renderer;
 import com.microsoft.embeddedsocial.ui.adapter.viewholder.SingleViewHolder;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * <p>Simple {@link FetchableAdapter}'s extension showing a simple list of items (optionally with a header)

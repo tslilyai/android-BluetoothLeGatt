@@ -8,8 +8,9 @@ package com.microsoft.embeddedsocial.ui.activity;
 import android.support.v7.app.ActionBar;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.ui.activity.base.BaseProfileActivity;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Activity shoving current user's feeds.

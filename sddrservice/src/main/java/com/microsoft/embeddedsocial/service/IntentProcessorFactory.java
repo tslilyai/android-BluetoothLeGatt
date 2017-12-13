@@ -7,7 +7,6 @@ package com.microsoft.embeddedsocial.service;
 
 import android.content.Context;
 
-import com.microsoft.embeddedsocial.service.handler.UpdateAccountHandler;
 import com.microsoft.embeddedsocial.base.service.IServiceIntentProcessor;
 import com.microsoft.embeddedsocial.base.service.IntentProcessor;
 import com.microsoft.embeddedsocial.service.handler.BackgroundInitializationHandler;
@@ -15,7 +14,6 @@ import com.microsoft.embeddedsocial.service.handler.CreateAccountHandler;
 import com.microsoft.embeddedsocial.service.handler.DeleteAccountHandler;
 import com.microsoft.embeddedsocial.service.handler.DeleteSearchHistoryHandler;
 import com.microsoft.embeddedsocial.service.handler.GetCommentHandler;
-import com.microsoft.embeddedsocial.service.handler.GetGcmIdHandler;
 import com.microsoft.embeddedsocial.service.handler.GetReplyHandler;
 import com.microsoft.embeddedsocial.service.handler.LinkUserThirdPartyAccountHandler;
 import com.microsoft.embeddedsocial.service.handler.RemoveFollowerHandler;
@@ -23,6 +21,7 @@ import com.microsoft.embeddedsocial.service.handler.SignInHandler;
 import com.microsoft.embeddedsocial.service.handler.SignOutHandler;
 import com.microsoft.embeddedsocial.service.handler.SynchronizationHandler;
 import com.microsoft.embeddedsocial.service.handler.UnlinkUserThirdPartyAccountHandler;
+import com.microsoft.embeddedsocial.service.handler.UpdateAccountHandler;
 import com.microsoft.embeddedsocial.service.handler.UpdateNotificationCountHandler;
 
 /**

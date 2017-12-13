@@ -5,21 +5,10 @@
 
 package com.microsoft.embeddedsocial.data.storage.syncadapter;
 
-import android.provider.Settings;
 import android.text.TextUtils;
 
 import com.j256.ormlite.dao.Dao;
 import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.data.model.DiscussionItem;
-import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
-import com.microsoft.embeddedsocial.data.storage.model.TopicFeedRelation;
-import com.microsoft.embeddedsocial.event.sync.PostUploadFailedEvent;
-import com.microsoft.embeddedsocial.event.sync.PostUploadedEvent;
-import com.microsoft.embeddedsocial.server.ImageUploader;
-import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
-import com.microsoft.embeddedsocial.server.model.content.topics.AddTopicRequest;
-import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicResponse;
-import com.microsoft.embeddedsocial.server.sync.exception.SynchronizationException;
 import com.microsoft.embeddedsocial.autorest.models.BlobType;
 import com.microsoft.embeddedsocial.autorest.models.ImageType;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
@@ -29,24 +18,27 @@ import com.microsoft.embeddedsocial.data.model.TopicFeedType;
 import com.microsoft.embeddedsocial.data.storage.DatabaseHelper;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
 import com.microsoft.embeddedsocial.data.storage.exception.FatalDatabaseException;
+import com.microsoft.embeddedsocial.data.storage.model.TopicFeedRelation;
 import com.microsoft.embeddedsocial.data.storage.transaction.DbTransaction;
-import com.microsoft.embeddedsocial.server.IContentService;
+import com.microsoft.embeddedsocial.event.sync.PostUploadFailedEvent;
+import com.microsoft.embeddedsocial.event.sync.PostUploadedEvent;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
+import com.microsoft.embeddedsocial.server.IContentService;
+import com.microsoft.embeddedsocial.server.ImageUploader;
 import com.microsoft.embeddedsocial.server.exception.BadRequestException;
+import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
+import com.microsoft.embeddedsocial.server.model.content.topics.AddTopicRequest;
 import com.microsoft.embeddedsocial.server.model.content.topics.AddTopicResponse;
 import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicRequest;
+import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicResponse;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.server.sync.ISynchronizable;
 import com.microsoft.embeddedsocial.server.sync.exception.OperationRejectedException;
-import com.microsoft.embeddedsocial.service.ServiceAction;
-import com.microsoft.embeddedsocial.service.WorkerService;
-
-import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
+import com.microsoft.embeddedsocial.server.sync.exception.SynchronizationException;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Sync adapter for posts.

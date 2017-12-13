@@ -16,22 +16,23 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.base.utils.ViewUtils;
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
-import com.microsoft.embeddedsocial.ui.util.CommonBehaviorEventListener;
 import com.microsoft.embeddedsocial.account.AuthorizationCause;
+import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.base.utils.EnumUtils;
 import com.microsoft.embeddedsocial.base.utils.ObjectUtils;
+import com.microsoft.embeddedsocial.base.utils.ViewUtils;
 import com.microsoft.embeddedsocial.data.Preferences;
 import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.activity.SignInActivity;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseFragment;
 import com.microsoft.embeddedsocial.ui.theme.Theme;
+import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
+import com.microsoft.embeddedsocial.ui.util.CommonBehaviorEventListener;
+
+import org.mpisws.sddrservice.R;
 
 import java.util.List;
 

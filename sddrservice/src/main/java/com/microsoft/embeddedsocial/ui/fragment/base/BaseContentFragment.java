@@ -22,15 +22,16 @@ import android.widget.TextView;
 
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.ViewUtils;
+import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableAdapter;
 import com.microsoft.embeddedsocial.fetcher.base.FetchableRecyclerView;
 import com.microsoft.embeddedsocial.fetcher.base.FetcherState;
 import com.microsoft.embeddedsocial.fetcher.base.ViewState;
 import com.microsoft.embeddedsocial.fetcher.base.ViewStateListener;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.server.NetworkAvailability;
 import com.microsoft.embeddedsocial.ui.fragment.module.SlowConnectionMessageModule;
-import com.microsoft.embeddedsocial.fetcher.base.Callback;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Base class for fragments loading and displaying data. It contains a RecyclerView to show data, empty data message view,

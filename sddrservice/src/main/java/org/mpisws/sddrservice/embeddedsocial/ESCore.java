@@ -16,15 +16,12 @@ import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 import com.microsoft.embeddedsocial.server.NetworkAvailability;
 import com.microsoft.embeddedsocial.server.RequestInfoProvider;
-import com.microsoft.embeddedsocial.service.ServiceAction;
-import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.ui.notification.NotificationController;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 import org.mpisws.sddrservice.R;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by tslilyai on 12/8/17.

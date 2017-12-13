@@ -8,18 +8,19 @@ package com.microsoft.embeddedsocial.ui.fragment;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.base.event.EventBus;
+import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.event.data.ProfileDataUpdatedEvent;
 import com.microsoft.embeddedsocial.event.relationship.UserFollowedStateChangedEvent;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
-import org.mpisws.sddrservice.R;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.ui.adapter.ProfileInfoAdapter;
 import com.microsoft.embeddedsocial.ui.fragment.base.BaseListContentFragment;
 import com.squareup.otto.Subscribe;
+
+import org.mpisws.sddrservice.R;
 
 /**
  * Shows user's profile.

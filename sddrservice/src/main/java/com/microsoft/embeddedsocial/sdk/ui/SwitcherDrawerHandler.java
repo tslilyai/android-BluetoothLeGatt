@@ -15,15 +15,16 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import org.mpisws.sddrservice.R;
-import com.microsoft.embeddedsocial.ui.fragment.NavigationFragment;
-import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.image.ImageViewContentLoader;
 import com.microsoft.embeddedsocial.sdk.NavigationProfileHelper;
 import com.microsoft.embeddedsocial.sdk.Options;
+import com.microsoft.embeddedsocial.ui.fragment.NavigationFragment;
 import com.microsoft.embeddedsocial.ui.theme.Theme;
+import com.microsoft.embeddedsocial.ui.theme.ThemeGroup;
 import com.microsoft.embeddedsocial.ui.view.NavigationItemView;
+
+import org.mpisws.sddrservice.R;
 
 public class SwitcherDrawerHandler extends DrawerHandler {
 	private final LayoutInflater themedInflater;
