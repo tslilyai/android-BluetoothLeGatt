@@ -9,7 +9,6 @@ import android.content.Context;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.TextUtils;
 
-import com.facebook.login.LoginManager;
 import com.microsoft.embeddedsocial.actions.OngoingActions;
 import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
@@ -40,7 +39,7 @@ import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
  */
 public class UserAccount {
 
-	private final Context context;
+	public final Context context;
 
 	private String userHandle;
 	private AccountData accountDetails;
@@ -135,7 +134,6 @@ public class UserAccount {
 		userHandle = null;
 		NotificationCountChecker.reset();
 		NotificationManagerCompat.from(context).cancelAll();
-		LoginManager.getInstance().logOut();
 		SocialNetworkTokens.clearAll();
 	}
 

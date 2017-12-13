@@ -8,6 +8,7 @@ package com.microsoft.embeddedsocial.service.handler;
 import android.content.Context;
 import android.content.Intent;
 
+import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.base.service.IServiceIntentHandler;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.storage.ActivityCache;
@@ -17,6 +18,8 @@ import com.microsoft.embeddedsocial.gcm.GcmTokenHolder;
 import com.microsoft.embeddedsocial.server.sync.DataSynchronizer;
 import com.microsoft.embeddedsocial.data.storage.UserCache;
 import com.microsoft.embeddedsocial.service.ServiceAction;
+
+import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 
 /**
  * Uploads all available data to the server.
@@ -40,15 +43,15 @@ public class SynchronizationHandler implements IServiceIntentHandler<ServiceActi
 		synchronizer.registerSyncProducer(userActionCache::getPendingPinActions, "pins");
 		synchronizer.registerSyncProducer(userActionCache::getPendingHideTopicActions, "hidden topics");
 		synchronizer.registerSyncProducer(userActionCache::getPendingReportContentActions,
-			"reported content");
+				"reported content");
 		synchronizer.registerSyncProducer(new ActivityCache(context)::getActivityHandleSyncActions,
-			"notification updates");
+				"notification updates");
 		synchronizer.registerSyncProducer(new UserCache()::getPendingUserRelationOperations,
-			"user relations");
+				"user relations");
 		synchronizer.registerSyncProducer(userActionCache::getPendingContentRemovalActions,
-			"removals");
+				"removals");
 		synchronizer.registerSyncProducer(GcmTokenHolder.create(context)::getTokenSyncOperations,
-			"gcm");
+				"gcm");
 	}
 
 	@Override
@@ -58,6 +61,9 @@ public class SynchronizationHandler implements IServiceIntentHandler<ServiceActi
 			boolean synced = synchronizer.synchronize();
 			DebugLog.i(synced ? "sync succeeded" : "sync failed");
 		}
+		// send any unsent messages
+		if (UserAccount.getInstance().isSignedIn())
+			new ESMsgs(UserAccount.getInstance().context).sendUnsentMsgs();
 	}
 
 	@Override

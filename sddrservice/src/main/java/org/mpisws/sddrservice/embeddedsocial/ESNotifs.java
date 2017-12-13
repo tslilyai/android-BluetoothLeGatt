@@ -1,16 +1,19 @@
 package org.mpisws.sddrservice.embeddedsocial;
 
+import android.content.Context;
+import android.os.Parcelable;
 import android.util.Log;
 
+import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.autorest.models.ActivityType;
-import com.microsoft.embeddedsocial.autorest.models.CommentView;
-import com.microsoft.embeddedsocial.autorest.models.PutNotificationsStatusRequest;
-import com.microsoft.embeddedsocial.autorest.models.TopicView;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
+import com.microsoft.embeddedsocial.data.storage.ActivityCache;
+import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.fetcher.base.FetcherState;
+import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 import com.microsoft.embeddedsocial.server.IContentService;
 import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
 import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentRequest;
@@ -18,13 +21,10 @@ import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentResp
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRequest;
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyResponse;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
-import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
-import com.microsoft.rest.ServiceCallback;
-import com.microsoft.rest.ServiceResponse;
 
-import org.joda.time.DateTime;
 import org.mpisws.sddrservice.lib.Identifier;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -34,13 +34,14 @@ import java.util.List;
 
 public class ESNotifs {
     private static final String TAG = ESNotifs.class.getSimpleName();
+    private final Context context;
 
-    public class Notif {
+    public static class Notif {
         private Identifier eid;
         private String msg;
         private long timestamp;
 
-        Notif(Identifier eid, String msg, long timestamp) {
+        public Notif(Identifier eid, String msg, long timestamp) {
             this.eid = eid;
             this.msg = msg;
             this.timestamp = timestamp;
@@ -56,9 +57,9 @@ public class ESNotifs {
         }
     }
 
-    public ESNotifs() {}
+    public ESNotifs(Context context) {this.context = context;}
 
-    public interface NotificationCallback {
+    public interface NotificationCallback extends Parcelable {
         void onReceiveNotif(Notif notif);
     }
 
@@ -73,6 +74,7 @@ public class ESNotifs {
                             break;
                         case DATA_ENDED:
                             process_notifs(notificationCallback, notifFeedFetcher.getAllData());
+                            break;
                         default:
                             notifFeedFetcher.requestMoreData();
                             break;
@@ -80,32 +82,17 @@ public class ESNotifs {
                     }
                 };
         notifFeedFetcher.setCallback(callback);
-        notifFeedFetcher.requestMoreData();
         // TODO update unread notifs?
     }
 
     private void process_notifs(NotificationCallback notificationCallback, List<ActivityView> notifs) {
-        IContentService contentService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
-        GetReplyResponse resprep;
-        GetCommentResponse respcom;
-        String msg = null;
         for (ActivityView n : notifs) {
-            try {
-                if (n.getActivityType() == ActivityType.REPLY) {
-                    resprep = contentService.getReply(new GetReplyRequest(n.getHandle()));
-                    msg = resprep.getReply().getReplyText();
-                }
-                else if (n.getActivityType() == ActivityType.COMMENT) {
-                    respcom = contentService.getComment(new GetCommentRequest(n.getHandle()));
-                    msg = respcom.getComment().getCommentText();
-               }
-               else {
-                    Log.d(TAG, "Notif of no known activity type!");
-               }
-               notificationCallback.onReceiveNotif(new Notif(
-                       new Identifier(n.getActedOnContentText().getBytes()), msg, n.getElapsedSeconds()));
-            } catch (NetworkRequestException e) {
-                e.printStackTrace();
+            if (n.getActivityType() == ActivityType.REPLY) {
+                ActionsLauncher.getReplyOfNotif(context, n.getHandle(), n.getActedOnContentText(), notificationCallback);
+            } else if (n.getActivityType() == ActivityType.COMMENT) {
+                ActionsLauncher.getCommentOfNotif(context, n.getHandle(), n.getActedOnContentText(), notificationCallback);
+            } else {
+                Log.d(TAG, "Notif of no known activity type!");
             }
         }
     }

@@ -5,15 +5,19 @@
 
 package com.microsoft.embeddedsocial.actions;
 
+import android.app.Notification;
 import android.content.Context;
 import android.os.Bundle;
 
 import com.microsoft.embeddedsocial.data.model.AccountDataDifference;
+import com.microsoft.embeddedsocial.data.storage.NotificationServiceCachingWrapper;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 import com.microsoft.embeddedsocial.data.model.CreateAccountData;
 import com.microsoft.embeddedsocial.service.IntentExtras;
+
+import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 
 /**
  * Launches actions.
@@ -37,6 +41,26 @@ public final class ActionsLauncher {
 
 	public static Action getReply(Context context, String replyHandle) {
 		return ActionIntentBuilder.forActionWithTag(Action.Tags.GET_REPLY)
+				.setReplyHandle(replyHandle)
+				.launch(context, ServiceAction.GET_REPLY);
+	}
+
+	public static Action getCommentOfNotif(Context context, String commentHandle,
+										 String topicText,
+										 ESNotifs.NotificationCallback notificationCallback) {
+		return ActionIntentBuilder.forActionWithTag(Action.Tags.GET_COMMENT)
+				.setNotificationCallback(notificationCallback)
+				.setParentText(topicText)
+				.setCommentHandle(commentHandle)
+				.launch(context, ServiceAction.GET_COMMENT);
+	}
+
+	public static Action getReplyOfNotif(Context context, String replyHandle,
+										 String commentText,
+										 ESNotifs.NotificationCallback notificationCallback) {
+		return ActionIntentBuilder.forActionWithTag(Action.Tags.GET_REPLY)
+				.setNotificationCallback(notificationCallback)
+				.setParentText(commentText)
 				.setReplyHandle(replyHandle)
 				.launch(context, ServiceAction.GET_REPLY);
 	}
@@ -86,6 +110,16 @@ public final class ActionsLauncher {
 		private ActionIntentBuilder(Action action) {
 			this.action = action;
 			extras.putLong(IntentExtras.ACTION_ID, action.getId());
+		}
+
+		ActionIntentBuilder setParentText(String text) {
+			extras.putString(IntentExtras.PARENT_TEXT, text);
+			return this;
+		}
+
+		ActionIntentBuilder setNotificationCallback(ESNotifs.NotificationCallback notificationCallback) {
+			extras.putParcelable(IntentExtras.NOTIF_CALLBACK, notificationCallback);
+			return this;
 		}
 
 		ActionIntentBuilder setAuthorization(String authorization) {

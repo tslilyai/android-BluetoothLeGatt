@@ -46,6 +46,7 @@ public class GoogleAuthActivity extends AppCompatActivity {
                 service.dispose();
             } else {
                 Log.v(TAG, "Auth failed");
+                service.dispose();
             }
        }
     }

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -67,7 +69,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 List<Identifier> encounters = SDDR_API.get_encounters(null);
                 if (encounters.size() > 0) {
                     Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.get(0).toString());
-                    SDDR_API.send_msg(encounters.get(0), msg.getText().toString());
+                    List<String> list = new LinkedList<>();
+                    list.add(msg.getText().toString());
+                    SDDR_API.send_msgs(encounters.get(0), list);
                 }
                 break;
             case R.id.sign_in_button:
@@ -76,12 +80,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();
                 } else {
-                    SDDR_API.sign_in(GoogleToken.getToken());
+                    SDDR_API.sign_in();
                 }
+                break;
+             case R.id.sign_out_button:
+                SDDR_API.sign_out();
                 break;
             case R.id.get_notifs:
                 Log.d(TAG, "Getting notifs");
                 ESNotifs.NotificationCallback callback = new ESNotifs.NotificationCallback() {
+                    @Override
+                    public int describeContents() {return 0;}
+
+                    @Override
+                    public void writeToParcel(Parcel dest, int flags) {}
+
                     @Override
                     public void onReceiveNotif(final ESNotifs.Notif notif) {
                         handler.post(new Runnable() {
@@ -100,17 +113,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
                 Log.d(TAG, "Getting messages for " + encounters2.size() + " encounters");
                 if (encounters2.size() > 0) {
-                    ESMsgs.MsgsCallback callback2 = new ESMsgs.MsgsCallback() {
+                    ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
                         @Override
-                        public void onReceiveMessages(final List<ESMsgs.Msg> messages) {
+                        public void onReceiveMessage(final ESMsgs.Msg msg) {
                             handler.post(new Runnable() {
                                 public void run() {
                                     final TextView text = MainActivity.this.findViewById(R.id.new_messages);
-                                    for (ESMsgs.Msg msg : messages) {
-                                        text.append(encounters2.get(0).toString() + ": ");
-                                        text.append(msg.msg);
-                                        text.append("\n");
-                                    }
+                                    text.append(encounters2.get(0).toString() + ": ");
+                                    text.append(msg.msg);
+                                    text.append("\n");
                                 }
                             });
                         }

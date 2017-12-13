@@ -97,7 +97,7 @@ public class TopicView implements Parcelable, UniqueItem, TimedItem {
 	 */
 	private int localPostId = -1;
 
-	TopicView() {  }
+	public TopicView() {  }
 
 	public boolean isLocal() {
 		return local;

@@ -20,6 +20,9 @@ import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRequest
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 
+import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
+import org.mpisws.sddrservice.lib.Identifier;
+
 /**
  * Get single reply.
  */
@@ -30,11 +33,19 @@ public class GetReplyHandler extends ActionHandler {
 				= GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
 
 		final String replyHandle = intent.getExtras().getString(IntentExtras.REPLY_HANDLE);
+		ESNotifs.NotificationCallback notifCallback = null;
+		String parentText = null;
+		if (intent.hasExtra(IntentExtras.NOTIF_CALLBACK)) {
+			notifCallback = (ESNotifs.NotificationCallback) intent.getExtras().get(IntentExtras.NOTIF_CALLBACK);
+			parentText = intent.getExtras().getString(IntentExtras.PARENT_TEXT);
+		}
 
 		try {
 			final GetReplyRequest request = new GetReplyRequest(replyHandle);
 			GetReplyResponse response = contentService.getReply(request);
-			EventBus.post(new GetReplyEvent(response.getReply(), response.getReply() != null));
+			if (notifCallback != null) {
+				notifCallback.onReceiveNotif(new ESNotifs.Notif(new Identifier(parentText.getBytes()), response.getReply().getReplyText(), response.getReply().getElapsedSeconds()));
+			}	EventBus.post(new GetReplyEvent(response.getReply(), response.getReply() != null));
 		} catch (NetworkRequestException e) {
 			DebugLog.logException(e);
 			action.fail(e.getMessage());

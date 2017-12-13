@@ -15,19 +15,11 @@ import android.net.NetworkInfo;
 /**
  * Tracks network availability.
  */
-public class NetworkAvailability {
+public class NetworkAvailability extends BroadcastReceiver {
 
 	private boolean networkAvailable = true;
 
 	public void startMonitoring(Context context) {
-		context.registerReceiver(
-				new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						checkActiveNetwork(context);
-					}
-				},
-				new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 		checkActiveNetwork(context);
 	}
 
@@ -39,5 +31,10 @@ public class NetworkAvailability {
 
 	public boolean isNetworkAvailable() {
 		return networkAvailable;
+	}
+
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		checkActiveNetwork(context);
 	}
 }

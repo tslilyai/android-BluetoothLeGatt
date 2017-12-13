@@ -5,10 +5,13 @@
 
 package com.microsoft.embeddedsocial.data.storage.syncadapter;
 
+import android.provider.Settings;
 import android.text.TextUtils;
 
 import com.j256.ormlite.dao.Dao;
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.data.model.DiscussionItem;
+import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.data.storage.model.TopicFeedRelation;
 import com.microsoft.embeddedsocial.event.sync.PostUploadFailedEvent;
 import com.microsoft.embeddedsocial.event.sync.PostUploadedEvent;
@@ -35,10 +38,15 @@ import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicRequest;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.server.sync.ISynchronizable;
 import com.microsoft.embeddedsocial.server.sync.exception.OperationRejectedException;
+import com.microsoft.embeddedsocial.service.ServiceAction;
+import com.microsoft.embeddedsocial.service.WorkerService;
+
+import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Sync adapter for posts.
@@ -82,6 +90,7 @@ public class PostSyncAdapter implements ISynchronizable {
 			}
 			AddTopicResponse response = contentService.addTopic(requestBuilder.build());
 			loadTopicToCache(contentService, response.getTopicHandle(), imagePath);
+			UserAccount.getInstance().getAccountDetails().removePendingTopic(postData.getTitle());
 		} catch (BadRequestException e) {
 			throw new OperationRejectedException(e);
 		} catch (IOException | NetworkRequestException e) {

@@ -79,7 +79,7 @@ public class SDDR_API {
         esCore.register_user_details(googletoken, firstname, lastname);
     }
 
-    public static void sign_in(String googletoken) {
+    public static void sign_in() {
         if (!isRunning) return;
         esCore.sign_in();
     }
@@ -89,12 +89,12 @@ public class SDDR_API {
         esCore.sign_out();
     }
 
-    public static void send_msg(Identifier encounterID, String msg) {
+    public static void send_msgs(Identifier encounterID, List<String> msgs) {
         if (!isRunning) return;
-        esCore.send_msg(encounterID.toString(), msg);
+        esCore.send_msgs(encounterID.toString(), msgs);
     }
 
-    public static void get_msgs(Identifier encounterID, ESMsgs.MsgsCallback callback) {
+    public static void get_msgs(Identifier encounterID, ESMsgs.MsgCallback callback) {
         if (!isRunning) return;
         esCore.get_msgs(encounterID.toString(), callback);
     }

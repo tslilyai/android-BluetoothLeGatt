@@ -72,13 +72,6 @@
 		</activity>
 
 		<activity
-			android:name="com.microsoft.embeddedsocial.ui.activity.PopularActivity"
-			android:configChanges="keyboard|keyboardHidden|screenSize"
-			android:windowSoftInputMode="stateHidden"
-			android:label="@string/es_screen_title_popular"
-			android:theme="@style/EmbeddedSocialSdkAppTheme.Stub"
-			/>
-		<activity
 			android:name="com.microsoft.embeddedsocial.ui.activity.AddPostActivity"
 			android:configChanges="keyboard|keyboardHidden|screenSize"
 			android:label="@string/es_screen_title_add_post"
@@ -298,6 +291,12 @@
 				<action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
 
 				<category android:name="${applicationId}"/>
+			</intent-filter>
+		</receiver>
+
+		<receiver android:name="com.microsoft.embeddedsocial.server.NetworkAvailability" >
+			<intent-filter>
+				<action android:name="android.net.ConnectivityManager.CONNECTIVITY_ACTION"/>
 			</intent-filter>
 		</receiver>
 

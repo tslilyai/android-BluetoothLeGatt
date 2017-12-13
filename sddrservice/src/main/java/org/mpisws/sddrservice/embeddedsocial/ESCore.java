@@ -23,6 +23,9 @@ import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 import org.mpisws.sddrservice.R;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by tslilyai on 12/8/17.
  */
@@ -58,8 +61,8 @@ public class ESCore {
         // TODO gcm?
         //WorkerService.getLauncher(context).launchService(ServiceAction.BACKGROUND_INIT);
 
-        esMsgs = new ESMsgs();
-        esNotifs = new ESNotifs();
+        esMsgs = new ESMsgs(context);
+        esNotifs = new ESNotifs(context);
         this.defaultCreateMsgChannels = 0;
     }
 
@@ -91,15 +94,16 @@ public class ESCore {
     }
 
     public void create_topic(String eid) {
-        if (defaultCreateMsgChannels > 0)
+        if (defaultCreateMsgChannels > 0) {
             esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.CreateOnly));
+        }
     }
 
-    public void send_msg(String eid, String msg) {
-        esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, msg));
+    public void send_msgs(String eid, List<String> msgs) {
+        esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, msgs));
     }
 
-    public void get_msgs(String eid, ESMsgs.MsgsCallback msgsCallback) {
+    public void get_msgs(String eid, ESMsgs.MsgCallback msgsCallback) {
         esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.GetMsgs, msgsCallback));
     }
 

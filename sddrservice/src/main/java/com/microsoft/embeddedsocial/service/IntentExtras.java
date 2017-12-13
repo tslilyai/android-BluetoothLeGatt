@@ -45,6 +45,8 @@ public final class IntentExtras {
 	public static final String POST_TITLE = "postTitle";
 	public static final String POST_DESCRIPTION = "postDescription";
 	public static final String POST_IMAGE_URI = "postImageUri";
+	public static final String PARENT_TEXT = "parentText";
+	public static final String NOTIF_CALLBACK = "notifCallback";
 
 	// TODO
 	public static final String AUTOMATIC = "automatic";

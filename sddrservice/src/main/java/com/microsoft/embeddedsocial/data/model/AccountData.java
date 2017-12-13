@@ -8,6 +8,7 @@ package com.microsoft.embeddedsocial.data.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.server.model.view.ThirdPartyAccountView;
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
@@ -15,7 +16,15 @@ import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.server.model.view.UserAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserProfileView;
 
+import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
+
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Information about some user's account.
@@ -33,6 +42,8 @@ public class AccountData implements Parcelable {
 	private long followingCount;
 	private boolean isPrivate;
 	private FollowerStatus followedStatus = FollowerStatus.NONE;
+	private Map<String, List<String>> unsentMsgs;
+	private Set<String> pendingTopics;
 
 	public AccountData() {
 		identityProvider = IdentityProvider.MICROSOFT; // TODO verify this default value is OK
@@ -52,6 +63,8 @@ public class AccountData implements Parcelable {
 		this.isPrivate = userProfile.isPrivate();
 		FollowerStatus status = userProfile.getFollowerStatus();
 		this.followedStatus = status != null ? status : FollowerStatus.NONE;
+		this.unsentMsgs = new HashMap<>();
+		this.pendingTopics = new ConcurrentSkipListSet<>();
 	}
 
 	private AccountData(Parcel in) {
@@ -172,6 +185,30 @@ public class AccountData implements Parcelable {
 		this.followedStatus = followedStatus;
 	}
 
+	public void addUnsentMsgs(String eid, List<String> msgs) {
+		if (!unsentMsgs.containsKey(eid)) {
+			this.unsentMsgs.put(eid, new LinkedList<>());
+		}
+		unsentMsgs.get(eid).addAll(msgs);
+	}
+
+	public Map<String, List<String>> getUnsentMsgs() {
+		return unsentMsgs;
+	}
+
+	public void addPendingTopic(String eid) {
+		this.pendingTopics.add(eid);
+	}
+
+	public boolean pendingTopic(String eid) {
+		return pendingTopics.contains(eid);
+	}
+
+	public void removePendingTopic(String eid) {
+		pendingTopics.remove(eid);
+	}
+
+
 	public void setAccountTypeFromThirdPartyAccounts(List<ThirdPartyAccountView> thirdPartyAccounts) {
 		if (thirdPartyAccounts == null || thirdPartyAccounts.isEmpty()) {
 			throw new IllegalArgumentException("Third party accounts list should not be null");
@@ -190,6 +227,8 @@ public class AccountData implements Parcelable {
 		accountData.setBio(userAccountView.getBio());
 		accountData.setIsPrivate(userAccountView.isPrivate());
 		accountData.setAccountTypeFromThirdPartyAccounts(userAccountView.getThirdPartyAccounts());
+		accountData.unsentMsgs = new HashMap<>();
+		accountData.pendingTopics = new ConcurrentSkipListSet<>();
 		return accountData;
 	}
 

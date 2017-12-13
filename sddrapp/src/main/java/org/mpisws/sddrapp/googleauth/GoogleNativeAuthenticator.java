@@ -73,6 +73,7 @@ public class GoogleNativeAuthenticator {
         Intent intent = new Intent(context, GoogleAuthActivity.class);
         PendingIntent pi = PendingIntent.getActivity(context, request.hashCode(), intent, 0);
         service.performAuthorizationRequest(request, pi);
+        service.dispose();
     }
 
     /**
