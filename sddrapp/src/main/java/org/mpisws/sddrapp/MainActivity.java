@@ -71,7 +71,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.get(0).toString());
                     List<String> list = new LinkedList<>();
                     list.add(msg.getText().toString());
-                    SDDR_API.send_msgs(encounters.get(0), list);
+                    for (Identifier e : encounters) {
+                        SDDR_API.send_msgs(encounters.get(0), list);
+                    }
                 }
                 break;
             case R.id.sign_in_button:
@@ -119,14 +121,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             handler.post(new Runnable() {
                                 public void run() {
                                     final TextView text = MainActivity.this.findViewById(R.id.new_messages);
-                                    text.append(encounters2.get(0).toString() + ": ");
                                     text.append(msg.msg);
                                     text.append("\n");
                                 }
                             });
                         }
                     };
-                    SDDR_API.get_msgs(encounters2.get(0), callback2);
+                    for (Identifier e : encounters2) {
+                        SDDR_API.get_msgs(e, callback2);
+                    }
                 }
                 break;
             default:

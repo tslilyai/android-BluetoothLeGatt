@@ -171,6 +171,7 @@ public class ESMsgs {
                             break;
                         case DATA_ENDED:
                             do_action(ta, topicToComment, commentFeedFetcher.getAllData());
+                            break;
                         default:
                             commentFeedFetcher.requestMoreData();
                             break;
@@ -187,15 +188,16 @@ public class ESMsgs {
         /* Find the comment that acts as the "response" thread for the user that did not create the topic */
         CommentView reply_comment = null;
         for (Object obj : comments) {
-            if (CommentView.class.isInstance(obj)) {
-                Log.d(TAG, "Is an instance of commentview!");
-                CommentView comment = CommentView.class.cast(obj);
-                if (is_my_topic && !userAccount.isCurrentUser(comment.getUser().getHandle())
-                        || !is_my_topic && userAccount.isCurrentUser(comment.getUser().getHandle())) {
-                    reply_comment = comment;
-                    Utils.myAssert(reply_comment.getCommentText() == topic.getTopicTitle());
-                    break;
-                }
+            if (!CommentView.class.isInstance(obj)) {
+                Log.d(TAG, "Fetcher did not return an instance of commentview!");
+                continue;
+            }
+            CommentView comment = CommentView.class.cast(obj);
+            if (is_my_topic && !userAccount.isCurrentUser(comment.getUser().getHandle())
+                    || !is_my_topic && userAccount.isCurrentUser(comment.getUser().getHandle())) {
+                reply_comment = comment;
+                Utils.myAssert(reply_comment.getCommentText() == topic.getTopicTitle());
+                break;
             }
         }
 
@@ -240,11 +242,11 @@ public class ESMsgs {
     }
 
     private void get_msgs_helper(CommentView reply_comment, List<Object> comments, final MsgCallback msgCallback) {
-        final List<Msg> msgmap = new LinkedList<>();
         // get all the messages associated with the topic thread
         for (Object obj : comments) {
-            if (CommentView.class.isInstance(obj)) {
+            if (!CommentView.class.isInstance(obj)) {
                 Log.d(TAG, "Fetcher returned something that is not a comment!");
+                continue;
             }
             CommentView comment = (CommentView) obj;
             if (comment != reply_comment) {
@@ -253,6 +255,10 @@ public class ESMsgs {
                         userAccount.isCurrentUser(comment.getUser().getHandle()),
                         comment.getElapsedSeconds()));
             }
+        }
+
+        if (reply_comment == null) {
+            return;
         }
         // get all the messages associated with reply_comment
         final Fetcher<Object> replyFetcher = FetchersFactory.createReplyFeedFetcher(reply_comment.getHandle(), reply_comment);
@@ -267,6 +273,7 @@ public class ESMsgs {
                         for (Object obj : replyFetcher.getAllData()) {
                             if (!ReplyView.class.isInstance(obj)) {
                                 Log.d(TAG, "Fetcher returned something that is not a reply!");
+                                continue;
                             }
                             ReplyView reply = (ReplyView) obj;
                             msgCallback.onReceiveMessage(new Msg(

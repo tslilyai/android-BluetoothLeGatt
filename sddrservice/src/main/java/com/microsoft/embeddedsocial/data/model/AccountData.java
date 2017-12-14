@@ -16,6 +16,7 @@ import com.microsoft.embeddedsocial.server.model.view.UserAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserProfileView;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,8 @@ public class AccountData implements Parcelable {
 
 	public AccountData() {
 		identityProvider = IdentityProvider.MICROSOFT; // TODO verify this default value is OK
+		unsentMsgs = new HashMap<>();
+		pendingTopics = new ConcurrentSkipListSet<>();
 	}
 
 	/**
