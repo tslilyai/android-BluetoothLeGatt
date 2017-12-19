@@ -1,7 +1,9 @@
 package org.mpisws.sddrapp;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -42,7 +44,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         if (!requestBT() || !request_permissions()) {
-            return;
+            Intent mStartActivity = new Intent(this, MainActivity.class);
+            int mPendingIntentId = 123456;
+            PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+            AlarmManager mgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, mPendingIntent);
+            System.exit(0);
         }
         SDDR_API.start_service(this);
         SDDR_API.enable_msging();
@@ -173,10 +180,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setNegativeButton("Cancel", null)
                         .create()
                         .show();
+                return false;
             } else {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         Constants.REQUEST_ACCESS_FINE_LOCATION);
+                return false;
             }
         }
         return true;
