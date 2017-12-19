@@ -32,55 +32,63 @@ import java.util.Map;
 
 public class ESMsgs {
     private static final String TAG = ESMsgs.class.getSimpleName();
-    private final UserAccount userAccount;
     private final PostStorage postStorage;
     private final Context context;
     private final Object lock = new Object();
 
     public ESMsgs(Context context) {
         this.context = context;
-        userAccount = GlobalObjectRegistry.getObject(UserAccount.class);
         postStorage = new PostStorage(context);
     }
 
-    public static class TopicAction {
-    public enum TATyp {
-        GetMsgs,
-        SendMsg,
-        CreateOnly
-    }
+    public static class TopicAction     {
+        public enum TATyp {
+            GetMsgs,
+            SendMsg,
+            CreateOnly
+        }
 
-    TATyp typ;
-    List<String> msgs;
-    MsgCallback msgCallback;
+        TATyp typ;
+        List<String> msgs;
+        MsgCallback msgCallback;
 
-    public TopicAction(TATyp typ, List<String> msgs) {
-        Utils.myAssert(typ == TATyp.SendMsg);
-        this.typ = typ;
-        this.msgs = msgs;
-    }
+        public TopicAction(TATyp typ, List<String> msgs) {
+            Utils.myAssert(typ == TATyp.SendMsg);
+            this.typ = typ;
+            this.msgs = msgs;
+        }
 
-    public TopicAction(TATyp typ, MsgCallback msgCallback) {
-        Utils.myAssert(typ == TATyp.GetMsgs);
-        this.typ = typ;
-        this.msgCallback = msgCallback;
-    }
+        public TopicAction(TATyp typ, MsgCallback msgCallback) {
+            Utils.myAssert(typ == TATyp.GetMsgs);
+            this.typ = typ;
+            this.msgCallback = msgCallback;
+        }
 
-    public TopicAction(TATyp typ) {
-        Utils.myAssert(typ == TATyp.CreateOnly);
-        this.typ = typ;
+        public TopicAction(TATyp typ) {
+            Utils.myAssert(typ == TATyp.CreateOnly);
+            this.typ = typ;
+        }
     }
-}
 
     public static class Msg {
-        public String msg;
+        private String msg;
         private boolean fromMe;
-        public long timestamp;
+        private long timestamp;
 
         Msg(String msg, boolean fromMe, long timestamp) {
             this.msg = msg;
             this.fromMe = fromMe;
             this.timestamp = timestamp;
+        }
+
+        public String getMsg() {
+            return msg;
+        }
+        public boolean isFromMe() {
+            return fromMe;
+        }
+        public long getTimestamp() {
+            return timestamp;
         }
     }
 
@@ -127,6 +135,7 @@ public class ESMsgs {
 
 
     private void process_topics(String eid, TopicAction ta, List<TopicView> topiclist) {
+        Log.d(TAG, "Found " + topiclist.size() + " topics, eid " + eid + " going to do topic action " + ta.typ.name());
        // No one has created this topic yet! We should try to create it
         if (topiclist.size() == 0) {
             // If we've already tried, this means the post is still not synced. Don't do anything.
@@ -135,11 +144,11 @@ public class ESMsgs {
             // Store the message to be sent
             if (ta.typ == TopicAction.TATyp.SendMsg) {
                 synchronized(lock) {
-                    userAccount.getAccountDetails().addUnsentMsgs(eid, ta.msgs);
+                    UserAccount.getInstance().getAccountDetails().addUnsentMsgs(eid, ta.msgs);
                 }
             }
-            if (!userAccount.getAccountDetails().pendingTopic(eid)) {
-                userAccount.getAccountDetails().addPendingTopic(eid);
+            if (!UserAccount.getInstance().getAccountDetails().pendingTopic(eid)) {
+                UserAccount.getInstance().getAccountDetails().addPendingTopic(eid);
                 postStorage.storePost(eid, eid, null, PublisherType.USER);
                 WorkerService.getLauncher(context).launchService((ServiceAction.SYNC_DATA));
             }
@@ -156,6 +165,7 @@ public class ESMsgs {
                 topicToComment = topiclist.get(0).getHandle().compareTo(topiclist.get(1).getHandle()) <= 0
                         ? topiclist.get(0)
                         : topiclist.get(1);
+                Log.d(TAG, "Removing topic " + topicToRemove.getTopicTitle());
                 new UserActionProxy(context).removeTopic(topicToRemove);
             } else {
                 topicToComment = topiclist.get(0);
@@ -183,7 +193,7 @@ public class ESMsgs {
     }
 
     private void do_action(TopicAction ta, TopicView topic, List<Object> comments) {
-        final boolean is_my_topic = userAccount.isCurrentUser(topic.getUser().getHandle()) ? true : false;
+        final boolean is_my_topic = UserAccount.getInstance().isCurrentUser(topic.getUser().getHandle()) ? true : false;
 
         /* Find the comment that acts as the "response" thread for the user that did not create the topic */
         CommentView reply_comment = null;
@@ -193,10 +203,11 @@ public class ESMsgs {
                 continue;
             }
             CommentView comment = CommentView.class.cast(obj);
-            if (is_my_topic && !userAccount.isCurrentUser(comment.getUser().getHandle())
-                    || !is_my_topic && userAccount.isCurrentUser(comment.getUser().getHandle())) {
+            if (is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle())
+                    || !is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle())) {
                 reply_comment = comment;
                 Utils.myAssert(reply_comment.getCommentText() == topic.getTopicTitle());
+                Log.d(TAG, "Found reply comment for " + topic.getTopicTitle());
                 break;
             }
         }
@@ -212,18 +223,21 @@ public class ESMsgs {
                     // we add the reply comment if there is none and we're not the topic owner
                     if (!is_my_topic && reply_comment == null) {
                         postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicText(), null));
+                        Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
                     }
                     // if either (1) there is no reply comment and we're the topic owner
                     // or (2) we're not the topic owner, then post a comment
                     if ((is_my_topic && reply_comment == null) || !is_my_topic) {
                         for (String msg : ta.msgs) {
                             postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), msg, null));
+                            Log.d(TAG, "Add comment for " + topic.getTopicTitle());
                         }
                     }
                     // post a reply to the reply comment if it exists and we're the topic owner
                     else if (is_my_topic && reply_comment != null) {
                         for (String msg : ta.msgs) {
                             postStorage.storeDiscussionItem(DiscussionItem.newReply(reply_comment.getHandle(), msg));
+                            Log.d(TAG, "Add reply for " + topic.getTopicTitle());
                         }
                     }
                     break;
@@ -232,6 +246,7 @@ public class ESMsgs {
                     // create the reply comment if none exists
                     if (!is_my_topic || reply_comment == null) {
                         postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicText(), null));
+                        Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
                     }
                     break;
                 }
@@ -250,9 +265,10 @@ public class ESMsgs {
             }
             CommentView comment = (CommentView) obj;
             if (comment != reply_comment) {
+                Log.d(TAG, "Got comment " + comment.getCommentText());
                 msgCallback.onReceiveMessage(new Msg(
                         comment.getCommentText(),
-                        userAccount.isCurrentUser(comment.getUser().getHandle()),
+                        UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()),
                         comment.getElapsedSeconds()));
             }
         }
@@ -276,9 +292,10 @@ public class ESMsgs {
                                 continue;
                             }
                             ReplyView reply = (ReplyView) obj;
+                            Log.d(TAG, "Got reply " + reply.getReplyText());
                             msgCallback.onReceiveMessage(new Msg(
                                     reply.getReplyText(),
-                                    userAccount.isCurrentUser(reply.getUser().getHandle()),
+                                    UserAccount.getInstance().isCurrentUser(reply.getUser().getHandle()),
                                     reply.getElapsedSeconds()));
                         }
                         break;

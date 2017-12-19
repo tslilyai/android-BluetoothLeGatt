@@ -41,9 +41,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!requestBT() || !request_permissions()) {
-            return;
-        }
+        requestBT();
+        request_permissions();
+        //if (!requestBT() || !request_permissions()) {
+            //return;
+        //}
         SDDR_API.start_service(this);
         SDDR_API.enable_msging();
 
@@ -115,19 +117,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
                 Log.d(TAG, "Getting messages for " + encounters2.size() + " encounters");
                 if (encounters2.size() > 0) {
-                    ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
-                        @Override
-                        public void onReceiveMessage(final ESMsgs.Msg msg) {
-                            handler.post(new Runnable() {
-                                public void run() {
-                                    final TextView text = MainActivity.this.findViewById(R.id.new_messages);
-                                    text.append(msg.msg);
-                                    text.append("\n");
-                                }
-                            });
-                        }
-                    };
-                    for (Identifier e : encounters2) {
+                   for (final Identifier e : encounters2) {
+                        ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
+                            @Override
+                            public void onReceiveMessage(final ESMsgs.Msg msg) {
+                                handler.post(new Runnable() {
+                                    public void run() {
+                                        final TextView text = MainActivity.this.findViewById(R.id.new_messages);
+                                        if ((msg.isFromMe())) {
+                                            text.append("Me: ");
+                                        } else {
+                                            text.append(e.toString() + ": ");
+                                        }
+                                        text.append(msg.getMsg());
+                                        text.append("\t" + msg.getTimestamp() + "\n");
+                                    }
+                                });
+                            }
+                        };
                         SDDR_API.get_msgs(e, callback2);
                     }
                 }
@@ -193,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private boolean requestBT() {
+    private void requestBT() {
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter btadapter = bluetoothManager.getAdapter();
         if(btadapter == null||!btadapter.isEnabled())
@@ -201,8 +208,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "Bluetooth not enabled");
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
-            return false;
+            //return false;
         }
-        return true;
+        //return true;
     }
 }

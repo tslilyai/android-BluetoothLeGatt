@@ -91,20 +91,32 @@ public class ESCore {
     }
 
     public void create_topic(String eid) {
+        if (!UserAccount.getInstance().isSignedIn()) {
+            return;
+        }
         if (defaultCreateMsgChannels > 0) {
             esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.CreateOnly));
         }
     }
 
     public void send_msgs(String eid, List<String> msgs) {
+        if (!UserAccount.getInstance().isSignedIn()) {
+            return;
+        }
         esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, msgs));
     }
 
     public void get_msgs(String eid, ESMsgs.MsgCallback msgsCallback) {
+        if (!UserAccount.getInstance().isSignedIn()) {
+            return;
+        }
         esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.GetMsgs, msgsCallback));
     }
 
     public void get_notifs(ESNotifs.NotificationCallback notificationCallback) {
+        if (!UserAccount.getInstance().isSignedIn()) {
+            return;
+        }
         esNotifs.get_notifications(notificationCallback);
     }
 }

@@ -75,10 +75,13 @@ public class ESNotifs {
     }
 
     private void process_notifs(NotificationCallback notificationCallback, List<ActivityView> notifs) {
+        Log.d(TAG, "Received " + notifs.size() + " notifications");
         for (ActivityView n : notifs) {
             if (n.getActivityType() == ActivityType.REPLY) {
+                Log.d(TAG, "Notification of type reply");
                 ActionsLauncher.getReplyOfNotif(context, n.getHandle(), n.getActedOnContentText(), notificationCallback);
             } else if (n.getActivityType() == ActivityType.COMMENT) {
+                Log.d(TAG, "Notification of type comment");
                 ActionsLauncher.getCommentOfNotif(context, n.getHandle(), n.getActedOnContentText(), notificationCallback);
             } else {
                 Log.d(TAG, "Notif of no known activity type!");

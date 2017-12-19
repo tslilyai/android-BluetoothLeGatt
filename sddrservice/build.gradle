@@ -76,7 +76,7 @@ android {
 
     task buildNDK(type: Exec) {
         workingDir 'src/main/jni'
-        commandLine './ndk-build.sh'
+        commandLine './ndk-build-script.sh'
     }
 
     tasks.withType(JavaCompile) {

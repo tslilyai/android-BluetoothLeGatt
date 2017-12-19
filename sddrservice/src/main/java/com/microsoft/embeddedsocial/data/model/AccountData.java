@@ -7,6 +7,7 @@ package com.microsoft.embeddedsocial.data.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * Information about some user's account.
  */
 public class AccountData implements Parcelable {
+	private final static String TAG = AccountData.class.getSimpleName();
 
 	private IdentityProvider identityProvider;
 	private String firstName;
@@ -39,8 +41,8 @@ public class AccountData implements Parcelable {
 	private long followingCount;
 	private boolean isPrivate;
 	private FollowerStatus followedStatus = FollowerStatus.NONE;
-	private Map<String, List<String>> unsentMsgs;
-	private Set<String> pendingTopics;
+	private Map<String, List<String>> unsentMsgs = new HashMap<>();
+	private Set<String> pendingTopics = new ConcurrentSkipListSet<>();
 
 	public AccountData() {
 		identityProvider = IdentityProvider.MICROSOFT; // TODO verify this default value is OK
@@ -62,8 +64,6 @@ public class AccountData implements Parcelable {
 		this.isPrivate = userProfile.isPrivate();
 		FollowerStatus status = userProfile.getFollowerStatus();
 		this.followedStatus = status != null ? status : FollowerStatus.NONE;
-		this.unsentMsgs = new HashMap<>();
-		this.pendingTopics = new ConcurrentSkipListSet<>();
 	}
 
 	private AccountData(Parcel in) {
@@ -185,6 +185,7 @@ public class AccountData implements Parcelable {
 	}
 
 	public void addUnsentMsgs(String eid, List<String> msgs) {
+		Log.d(TAG, "Adding " + msgs.size() + " unsent messages to " + eid);
 		if (!unsentMsgs.containsKey(eid)) {
 			this.unsentMsgs.put(eid, new LinkedList<>());
 		}
@@ -196,6 +197,7 @@ public class AccountData implements Parcelable {
 	}
 
 	public void addPendingTopic(String eid) {
+		Log.d(TAG, "Adding pending topic " + eid);
 		this.pendingTopics.add(eid);
 	}
 
@@ -204,6 +206,7 @@ public class AccountData implements Parcelable {
 	}
 
 	public void removePendingTopic(String eid) {
+		Log.d(TAG, "Removing pending topic " + eid);
 		pendingTopics.remove(eid);
 	}
 
@@ -226,8 +229,6 @@ public class AccountData implements Parcelable {
 		accountData.setBio(userAccountView.getBio());
 		accountData.setIsPrivate(userAccountView.isPrivate());
 		accountData.setAccountTypeFromThirdPartyAccounts(userAccountView.getThirdPartyAccounts());
-		accountData.unsentMsgs = new HashMap<>();
-		accountData.pendingTopics = new ConcurrentSkipListSet<>();
 		return accountData;
 	}
 
