@@ -41,11 +41,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        requestBT();
-        request_permissions();
-        //if (!requestBT() || !request_permissions()) {
-            //return;
-        //}
+        if (!requestBT() || !request_permissions()) {
+            return;
+        }
         SDDR_API.start_service(this);
         SDDR_API.enable_msging();
 
@@ -170,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 };
                 new AlertDialog.Builder(MainActivity.this)
-                        .setMessage("SDDR_API requires location access for Bluetooth protocol")
+                        .setMessage("SDDR_API requires location access for Bluetooth protocol; please grant and then restart the application (Note to self: this should be handled better by the actual application using the library)")
                         .setPositiveButton("OK", listener)
                         .setNegativeButton("Cancel", null)
                         .create()
@@ -193,14 +191,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     // permission denied!
                     Log.d(TAG, "No access to fine location");
                     Toast.makeText(this, "Exiting SDDR_API: Location access required", Toast.LENGTH_SHORT).show();
-                    finishAndRemoveTask ();
+                    finishAndRemoveTask();
                 }
                 return;
             }
         }
     }
 
-    private void requestBT() {
+    private boolean requestBT() {
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter btadapter = bluetoothManager.getAdapter();
         if(btadapter == null||!btadapter.isEnabled())
@@ -208,8 +206,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "Bluetooth not enabled");
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
-            //return false;
+            return false;
         }
-        //return true;
+        return true;
     }
 }

@@ -32,6 +32,7 @@ public class SDDR_Core_Service extends Service {
     public boolean was_destroyed = false;
 
     public void restart() {
+        Log.d(TAG, "Restarting SDDR Core");
         Looper.prepare();
         check_and_start_core();
         was_destroyed = false;
