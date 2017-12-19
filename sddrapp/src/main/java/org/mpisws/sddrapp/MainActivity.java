@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     List<String> list = new LinkedList<>();
                     list.add(msg.getText().toString());
                     for (Identifier e : encounters) {
-                        SDDR_API.send_msgs(encounters.get(0), list);
+                        SDDR_API.send_msgs(e, list);
                     }
                 }
                 break;
@@ -122,8 +122,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
                 Log.d(TAG, "Getting messages for " + encounters2.size() + " encounters");
                 if (encounters2.size() > 0) {
-                   for (final Identifier e : encounters2) {
-                        ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
+                   for (Identifier e : encounters2) {
+                       final Identifier e1 = e;
+                       ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
                             @Override
                             public void onReceiveMessage(final ESMsgs.Msg msg) {
                                 handler.post(new Runnable() {
@@ -132,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         if ((msg.isFromMe())) {
                                             text.append("Me: ");
                                         } else {
-                                            text.append(e.toString() + ": ");
+                                            text.append(e1.toString() + ": ");
                                         }
                                         text.append(msg.getMsg());
                                         text.append("\t" + msg.getTimestamp() + "\n");

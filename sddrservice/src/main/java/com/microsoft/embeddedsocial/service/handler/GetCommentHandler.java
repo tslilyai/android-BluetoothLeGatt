@@ -5,7 +5,9 @@
 
 package com.microsoft.embeddedsocial.service.handler;
 
+import android.app.Notification;
 import android.content.Intent;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
@@ -31,20 +33,11 @@ public class GetCommentHandler extends ActionHandler {
 	protected void handleAction(Action action, ServiceAction serviceAction, Intent intent) {
 		IContentService contentService
 				= GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
-		ESNotifs.NotificationCallback notifCallback = null;
-		String parentText = null;
 		final String commentHandle = intent.getExtras().getString(IntentExtras.COMMENT_HANDLE);
-		if (intent.hasExtra(IntentExtras.NOTIF_CALLBACK)) {
-			notifCallback = (ESNotifs.NotificationCallback) intent.getExtras().get(IntentExtras.NOTIF_CALLBACK);
-			parentText = intent.getExtras().getString(IntentExtras.PARENT_TEXT);
-		}
 
 		try {
 			final GetCommentRequest request = new GetCommentRequest(commentHandle);
 			GetCommentResponse response = contentService.getComment(request);
-			if (notifCallback != null) {
-				notifCallback.onReceiveNotif(new ESNotifs.Notif(new Identifier(parentText.getBytes()), response.getComment().getCommentText(), response.getComment().getElapsedSeconds()));
-			}
 			EventBus.post(new GetCommentEvent(response.getComment(), response.getComment() != null));
 		} catch (NetworkRequestException e) {
 			DebugLog.logException(e);

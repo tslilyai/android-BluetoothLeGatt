@@ -16,6 +16,8 @@ import com.microsoft.embeddedsocial.sdk.Options;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 import com.microsoft.embeddedsocial.server.NetworkAvailability;
 import com.microsoft.embeddedsocial.server.RequestInfoProvider;
+import com.microsoft.embeddedsocial.service.ServiceAction;
+import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.ui.notification.NotificationController;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
@@ -56,7 +58,7 @@ public class ESCore {
         networkAccessibility.startMonitoring(context);
         GlobalObjectRegistry.addObject(networkAccessibility);
         // TODO gcm?
-        //WorkerService.getLauncher(context).launchService(ServiceAction.BACKGROUND_INIT);
+        WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
 
         esMsgs = new ESMsgs(context);
         esNotifs = new ESNotifs(context);

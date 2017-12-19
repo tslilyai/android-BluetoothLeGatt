@@ -8,6 +8,7 @@ package com.microsoft.embeddedsocial.service.handler;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 import android.webkit.CookieManager;
 
 import com.microsoft.embeddedsocial.actions.Action;
@@ -34,6 +35,7 @@ public class SignOutHandler extends ActionHandler {
 
 	@Override
 	protected void handleAction(Action action, ServiceAction serviceAction, Intent intent) {
+		Log.d("SIGNOUT", "Signing out");
 		String authorization = intent.getStringExtra(IntentExtras.AUTHORIZATION);
 		IAuthenticationService server = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getAuthenticationService();
 		try {

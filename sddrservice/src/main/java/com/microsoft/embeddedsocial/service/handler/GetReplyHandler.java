@@ -33,19 +33,11 @@ public class GetReplyHandler extends ActionHandler {
 				= GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
 
 		final String replyHandle = intent.getExtras().getString(IntentExtras.REPLY_HANDLE);
-		ESNotifs.NotificationCallback notifCallback = null;
-		String parentText = null;
-		if (intent.hasExtra(IntentExtras.NOTIF_CALLBACK)) {
-			notifCallback = (ESNotifs.NotificationCallback) intent.getExtras().get(IntentExtras.NOTIF_CALLBACK);
-			parentText = intent.getExtras().getString(IntentExtras.PARENT_TEXT);
-		}
 
 		try {
 			final GetReplyRequest request = new GetReplyRequest(replyHandle);
 			GetReplyResponse response = contentService.getReply(request);
-			if (notifCallback != null) {
-				notifCallback.onReceiveNotif(new ESNotifs.Notif(new Identifier(parentText.getBytes()), response.getReply().getReplyText(), response.getReply().getElapsedSeconds()));
-			}	EventBus.post(new GetReplyEvent(response.getReply(), response.getReply() != null));
+			EventBus.post(new GetReplyEvent(response.getReply(), response.getReply() != null));
 		} catch (NetworkRequestException e) {
 			DebugLog.logException(e);
 			action.fail(e.getMessage());

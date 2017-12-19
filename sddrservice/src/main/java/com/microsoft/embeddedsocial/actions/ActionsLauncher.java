@@ -7,6 +7,7 @@ package com.microsoft.embeddedsocial.actions;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.data.model.AccountDataDifference;
 import com.microsoft.embeddedsocial.data.model.CreateAccountData;
@@ -15,12 +16,11 @@ import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
-import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
-
 /**
  * Launches actions.
  */
 public final class ActionsLauncher {
+	private static final String TAG = ActionsLauncher.class.getSimpleName();
 
 	private ActionsLauncher() {
 	}
@@ -39,26 +39,6 @@ public final class ActionsLauncher {
 
 	public static Action getReply(Context context, String replyHandle) {
 		return ActionIntentBuilder.forActionWithTag(Action.Tags.GET_REPLY)
-				.setReplyHandle(replyHandle)
-				.launch(context, ServiceAction.GET_REPLY);
-	}
-
-	public static Action getCommentOfNotif(Context context, String commentHandle,
-										 String topicText,
-										 ESNotifs.NotificationCallback notificationCallback) {
-		return ActionIntentBuilder.forActionWithTag(Action.Tags.GET_COMMENT)
-				.setNotificationCallback(notificationCallback)
-				.setParentText(topicText)
-				.setCommentHandle(commentHandle)
-				.launch(context, ServiceAction.GET_COMMENT);
-	}
-
-	public static Action getReplyOfNotif(Context context, String replyHandle,
-										 String commentText,
-										 ESNotifs.NotificationCallback notificationCallback) {
-		return ActionIntentBuilder.forActionWithTag(Action.Tags.GET_REPLY)
-				.setNotificationCallback(notificationCallback)
-				.setParentText(commentText)
 				.setReplyHandle(replyHandle)
 				.launch(context, ServiceAction.GET_REPLY);
 	}
@@ -101,23 +81,12 @@ public final class ActionsLauncher {
 	 * Builds a service intent and sends it.
 	 */
 	private static final class ActionIntentBuilder {
-
 		private final Bundle extras = new Bundle();
 		private final Action action;
 
 		private ActionIntentBuilder(Action action) {
 			this.action = action;
 			extras.putLong(IntentExtras.ACTION_ID, action.getId());
-		}
-
-		ActionIntentBuilder setParentText(String text) {
-			extras.putString(IntentExtras.PARENT_TEXT, text);
-			return this;
-		}
-
-		ActionIntentBuilder setNotificationCallback(ESNotifs.NotificationCallback notificationCallback) {
-			extras.putParcelable(IntentExtras.NOTIF_CALLBACK, notificationCallback);
-			return this;
 		}
 
 		ActionIntentBuilder setAuthorization(String authorization) {
@@ -157,6 +126,7 @@ public final class ActionsLauncher {
 
 		Action launch(Context context, ServiceAction serviceAction) {
 			WorkerService.getLauncher(context).launchService(serviceAction, extras);
+			Log.d(TAG, "Launched serviceaction " + serviceAction.name());
 			return action;
 		}
 
@@ -166,6 +136,4 @@ public final class ActionsLauncher {
 		}
 
 	}
-
-
 }

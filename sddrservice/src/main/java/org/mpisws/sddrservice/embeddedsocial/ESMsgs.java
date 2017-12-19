@@ -194,21 +194,25 @@ public class ESMsgs {
 
     private void do_action(TopicAction ta, TopicView topic, List<Object> comments) {
         final boolean is_my_topic = UserAccount.getInstance().isCurrentUser(topic.getUser().getHandle()) ? true : false;
+        Log.d(TAG, "Doing action on topic " + topic.getTopicTitle() + " that is mine? " + is_my_topic);
 
         /* Find the comment that acts as the "response" thread for the user that did not create the topic */
         CommentView reply_comment = null;
         for (Object obj : comments) {
             if (!CommentView.class.isInstance(obj)) {
-                Log.d(TAG, "Fetcher did not return an instance of commentview!");
+                Log.d(TAG, "Fetcher did not return an instance of commentview! It's a " + obj.getClass().getSimpleName());
                 continue;
             }
             CommentView comment = CommentView.class.cast(obj);
-            if (is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle())
-                    || !is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle())) {
-                reply_comment = comment;
-                Utils.myAssert(reply_comment.getCommentText() == topic.getTopicTitle());
-                Log.d(TAG, "Found reply comment for " + topic.getTopicTitle());
-                break;
+            Log.d(TAG, "Comment is my comment? " + UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()));
+            if ((is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
+                    || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
+                Log.d(TAG, "This should be a reply comment " + comment.getCommentText());
+                if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
+                    reply_comment = comment;
+                    Log.d(TAG, "Found reply comment " + reply_comment.getCommentText() + " for " + topic.getTopicTitle());
+                    break;
+                }
             }
         }
 
@@ -251,6 +255,7 @@ public class ESMsgs {
                     break;
                 }
             }
+            WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -260,7 +265,7 @@ public class ESMsgs {
         // get all the messages associated with the topic thread
         for (Object obj : comments) {
             if (!CommentView.class.isInstance(obj)) {
-                Log.d(TAG, "Fetcher returned something that is not a comment!");
+                Log.d(TAG, "Fetcher returned something that is not a comment! It's a " + obj.getClass().getSimpleName());
                 continue;
             }
             CommentView comment = (CommentView) obj;
@@ -288,7 +293,7 @@ public class ESMsgs {
                     case DATA_ENDED:
                         for (Object obj : replyFetcher.getAllData()) {
                             if (!ReplyView.class.isInstance(obj)) {
-                                Log.d(TAG, "Fetcher returned something that is not a reply!");
+                                Log.d(TAG, "Fetcher returned something that is not a reply! It's a " + obj.getClass().getSimpleName());
                                 continue;
                             }
                             ReplyView reply = (ReplyView) obj;

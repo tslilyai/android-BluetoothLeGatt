@@ -6,6 +6,7 @@
 package com.microsoft.embeddedsocial.service;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.base.service.AbstractProcessingService;
 import com.microsoft.embeddedsocial.base.service.IServiceIntentProcessor;
@@ -15,11 +16,13 @@ import com.microsoft.embeddedsocial.base.service.ServiceLauncher;
  * Worker service.
  */
 public class WorkerService extends AbstractProcessingService {
+	private static final String TAG = WorkerService.class.getSimpleName();
 
 	IntentProcessorFactory factory = new IntentProcessorFactory(this);
 
 	@Override
 	protected IServiceIntentProcessor createIntentProcessor() {
+		Log.d(TAG, "Created intent processor");
 		return factory.createIntentProcessor();
 	}
 
