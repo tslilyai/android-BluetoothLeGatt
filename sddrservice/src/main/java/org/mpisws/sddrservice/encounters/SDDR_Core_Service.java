@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -31,8 +32,9 @@ public class SDDR_Core_Service extends Service {
     public boolean was_destroyed = false;
 
     public void restart() {
-        was_destroyed = false;
+        Looper.prepare();
         check_and_start_core();
+        was_destroyed = false;
     }
 
     private void check_and_start_core() {
