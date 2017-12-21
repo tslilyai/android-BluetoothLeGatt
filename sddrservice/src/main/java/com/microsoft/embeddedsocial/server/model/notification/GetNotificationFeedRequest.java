@@ -5,7 +5,10 @@
 
 package com.microsoft.embeddedsocial.server.model.notification;
 
+import android.util.Log;
+
 import com.microsoft.embeddedsocial.autorest.models.FeedResponseActivityView;
+import com.microsoft.embeddedsocial.data.storage.NotificationServiceCachingWrapper;
 import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
 import com.microsoft.embeddedsocial.server.model.FeedUserRequest;
 import com.microsoft.rest.ServiceException;
@@ -17,6 +20,7 @@ public class GetNotificationFeedRequest extends FeedUserRequest {
 
     @Override
     public GetNotificationFeedResponse send() throws NetworkRequestException {
+        Log.d("NOTIFS", "Sending getnotificationfeedrequest");
         ServiceResponse<FeedResponseActivityView> serviceResponse;
         try {
             serviceResponse = NOTIFICATIONS.getNotifications(authorization, getCursor(), getBatchSize());

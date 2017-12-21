@@ -5,6 +5,8 @@
 
 package com.microsoft.embeddedsocial.data.storage.syncadapter;
 
+import android.util.Log;
+
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.data.storage.ActivityCache;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
@@ -34,7 +36,9 @@ public class LatestActivitySyncAdapter implements ISynchronizable {
 			GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class)
 				.getNotificationService()
 				.updateNotificationStatus(request);
+			Log.d("NOTIFS", "Updated notification status!");
 		} catch (BadRequestException e) {
+			Log.d("NOTIFS", "Bad update request!");
 			metadataStorage.clearLastActivityHandle();
 			throw new OperationRejectedException(e);
 		} catch (NetworkRequestException e) {

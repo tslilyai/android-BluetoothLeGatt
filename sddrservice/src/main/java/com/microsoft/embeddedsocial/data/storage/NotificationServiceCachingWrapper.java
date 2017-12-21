@@ -57,6 +57,7 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 	@Override
 	public GetNotificationFeedResponse getNotificationFeed(GetNotificationFeedRequest request)
 		throws NetworkRequestException {
+		Log.d("NOTIFS", "Calling getnotificationfeed");
 
 		return notificationFeedWrapper.getResponse(request);
 	}
@@ -88,27 +89,20 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 		@Override
 		protected GetNotificationFeedResponse getCachedResponse(GetNotificationFeedRequest request)
 			throws SQLException {
-
 			return activityCache.getNotificationFeedResponse();
 		}
 
 		@Override
-		protected GetNotificationFeedResponse getNetworkResponse(GetNotificationFeedRequest request)
-			throws NetworkRequestException {
-
-			GetNotificationFeedResponse response = request.send();
-
+		protected void onNetworkResponseReceived (GetNotificationFeedRequest request, GetNotificationFeedResponse response) {
+			Log.d("NOTIFS", "Calling network response received");
 			for (ActivityView activityView : response.getData()) {
 				activityView.setUnread(activityCache.isActivityUnread(activityView.getHandle()));
 			}
 
 			if (isFirstDataRequest(request)) {
-				Log.d(TAG, "NOTIFS: Updating last activity handle");
 				updateLastActivityHandle(response);
 				Preferences.getInstance().resetNotificationCount();
 			}
-
-			return response;
 		}
 
 		private void updateLastActivityHandle(GetNotificationFeedResponse response) {
@@ -127,10 +121,15 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 			} else {
 				latestHandle = deliveredActivityHandle;
 			}
-
+			Log.d("NOTIFS", "Got last activity handle " + latestHandle);
 			if (activityCache.storeLastActivityHandle(latestHandle)) {
 				launchSync();
 			}
+		}
+
+		@Override
+		protected GetNotificationFeedResponse getNetworkResponse(GetNotificationFeedRequest request) throws NetworkRequestException {
+			return null;
 		}
 
 		@Override

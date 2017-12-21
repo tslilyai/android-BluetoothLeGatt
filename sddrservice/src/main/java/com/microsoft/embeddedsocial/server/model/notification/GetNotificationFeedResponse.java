@@ -5,10 +5,14 @@
 
 package com.microsoft.embeddedsocial.server.model.notification;
 
+import android.util.Log;
+
 import com.microsoft.embeddedsocial.autorest.models.FeedResponseActivityView;
 import com.microsoft.embeddedsocial.server.model.FeedUserResponse;
 import com.microsoft.embeddedsocial.server.model.ListResponse;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
+
+import org.mpisws.sddrservice.lib.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,20 +22,30 @@ public class GetNotificationFeedResponse extends FeedUserResponse implements Lis
 
 	private List<ActivityView> activities;
 	private String deliveredActivityHandle;
+	private String cursor;
 
 	public GetNotificationFeedResponse(List<ActivityView> activities) {
 		this.activities = activities;
 
-		// FIXME fix setting this handle
-		this.deliveredActivityHandle = "";
+		// XXX fix setting this handle not sure if this is right
+		this.deliveredActivityHandle = activities.get(activities.size()-1).getHandle();
 	}
 
 	public GetNotificationFeedResponse (FeedResponseActivityView response) {
 		activities = new ArrayList<>();
 		for (com.microsoft.embeddedsocial.autorest.models.ActivityView view : response.getData()) {
 			activities.add(new ActivityView(view));
+			if (deliveredActivityHandle == null || view.getActivityHandle().compareTo(deliveredActivityHandle) < 0)
+				deliveredActivityHandle = view.getActivityHandle();
 		}
-		this.deliveredActivityHandle = "";
+		this.cursor = response.getCursor();
+		Utils.myAssert(deliveredActivityHandle.compareTo(this.cursor) < 0);
+		Log.d("NOTIFS", "Got cursor " + cursor);
+	}
+
+	@Override
+	public String getContinuationKey() {
+		return this.cursor;
 	}
 
 	@Override

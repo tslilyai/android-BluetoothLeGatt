@@ -57,7 +57,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.get_notifs).setOnClickListener(this);
+        findViewById(R.id.get_notifs_old).setOnClickListener(this);
+        findViewById(R.id.get_notifs_new).setOnClickListener(this);
         findViewById(R.id.get_msgs).setOnClickListener(this);
         findViewById(R.id.SendMsg).setOnClickListener(this);
         findViewById(R.id.AddLink).setOnClickListener(this);
@@ -67,7 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        Identifier testEid = new Identifier("TopicTest".getBytes());
+        Identifier testEid = new Identifier("TopicTest2".getBytes());
+        final TextView notiftext = MainActivity.this.findViewById(R.id.new_notifs);
+        final TextView msgtext = MainActivity.this.findViewById(R.id.new_messages);
 
         switch (v.getId()) {
             case R.id.AddLink:
@@ -100,10 +103,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.sign_out_button:
                 SDDR_API.sign_out();
                 break;
-            case R.id.get_notifs:
-                Log.d(TAG, "Getting notifs");
+            case R.id.get_notifs_old:
+                Log.d(TAG, "Getting notifs old");
+                notiftext.setText("");
 
                 final ESMsgs.MsgCallback callback = new ESMsgs.MsgCallback() {
+                    @Override
+                    public void onReceiveMessage(final ESMsgs.Msg msg) {
+                        handler.post(new Runnable() {
+                            public void run() {
+                                if ((msg.isFromMe())) {
+                                    notiftext.append("Me: ");
+                                } else {
+                                    notiftext.append(msg.getEid().toString() + ": ");
+                                }
+                                notiftext.append(msg.getMsg());
+                                notiftext.append("\t" + msg.getTimestamp() + "\n");
+                            }
+                        });
+                    }
+                };
+                ESNotifs.NotificationCallback notifcallback1 = new ESNotifs.NotificationCallback() {
+                    @Override
+                    public void onReceiveNotification(ESNotifs.Notif notif) {
+                        SDDR_API.get_msg_of_notification(notif, callback);
+                    }
+                };
+                SDDR_API.get_notifs(notifcallback1, false);
+                break;
+            case R.id.get_notifs_new:
+                notiftext.setText("");
+                Log.d(TAG, "Getting notifs new");
+
+                final ESMsgs.MsgCallback callback3 = new ESMsgs.MsgCallback() {
                     @Override
                     public void onReceiveMessage(final ESMsgs.Msg msg) {
                         handler.post(new Runnable() {
@@ -120,14 +152,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         });
                     }
                 };
-                ESNotifs.NotificationCallback notifcallback = new ESNotifs.NotificationCallback() {
+                ESNotifs.NotificationCallback notifcallback2 = new ESNotifs.NotificationCallback() {
                     @Override
                     public void onReceiveNotification(ESNotifs.Notif notif) {
-                        SDDR_API.get_msg_of_notification(notif, callback);
+                        SDDR_API.get_msg_of_notification(notif, callback3);
                     }
                 };
-                SDDR_API.get_notifs(notifcallback, false);
+                SDDR_API.get_notifs(notifcallback2, true);
                 break;
+
             case R.id.get_msgs:
                 /*Log.d(TAG, "Getting messages");
                 final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
@@ -155,19 +188,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         SDDR_API.get_msgs(e, callback2);
                     }
                 }*/
-               ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
+                msgtext.setText("");
+                ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
                     @Override
                     public void onReceiveMessage(final ESMsgs.Msg msg) {
                         handler.post(new Runnable() {
                             public void run() {
-                                final TextView text = MainActivity.this.findViewById(R.id.new_messages);
                                 if ((msg.isFromMe())) {
-                                    text.append("Me: ");
+                                    msgtext.append("Me: ");
                                 } else {
-                                    text.append(msg.getEid() + ": ");
+                                    msgtext.append(msg.getEid() + ": ");
                                 }
-                                text.append(msg.getMsg());
-                                text.append("\t" + msg.getTimestamp() + "\n");
+                                msgtext.append(msg.getMsg());
+                                msgtext.append("\t" + msg.getTimestamp() + "\n");
                             }
                         });
                     }

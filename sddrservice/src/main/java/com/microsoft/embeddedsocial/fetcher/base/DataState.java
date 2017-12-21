@@ -6,6 +6,7 @@
 package com.microsoft.embeddedsocial.fetcher.base;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.base.utils.Values;
 
@@ -35,8 +36,10 @@ public class DataState extends Values {
 	 * Stores the continuation key returned by the server during the last data request.
 	 */
 	public void setContinuationKey(String continuationKey) {
+		Log.d("Fetcher", "Setting continuation key to " + continuationKey);
 		setValue(CURSOR, continuationKey);
 		if (TextUtils.isEmpty(continuationKey)) {
+			Log.d("Fetcher", "No continuation key, marking as ended");
 			markDataEnded();
 		}
 	}

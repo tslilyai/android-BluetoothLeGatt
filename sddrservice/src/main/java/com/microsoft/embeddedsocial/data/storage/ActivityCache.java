@@ -8,6 +8,7 @@ package com.microsoft.embeddedsocial.data.storage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
@@ -279,6 +280,7 @@ public class ActivityCache {
 		 */
 		public boolean isActivityUnread(String activityHandle) {
 			String lastActivityHandle = getLastActivityHandle();
+			Log.d("NOTIFS", "Last activity handle in cache is " + getLastActivityHandle());
 			return TextUtils.isEmpty(lastActivityHandle)
 				|| activityHandle.compareTo(lastActivityHandle) < 0;
 		}
@@ -290,13 +292,17 @@ public class ActivityCache {
 		 * stored successfully.
 		 */
 		public boolean storeLastActivityHandle(String newActivityHandle) {
+			Log.d("NOTIFS", "storing last activity handle");
 			boolean result = false;
+			Log.d("NOTIFS", "is empty? " + TextUtils.isEmpty(newActivityHandle));
+			Log.d("NOTIFS", "is unread? " + isActivityUnread(newActivityHandle));
 
 			if (!TextUtils.isEmpty(newActivityHandle) && isActivityUnread(newActivityHandle)) {
 				dataStorage.edit()
 					.putString(KEY_LAST_HANDLE, newActivityHandle)
 					.putBoolean(KEY_SYNCED, false)
 					.apply();
+				Log.d("NOTIFS", "actually setting synced to false");
 				result = true;
 			}
 

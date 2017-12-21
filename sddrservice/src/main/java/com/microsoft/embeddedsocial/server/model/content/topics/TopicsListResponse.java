@@ -16,6 +16,7 @@ import java.util.List;
 public class TopicsListResponse extends FeedUserResponse implements ListResponse<TopicView> {
 
 	private List<TopicView> topics;
+	private String cursor;
 
 	public TopicsListResponse(List<TopicView> topics) {
 		this.topics = topics;
@@ -26,6 +27,12 @@ public class TopicsListResponse extends FeedUserResponse implements ListResponse
 		for (com.microsoft.embeddedsocial.autorest.models.TopicView topic : response.getData()) {
 			topics.add(new TopicView(topic));
 		}
+		cursor = response.getCursor();
+	}
+
+	@Override
+	public String getContinuationKey() {
+		return this.cursor;
 	}
 
 	@Override
