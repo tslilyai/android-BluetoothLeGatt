@@ -51,32 +51,40 @@ public class ESMsgs {
         TATyp typ;
         List<String> msgs;
         MsgCallback msgCallback;
+        String eid;
 
-        public TopicAction(TATyp typ, List<String> msgs) {
+        public TopicAction(TATyp typ, String eid, List<String> msgs) {
             Utils.myAssert(typ == TATyp.SendMsg);
+            this.eid = eid;
             this.typ = typ;
             this.msgs = msgs;
         }
 
-        public TopicAction(TATyp typ, MsgCallback msgCallback) {
+        public TopicAction(TATyp typ, String eid, MsgCallback msgCallback) {
             Utils.myAssert(typ == TATyp.GetMsgs);
+            this.eid = eid;
             this.typ = typ;
             this.msgCallback = msgCallback;
         }
 
-        public TopicAction(TATyp typ) {
+        public TopicAction(TATyp typ, String eid) {
             Utils.myAssert(typ == TATyp.CreateOnly);
+            this.eid = eid;
             this.typ = typ;
         }
     }
 
     public static class Msg {
+        private String handle;
         private String msg;
+        private String eid;
         private boolean fromMe;
         private long timestamp;
 
-        Msg(String msg, boolean fromMe, long timestamp) {
+        Msg(String handle, String msg, String eid, boolean fromMe, long timestamp) {
+            this.handle = handle;
             this.msg = msg;
+            this.eid = eid;
             this.fromMe = fromMe;
             this.timestamp = timestamp;
         }
@@ -84,14 +92,15 @@ public class ESMsgs {
         public String getMsg() {
             return msg;
         }
+        public String getEid() { return eid; }
         public boolean isFromMe() {
             return fromMe;
         }
         public long getTimestamp() {
             return timestamp;
         }
+        protected String getHandle() {return handle;}
     }
-
 
     public interface MsgCallback {
         void onReceiveMessage(Msg messages);
@@ -101,19 +110,15 @@ public class ESMsgs {
         Map<String, List<String>> unsentMsgs = UserAccount.getInstance().getAccountDetails().getUnsentMsgs();
         synchronized(lock) {
             for (String eid : unsentMsgs.keySet()) {
-                find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, unsentMsgs.get(eid)));
+                find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, eid, unsentMsgs.get(eid)));
                 unsentMsgs.remove(eid);
             }
         }
         WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
     }
 
-    public void find_and_act_on_topic(String eid, final TopicAction ta) {
-        find_and_process_topics(eid, ta);
-    }
-
-    private void find_and_process_topics(String eid, TopicAction ta) {
-        final Fetcher<TopicView> topicFeedFetcher = FetchersFactory.createSearchTopicsFetcher(eid);
+    public void find_and_act_on_topic(TopicAction ta) {
+        final Fetcher<TopicView> topicFeedFetcher = FetchersFactory.createSearchTopicsFetcher(ta.eid);
         Callback callback = new Callback() {
             @Override
             public void onStateChanged(FetcherState newState) {
@@ -122,7 +127,7 @@ public class ESMsgs {
                     case LOADING:
                         break;
                     case DATA_ENDED:
-                        process_topics(eid, ta, topicFeedFetcher.getAllData());
+                        process_topics(ta, topicFeedFetcher.getAllData());
                         break;
                     default:
                         topicFeedFetcher.requestMoreData();
@@ -133,9 +138,8 @@ public class ESMsgs {
         topicFeedFetcher.setCallback(callback);
     }
 
-
-    private void process_topics(String eid, TopicAction ta, List<TopicView> topiclist) {
-        Log.d(TAG, "Found " + topiclist.size() + " topics, eid " + eid + " going to do topic action " + ta.typ.name());
+    private void process_topics(TopicAction ta, List<TopicView> topiclist) {
+        Log.d(TAG, "Found " + topiclist.size() + " topics, ta.eid " + ta.eid + " going to do topic action " + ta.typ.name());
        // No one has created this topic yet! We should try to create it
         if (topiclist.size() == 0) {
             // If we've already tried, this means the post is still not synced. Don't do anything.
@@ -144,12 +148,12 @@ public class ESMsgs {
             // Store the message to be sent
             if (ta.typ == TopicAction.TATyp.SendMsg) {
                 synchronized(lock) {
-                    UserAccount.getInstance().getAccountDetails().addUnsentMsgs(eid, ta.msgs);
+                    UserAccount.getInstance().getAccountDetails().addUnsentMsgs(ta.eid, ta.msgs);
                 }
             }
-            if (!UserAccount.getInstance().getAccountDetails().pendingTopic(eid)) {
-                UserAccount.getInstance().getAccountDetails().addPendingTopic(eid);
-                postStorage.storePost(eid, eid, null, PublisherType.USER);
+            if (!UserAccount.getInstance().getAccountDetails().pendingTopic(ta.eid)) {
+                UserAccount.getInstance().getAccountDetails().addPendingTopic(ta.eid);
+                postStorage.storePost(ta.eid, ta.eid, null, PublisherType.USER);
                 WorkerService.getLauncher(context).launchService((ServiceAction.SYNC_DATA));
             }
         } else {
@@ -175,17 +179,17 @@ public class ESMsgs {
             Callback callback = new Callback() {
                 @Override
                 public void onStateChanged(FetcherState newState) {
-                    super.onStateChanged(newState);
-                    switch (newState) {
-                        case LOADING:
-                            break;
-                        case DATA_ENDED:
-                            do_action(ta, topicToComment, commentFeedFetcher.getAllData());
-                            break;
-                        default:
-                            commentFeedFetcher.requestMoreData();
-                            break;
-                    }
+                super.onStateChanged(newState);
+                switch (newState) {
+                    case LOADING:
+                        break;
+                    case DATA_ENDED:
+                        do_action(ta, topicToComment, commentFeedFetcher.getAllData());
+                        break;
+                    default:
+                        commentFeedFetcher.requestMoreData();
+                        break;
+                }
                 }
             };
             commentFeedFetcher.setCallback(callback);
@@ -207,7 +211,6 @@ public class ESMsgs {
             Log.d(TAG, "Comment is my comment? " + UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()));
             if ((is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
                     || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
-                Log.d(TAG, "This should be a reply comment " + comment.getCommentText());
                 if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
                     reply_comment = comment;
                     Log.d(TAG, "Found reply comment " + reply_comment.getCommentText() + " for " + topic.getTopicTitle());
@@ -220,7 +223,7 @@ public class ESMsgs {
             PostStorage postStorage = new PostStorage(context);
             switch (ta.typ) {
                 case GetMsgs: {
-                    get_msgs_helper(reply_comment, comments, ta.msgCallback);
+                    get_msgs_helper(reply_comment, comments, ta);
                     break;
                 }
                 case SendMsg: {
@@ -261,7 +264,7 @@ public class ESMsgs {
         }
     }
 
-    private void get_msgs_helper(CommentView reply_comment, List<Object> comments, final MsgCallback msgCallback) {
+    private void get_msgs_helper(CommentView reply_comment, List<Object> comments, final TopicAction ta) {
         // get all the messages associated with the topic thread
         for (Object obj : comments) {
             if (!CommentView.class.isInstance(obj)) {
@@ -271,8 +274,10 @@ public class ESMsgs {
             CommentView comment = (CommentView) obj;
             if (comment != reply_comment) {
                 Log.d(TAG, "Got comment " + comment.getCommentText());
-                msgCallback.onReceiveMessage(new Msg(
+                ta.msgCallback.onReceiveMessage(new Msg(
+                        comment.getHandle(),
                         comment.getCommentText(),
+                        ta.eid,
                         UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()),
                         comment.getElapsedSeconds()));
             }
@@ -298,8 +303,10 @@ public class ESMsgs {
                             }
                             ReplyView reply = (ReplyView) obj;
                             Log.d(TAG, "Got reply " + reply.getReplyText());
-                            msgCallback.onReceiveMessage(new Msg(
+                            ta.msgCallback.onReceiveMessage(new Msg(
+                                    reply.getHandle(),
                                     reply.getReplyText(),
+                                    ta.eid,
                                     UserAccount.getInstance().isCurrentUser(reply.getUser().getHandle()),
                                     reply.getElapsedSeconds()));
                         }

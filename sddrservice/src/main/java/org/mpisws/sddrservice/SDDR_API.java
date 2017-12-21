@@ -99,12 +99,12 @@ public class SDDR_API {
         esCore.get_msgs(encounterID.toString(), callback);
     }
 
-    public static void enable_msging() {
+    public static void enable_msging_channels() {
         if (!isRunning) return;
         esCore.setDefaultCreateMsgChannels();
     }
 
-    public static void disable_msging() {
+    public static void disable_msging_channels() {
         if (!isRunning) return;
         esCore.unsetDefaultCreateMsgChannels();
     }
@@ -114,8 +114,13 @@ public class SDDR_API {
         esCore.create_topic(eid.toString());
     }
 
-    public static void get_notifs(ESNotifs.NotificationCallback callback) {
+    public static void get_notifs(ESNotifs.NotificationCallback notificationCallback, boolean fromBeginning) {
         if (!isRunning) return;
-        esCore.get_notifs(callback);
+        esCore.get_notifs(notificationCallback, fromBeginning);
+    }
+
+    public static void get_msg_of_notification(ESNotifs.Notif notif, ESMsgs.MsgCallback msgCallback) {
+        if (!isRunning) return ;
+        esCore.get_msg_of_notification(notif, msgCallback);
     }
 }

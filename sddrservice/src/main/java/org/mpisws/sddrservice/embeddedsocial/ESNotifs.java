@@ -2,13 +2,10 @@ package org.mpisws.sddrservice.embeddedsocial;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Parcelable;
-import android.os.Process;
 import android.util.Log;
 
-import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.autorest.models.ActivityType;
+import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.event.content.GetCommentEvent;
@@ -24,17 +21,17 @@ import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentRequ
 import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentResponse;
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRequest;
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyResponse;
+import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicRequest;
+import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicResponse;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
-import com.microsoft.embeddedsocial.service.handler.GetCommentHandler;
-import com.microsoft.embeddedsocial.service.handler.GetReplyHandler;
 
 import org.mpisws.sddrservice.lib.Identifier;
 
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
-import static android.R.attr.action;
+import static java.util.concurrent.Executors.newCachedThreadPool;
 
 /**
  * Created by tslilyai on 11/14/17.
@@ -44,130 +41,109 @@ import static android.R.attr.action;
 public class ESNotifs {
     private static final String TAG = ESNotifs.class.getSimpleName();
     private final Context context;
+    private final Fetcher<ActivityView> notifFeedFetcher;
+    private final ExecutorService executorService;
 
     public static class Notif {
-        private Identifier eid;
-        private String msg;
-        private long timestamp;
+        private ActivityView activityView;
 
-        public Notif(Identifier eid, String msg, long timestamp) {
-            this.eid = eid;
-            this.msg = msg;
-            this.timestamp = timestamp;
+        public Notif(ActivityView activityView) {
+            this.activityView = activityView;
         }
-        public Identifier getEid() {
-            return eid;
-        }
-        public String getMsg() {
-            return msg;
-        }
-        public long getTimestamp() {
-            return timestamp;
+
+        public long getNotifTime() {
+            return activityView.getElapsedSeconds();
         }
     }
 
-    public ESNotifs(Context context) {this.context = context;}
-
-    public interface NotificationCallback extends Parcelable {
-        void onReceiveNotif(Notif notif);
+    public ESNotifs(Context context) {
+        this.context = context;
+        notifFeedFetcher = FetchersFactory.createNotificationFeedFetcher();
+        executorService = newCachedThreadPool();
     }
 
-    protected void get_notifications(final NotificationCallback notificationCallback) {
-        final Fetcher<ActivityView> notifFeedFetcher = FetchersFactory.createNotificationFeedFetcher();
+    public interface NotificationCallback {
+        void onReceiveNotification(Notif notif);
+    }
+
+    protected void get_notifications(NotificationCallback notificationCallback, boolean fromBeginning) {
+        if (notifFeedFetcher.isLoading()) { return; }
+
         Callback callback = new Callback() {
-                    @Override
-                    public void onStateChanged(FetcherState newState) {
-                    super.onStateChanged(newState);
-                    switch (newState) {
-                        case LOADING:
-                            break;
-                        case DATA_ENDED:
-                            process_notifs(notificationCallback, notifFeedFetcher.getAllData());
-                            break;
-                        default:
-                            notifFeedFetcher.requestMoreData();
-                            break;
-                    }
-                    }
-                };
-        notifFeedFetcher.setCallback(callback);
-        // TODO update unread notifs?
-    }
-
-    private class ProcessNotifsClass extends AsyncTask<List<ActivityView>, Void, Void> {
-        private NotificationCallback notificationCallback;
-
-        public ProcessNotifsClass(NotificationCallback notificationCallback) {
-            this.notificationCallback = notificationCallback;
-        }
-
-        @Override
-        protected Void doInBackground(List<ActivityView>... lists) {
-            for (List<ActivityView> notifs : lists) {
-                for (ActivityView n : notifs) {
-                    if (n.getActivityType() == ActivityType.REPLY) {
-                        Log.d(TAG, "Notification of type reply");
-                        getReplyOfNotif(n.getHandle(), n.getActedOnContentText(), notificationCallback);
-                    } else if (n.getActivityType() == ActivityType.COMMENT) {
-                        Log.d(TAG, "Notification of type comment");
-                        getCommentOfNotif(n.getHandle(), n.getActedOnContentText(), notificationCallback);
-                    } else {
-                        Log.d(TAG, "Notif of no known activity type!");
-                    }
+            @Override
+            public void onStateChanged(FetcherState newState) {
+                super.onStateChanged(newState);
+                switch (newState) {
+                    case LOADING:
+                        break;
+                    case LAST_ATTEMPT_FAILED:
+                        notifFeedFetcher.requestMoreData();
+                        break;
+                    default: // ENDED or MORE_DATA
+                        Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
+                        for (ActivityView av : notifFeedFetcher.getAllData()) {
+                            notificationCallback.onReceiveNotification(new Notif(av));
+                        }
                 }
             }
-            return null;
-        }
-        protected void onPostExecute() {
-            Log.d(TAG, "Done processing notifs");
+        };
+        notifFeedFetcher.setCallbackSilent(callback);
+
+        if (fromBeginning) {
+            // this will call the callback after a new page is gotten from the beginning
+            notifFeedFetcher.refreshData();
+        } else if (notifFeedFetcher.hasMoreData()) {
+            notifFeedFetcher.requestMoreData();
         }
     }
 
-    private void process_notifs(NotificationCallback notificationCallback, List<ActivityView> notifs) {
-        ProcessNotifsClass processNotifs = new ProcessNotifsClass(notificationCallback);
-        processNotifs.execute(notifs);
-    }
+    public void get_msg_of_notification(Notif notif, ESMsgs.MsgCallback msgCallback) {
+        Runnable r = () -> {
+            ActivityView n = notif.activityView;
+            IContentService contentService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
 
-    private void getCommentOfNotif(String commentHandle, String parentText, NotificationCallback notificationCallback) {
-        IContentService contentService
-                = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
-        try {
-            final GetCommentRequest request = new GetCommentRequest(commentHandle);
-            GetCommentResponse response = contentService.getComment(request);
-            if (notificationCallback != null) {
-                if (parentText == response.getComment().getCommentText()) {
-                    Log.d(TAG, "This is the reply comment: " + commentHandle + " with parentText " + parentText);
+            // get the EID of the message
+            String eid;
+            try {
+                // get the content of the message (unless it's the reply comment) and create a message
+                // to call using the callback
+                String msgText, msgHandle;
+                long timeStamp;
+                if (n.getActivityType() == ActivityType.REPLY) {
+                    Log.d(TAG, "Notification of type reply");
+                    final GetReplyRequest request = new GetReplyRequest(n.getHandle());
+                    GetReplyResponse response = contentService.getReply(request);
+
+                    final GetCommentRequest req = new GetCommentRequest(response.getReply().getCommentHandle());
+                    eid = contentService.getComment(req).getComment().getCommentText();
+
+                    msgText = response.getReply().getReplyText();
+                    msgHandle = response.getReply().getHandle();
+                    timeStamp = response.getReply().getElapsedSeconds();
+                } else if (n.getActivityType() == ActivityType.COMMENT) {
+                    Log.d(TAG, "Notification of type comment");
+                    final GetCommentRequest request = new GetCommentRequest(n.getHandle());
+                    GetCommentResponse response = contentService.getComment(request);
+
+                    final GetTopicRequest req = new GetTopicRequest(response.getComment().getTopicHandle());
+                    eid = contentService.getTopic(req).getTopic().getTopicTitle();
+
+                    if (eid.compareTo(response.getComment().getCommentText()) == 0) {
+                        Log.d(TAG, "This is the reply comment: " + response.getComment().getCommentText());
+                        return;
+                    }
+                    msgText = response.getComment().getCommentText();
+                    msgHandle = response.getComment().getHandle();
+                    timeStamp = response.getComment().getElapsedSeconds();
+                } else {
+                    Log.e(TAG, "Notif of no known activity type!");
                     return;
                 }
-                Log.d(TAG, "Called notifCallback on commentHandle " + commentHandle + " with parentText " + parentText);
-                notificationCallback.onReceiveNotif(new ESNotifs.Notif(new Identifier(parentText.getBytes()), response.getComment().getCommentText(), response.getComment().getElapsedSeconds()));
-            } else {
-                Log.d(TAG, "No notification callback");
+                Log.d(TAG, "Got msg " + msgText + " with eid " + eid);
+                msgCallback.onReceiveMessage(new ESMsgs.Msg(msgHandle, msgText, eid, false, timeStamp));
+            } catch (NetworkRequestException e) {
             }
-            EventBus.post(new GetCommentEvent(response.getComment(), response.getComment() != null));
-        } catch (NetworkRequestException e) {
-            EventBus.post(new GetCommentEvent(null, false));
-        }
-    }
-    private void getReplyOfNotif(String replyHandle, String parentText, NotificationCallback notificationCallback) {
-        IContentService contentService
-                = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
-        try {
-            final GetReplyRequest request = new GetReplyRequest(replyHandle);
-            GetReplyResponse response = contentService.getReply(request);
-            if (notificationCallback != null) {
-                if (parentText == response.getReply().getReplyText()) {
-                    Log.d(TAG, "This is the reply reply: " + replyHandle + " with parentText " + parentText);
-                    return;
-                }
-                Log.d(TAG, "Called notifCallback on replyHandle " + replyHandle + " with parentText " + parentText);
-                notificationCallback.onReceiveNotif(new ESNotifs.Notif(new Identifier(parentText.getBytes()), response.getReply().getReplyText(), response.getReply().getElapsedSeconds()));
-            } else {
-                Log.d(TAG, "No notification callback");
-            }
-            EventBus.post(new GetReplyEvent(response.getReply(), response.getReply() != null));
-        } catch (NetworkRequestException e) {
-            EventBus.post(new GetReplyEvent(null, false));
-        }
+        };
+        executorService.execute(r);
     }
 }

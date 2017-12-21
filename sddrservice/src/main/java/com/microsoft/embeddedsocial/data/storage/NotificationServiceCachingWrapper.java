@@ -7,6 +7,7 @@ package com.microsoft.embeddedsocial.data.storage;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.autorest.models.CountResponse;
 import com.microsoft.embeddedsocial.data.Preferences;
@@ -31,6 +32,7 @@ import retrofit2.Response;
  * Provides transparent cache implementation of top of {@linkplain INotificationService}.
  */
 public class NotificationServiceCachingWrapper implements INotificationService {
+	private final static String TAG = NotificationServiceCachingWrapper.class.getSimpleName();
 
 	private final GetNotificationFeedWrapper notificationFeedWrapper = new GetNotificationFeedWrapper();
 	private final Context context;
@@ -101,6 +103,7 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 			}
 
 			if (isFirstDataRequest(request)) {
+				Log.d(TAG, "NOTIFS: Updating last activity handle");
 				updateLastActivityHandle(response);
 				Preferences.getInstance().resetNotificationCount();
 			}

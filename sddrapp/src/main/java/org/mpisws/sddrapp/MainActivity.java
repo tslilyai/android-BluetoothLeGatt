@@ -31,6 +31,7 @@ import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             System.exit(0);
         }
         SDDR_API.start_service(this);
-        SDDR_API.enable_msging();
+        SDDR_API.enable_msging_channels();
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
@@ -62,10 +63,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.AddLink).setOnClickListener(this);
 
         handler = new Handler();
-    }
+   }
 
     @Override
     public void onClick(View v) {
+        Identifier testEid = new Identifier("TopicTest".getBytes());
+
         switch (v.getId()) {
             case R.id.AddLink:
                 EditText linkID = MainActivity.this.findViewById(R.id.linkID);
@@ -75,11 +78,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final EditText msg = MainActivity.this.findViewById(R.id.Msg);
                 List<Identifier> encounters = SDDR_API.get_encounters(null);
                 if (encounters.size() > 0) {
-                    Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.get(0).toString());
+                    Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.size() + " encounters");
                     List<String> list = new LinkedList<>();
-                    list.add(msg.getText().toString());
+                    for (int i = 0; i < 100; i++)
+                        list.add(msg.getText().toString() + i);
                     for (Identifier e : encounters) {
-                        SDDR_API.send_msgs(e, list);
+                        SDDR_API.send_msgs(testEid, list);
                     }
                 }
                 break;
@@ -90,35 +94,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     GNA.makeAuthRequest();
                 } else {
                     SDDR_API.sign_in();
+                    SDDR_API.create_topic(testEid);
                 }
                 break;
-             case R.id.sign_out_button:
+            case R.id.sign_out_button:
                 SDDR_API.sign_out();
                 break;
             case R.id.get_notifs:
                 Log.d(TAG, "Getting notifs");
-                ESNotifs.NotificationCallback callback = new ESNotifs.NotificationCallback() {
-                    @Override
-                    public int describeContents() {return 0;}
 
+                final ESMsgs.MsgCallback callback = new ESMsgs.MsgCallback() {
                     @Override
-                    public void writeToParcel(Parcel dest, int flags) {}
-
-                    @Override
-                    public void onReceiveNotif(final ESNotifs.Notif notif) {
+                    public void onReceiveMessage(final ESMsgs.Msg msg) {
                         handler.post(new Runnable() {
                             public void run() {
                                 final TextView text = MainActivity.this.findViewById(R.id.new_notifs);
-                                text.append(notif.getEid().toString() + ": ");
-                                text.append(notif.getMsg() + " (" + notif.getTimestamp() + ")\n");
+                                if ((msg.isFromMe())) {
+                                    text.append("Me: ");
+                                } else {
+                                    text.append(msg.getEid().toString() + ": ");
+                                }
+                                text.append(msg.getMsg());
+                                text.append("\t" + msg.getTimestamp() + "\n");
                             }
                         });
                     }
                 };
-                SDDR_API.get_notifs(callback);
+                ESNotifs.NotificationCallback notifcallback = new ESNotifs.NotificationCallback() {
+                    @Override
+                    public void onReceiveNotification(ESNotifs.Notif notif) {
+                        SDDR_API.get_msg_of_notification(notif, callback);
+                    }
+                };
+                SDDR_API.get_notifs(notifcallback, false);
                 break;
             case R.id.get_msgs:
-                Log.d(TAG, "Getting messages");
+                /*Log.d(TAG, "Getting messages");
                 final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
                 Log.d(TAG, "Getting messages for " + encounters2.size() + " encounters");
                 if (encounters2.size() > 0) {
@@ -143,8 +154,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         };
                         SDDR_API.get_msgs(e, callback2);
                     }
-                }
-                break;
+                }*/
+               ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
+                    @Override
+                    public void onReceiveMessage(final ESMsgs.Msg msg) {
+                        handler.post(new Runnable() {
+                            public void run() {
+                                final TextView text = MainActivity.this.findViewById(R.id.new_messages);
+                                if ((msg.isFromMe())) {
+                                    text.append("Me: ");
+                                } else {
+                                    text.append(msg.getEid() + ": ");
+                                }
+                                text.append(msg.getMsg());
+                                text.append("\t" + msg.getTimestamp() + "\n");
+                            }
+                        });
+                    }
+                };
+                SDDR_API.get_msgs(testEid, callback2);
+        break;
             default:
                 // Unknown id.
                 Log.d(TAG, "Unknown button press");

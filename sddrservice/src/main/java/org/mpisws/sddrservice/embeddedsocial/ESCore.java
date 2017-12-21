@@ -84,7 +84,6 @@ public class ESCore {
     }
 
     public void sign_in() {
-        // TODO how to deal with session tokens?
         GlobalObjectRegistry.getObject(UserAccount.class).signInUsingThirdParty(socialNetworkAccount);
     }
 
@@ -97,7 +96,7 @@ public class ESCore {
             return;
         }
         if (defaultCreateMsgChannels > 0) {
-            esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.CreateOnly));
+            esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.CreateOnly, eid));
         }
     }
 
@@ -105,20 +104,23 @@ public class ESCore {
         if (!UserAccount.getInstance().isSignedIn()) {
             return;
         }
-        esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, msgs));
+        esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, eid, msgs));
     }
 
     public void get_msgs(String eid, ESMsgs.MsgCallback msgsCallback) {
         if (!UserAccount.getInstance().isSignedIn()) {
             return;
         }
-        esMsgs.find_and_act_on_topic(eid, new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.GetMsgs, msgsCallback));
+        esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.GetMsgs, eid, msgsCallback));
     }
 
-    public void get_notifs(ESNotifs.NotificationCallback notificationCallback) {
-        if (!UserAccount.getInstance().isSignedIn()) {
-            return;
-        }
-        esNotifs.get_notifications(notificationCallback);
+    public void get_notifs(ESNotifs.NotificationCallback notificationCallback, boolean fromBeginning) {
+        if (!UserAccount.getInstance().isSignedIn()) return;
+        esNotifs.get_notifications(notificationCallback, fromBeginning);
+    }
+
+    public void get_msg_of_notification(ESNotifs.Notif notif, ESMsgs.MsgCallback msgCallback) {
+        if (!UserAccount.getInstance().isSignedIn()) return;
+        esNotifs.get_msg_of_notification(notif, msgCallback);
     }
 }

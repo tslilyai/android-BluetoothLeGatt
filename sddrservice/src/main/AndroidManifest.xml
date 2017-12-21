@@ -299,23 +299,5 @@
 				<action android:name="android.net.ConnectivityManager.CONNECTIVITY_ACTION"/>
 			</intent-filter>
 		</receiver>
-
-		<service
-			android:name="com.microsoft.embeddedsocial.service.PushNotificationListenerService"
-			android:exported="false"
-			>
-			<intent-filter>
-				<action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-			</intent-filter>
-		</service>
-		<service
-			android:name="com.microsoft.embeddedsocial.service.GcmInstanceIdListenerService"
-			android:exported="false"
-			>
-			<intent-filter>
-				<action android:name="com.google.android.gms.iid.InstanceID"/>
-			</intent-filter>
-		</service>
-
     </application>
 </manifest>

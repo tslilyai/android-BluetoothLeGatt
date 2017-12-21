@@ -5,6 +5,8 @@
 
 package com.microsoft.embeddedsocial.fetcher.base;
 
+import android.util.Log;
+
 import com.microsoft.embeddedsocial.base.IDisposable;
 import com.microsoft.embeddedsocial.base.function.Predicate;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
@@ -23,6 +25,7 @@ import java.util.concurrent.Executors;
  * @param <T> data type
  */
 public abstract class Fetcher<T> implements IDisposable {
+	private static final String TAG = "Fetcher";
 
 	private static final int MAX_ITEMS_NUMBER = 5000;
 	private static final int SYNC_THREAD_PRIORITY = 8;
@@ -50,6 +53,10 @@ public abstract class Fetcher<T> implements IDisposable {
 		callbackNotifier.notifyStateChanged(state);
 	}
 
+	public final void setCallbackSilent(Callback callback) {
+		callbackNotifier.setCallback(callback);
+	}
+
 	/**
 	 * Returns whether the data is not marked as ended yet.
 	 */
@@ -66,6 +73,7 @@ public abstract class Fetcher<T> implements IDisposable {
 	 * Requests a new data page. it's forbidden to call this method if data is loading now.
 	 */
 	public final void requestMoreData() {
+		Log.d(TAG, "Requesting more data");
 		if (state == FetcherState.DATA_ENDED) {
 			throw new RuntimeException("no more data");
 		}
@@ -107,6 +115,7 @@ public abstract class Fetcher<T> implements IDisposable {
 	 * If the data request fails the data is not affected.
 	 */
 	public final void refreshData() {
+		Log.d(TAG, "Refreshing fetcher data!");
 		submitDataRequest(() -> {
 			try {
 				DataState dataState = createEmptyDataState(); // create a new data state object to read data from the start
@@ -174,6 +183,7 @@ public abstract class Fetcher<T> implements IDisposable {
 			currentDataState.markDataEnded();
 		}
 		if (currentDataState.isDataEnded()) {
+			Log.d(TAG, "Data ended with #items " + data.size());
 			setState(FetcherState.DATA_ENDED);
 		} else {
 			setState(error ? FetcherState.LAST_ATTEMPT_FAILED : FetcherState.HAS_MORE_DATA);
