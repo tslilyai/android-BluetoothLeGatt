@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Identifier testEid = new Identifier("TopicTest2".getBytes());
         final TextView notiftext = MainActivity.this.findViewById(R.id.new_notifs);
         final TextView msgtext = MainActivity.this.findViewById(R.id.new_messages);
+        final String[] notifCursor = {null};
 
         switch (v.getId()) {
             case R.id.AddLink:
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 SDDR_API.sign_out();
                 break;
             case R.id.get_notifs_old:
-                Log.d(TAG, "Getting notifs old");
+               Log.d(TAG, "Getting notifs old");
                 notiftext.setText("");
 
                 final ESMsgs.MsgCallback callback = new ESMsgs.MsgCallback() {
@@ -127,9 +128,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onReceiveNotification(ESNotifs.Notif notif) {
                         SDDR_API.get_msg_of_notification(notif, callback);
+                        notifCursor[0] = notif.getNotifCursor();
                     }
                 };
-                SDDR_API.get_notifs(notifcallback1, false);
+                SDDR_API.get_notifications_from_cursor(notifcallback1, notifCursor[0]);
                 break;
             case R.id.get_notifs_new:
                 notiftext.setText("");
@@ -156,9 +158,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onReceiveNotification(ESNotifs.Notif notif) {
                         SDDR_API.get_msg_of_notification(notif, callback3);
+                        notifCursor[0] = notif.getNotifCursor();
                     }
                 };
-                SDDR_API.get_notifs(notifcallback2, true);
+                SDDR_API.get_new_notifications(notifcallback2);
                 break;
 
             case R.id.get_msgs:

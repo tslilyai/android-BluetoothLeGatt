@@ -114,9 +114,14 @@ public class SDDR_API {
         esCore.create_topic(eid.toString());
     }
 
-    public static void get_notifs(ESNotifs.NotificationCallback notificationCallback, boolean fromBeginning) {
+    public static void get_notifications_from_cursor(ESNotifs.NotificationCallback notificationCallback, String cursor) {
         if (!isRunning) return;
-        esCore.get_notifs(notificationCallback, fromBeginning);
+        esCore.get_notifications_from_cursor(notificationCallback, cursor);
+    }
+
+    public static void get_new_notifications(ESNotifs.NotificationCallback notificationCallback) {
+        if (!isRunning) return;
+        esCore.get_new_notifications(notificationCallback);
     }
 
     public static void get_msg_of_notification(ESNotifs.Notif notif, ESMsgs.MsgCallback msgCallback) {

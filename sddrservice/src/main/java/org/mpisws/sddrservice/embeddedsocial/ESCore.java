@@ -61,7 +61,7 @@ public class ESCore {
         WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
 
         esMsgs = new ESMsgs(context);
-        esNotifs = new ESNotifs(context);
+        esNotifs = new ESNotifs();
         this.defaultCreateMsgChannels = 0;
     }
 
@@ -114,9 +114,14 @@ public class ESCore {
         esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.GetMsgs, eid, msgsCallback));
     }
 
-    public void get_notifs(ESNotifs.NotificationCallback notificationCallback, boolean fromBeginning) {
+    public void get_new_notifications(ESNotifs.NotificationCallback notificationCallback) {
         if (!UserAccount.getInstance().isSignedIn()) return;
-        esNotifs.get_notifications(notificationCallback, fromBeginning);
+        esNotifs.get_notifications_from_cursor(notificationCallback, null, true /*is_new*/);
+    }
+
+    public void get_notifications_from_cursor(ESNotifs.NotificationCallback notificationCallback, String cursor) {
+        if (!UserAccount.getInstance().isSignedIn()) return;
+        esNotifs.get_notifications_from_cursor(notificationCallback, cursor, false /*is_new*/);
     }
 
     public void get_msg_of_notification(ESNotifs.Notif notif, ESMsgs.MsgCallback msgCallback) {

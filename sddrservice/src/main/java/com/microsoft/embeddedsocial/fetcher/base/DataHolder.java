@@ -70,6 +70,8 @@ class DataHolder<T> {
 		callbackNotifier.notifyDataUpdated();
 	}
 
+	void clear() { data.clear(); }
+
 	void add(List<T> newData) {
 		data.addAll(newData);
 	}

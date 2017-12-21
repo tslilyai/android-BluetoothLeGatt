@@ -14,6 +14,7 @@ import com.microsoft.embeddedsocial.base.utils.thread.BackgroundThreadFactory;
 import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
 import com.microsoft.embeddedsocial.server.model.FeedUserRequest;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -62,6 +63,10 @@ public abstract class Fetcher<T> implements IDisposable {
 	 */
 	public final boolean hasMoreData() {
 		return state != FetcherState.DATA_ENDED;
+	}
+
+	public final void setCursor(String cursor) {
+		currentDataState.setContinuationKey(cursor);
 	}
 
 	private void setState(FetcherState newState) {
@@ -311,6 +316,12 @@ public abstract class Fetcher<T> implements IDisposable {
 	public void insertItem(T item, int position) {
 		synchronized (this) {
 			data.insertItem(item, position);
+		}
+	}
+
+	public void clearData() {
+		synchronized (this) {
+			data.clear();
 		}
 	}
 

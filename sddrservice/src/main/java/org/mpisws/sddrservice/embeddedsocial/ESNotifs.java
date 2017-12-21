@@ -1,15 +1,9 @@
 package org.mpisws.sddrservice.embeddedsocial;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.autorest.models.ActivityType;
-import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
-import com.microsoft.embeddedsocial.base.event.EventBus;
-import com.microsoft.embeddedsocial.event.content.GetCommentEvent;
-import com.microsoft.embeddedsocial.event.content.GetReplyEvent;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
@@ -22,13 +16,8 @@ import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentResp
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRequest;
 import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyResponse;
 import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicRequest;
-import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicResponse;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 
-import org.mpisws.sddrservice.lib.Identifier;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
@@ -40,7 +29,6 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 
 public class ESNotifs {
     private static final String TAG = ESNotifs.class.getSimpleName();
-    private final Context context;
     private final Fetcher<ActivityView> notifFeedFetcher;
     private final ExecutorService executorService;
 
@@ -54,10 +42,12 @@ public class ESNotifs {
         public long getNotifTime() {
             return activityView.getElapsedSeconds();
         }
+        public String getNotifCursor() {
+            return activityView.getHandle();
+        }
     }
 
-    public ESNotifs(Context context) {
-        this.context = context;
+    public ESNotifs() {
         notifFeedFetcher = FetchersFactory.createNotificationFeedFetcher();
         executorService = newCachedThreadPool();
     }
@@ -66,9 +56,8 @@ public class ESNotifs {
         void onReceiveNotification(Notif notif);
     }
 
-    protected void get_notifications(NotificationCallback notificationCallback, boolean fromBeginning) {
+    protected void get_notifications_from_cursor(NotificationCallback notificationCallback, String cursor, boolean is_new) {
         if (notifFeedFetcher.isLoading()) { return; }
-
         Callback callback = new Callback() {
             @Override
             public void onStateChanged(FetcherState newState) {
@@ -82,17 +71,24 @@ public class ESNotifs {
                     default: // ENDED or MORE_DATA
                         Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
                         for (ActivityView av : notifFeedFetcher.getAllData()) {
+                            if (!av.isUnread() && is_new) {
+                                break;
+                            }
                             notificationCallback.onReceiveNotification(new Notif(av));
                         }
                 }
             }
         };
         notifFeedFetcher.setCallbackSilent(callback);
+        notifFeedFetcher.clearData();
 
-        if (fromBeginning) {
+        if (is_new) {
             // this will call the callback after a new page is gotten from the beginning
             notifFeedFetcher.refreshData();
         } else if (notifFeedFetcher.hasMoreData()) {
+            if (cursor != null) {
+                notifFeedFetcher.setCursor(cursor);
+            }
             notifFeedFetcher.requestMoreData();
         }
     }

@@ -292,17 +292,14 @@ public class ActivityCache {
 		 * stored successfully.
 		 */
 		public boolean storeLastActivityHandle(String newActivityHandle) {
-			Log.d("NOTIFS", "storing last activity handle");
 			boolean result = false;
-			Log.d("NOTIFS", "is empty? " + TextUtils.isEmpty(newActivityHandle));
-			Log.d("NOTIFS", "is unread? " + isActivityUnread(newActivityHandle));
 
 			if (!TextUtils.isEmpty(newActivityHandle) && isActivityUnread(newActivityHandle)) {
+				Log.d("NOTIFS", "storing last activity handle");
 				dataStorage.edit()
 					.putString(KEY_LAST_HANDLE, newActivityHandle)
 					.putBoolean(KEY_SYNCED, false)
 					.apply();
-				Log.d("NOTIFS", "actually setting synced to false");
 				result = true;
 			}
 
