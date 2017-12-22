@@ -193,7 +193,7 @@ public class ESMsgs {
     }
 
     private void find_reply_comment_and_do_action(TopicAction ta, TopicView topic) {
-        if (topic.getTopicText() != DUMMY_TOPIC_TEXT) {
+        if (topic.getTopicText().compareTo(DUMMY_TOPIC_TEXT) != 0) {
             Log.d(TAG, "Found replyHandle in topic text!");
             do_action(ta, topic, topic.getTopicText());
             return;
@@ -227,7 +227,7 @@ public class ESMsgs {
                                         || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
                                     if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
                                         // this is the reply comment!
-                                        Log.d(TAG, "Found reply comment " + comment.getCommentText() + " for " + topic.getTopicTitle());
+                                        Log.d(TAG, "Found reply comment " + comment.getCommentText() + " for " + topic.getTopicTitle() + " , updating topic text to be handle");
                                         topic.setTopicText(comment.getHandle());
                                         new UserActionProxy(context).updateTopic(topic);
                                         do_action(ta, topic, comment.getHandle());
@@ -250,6 +250,7 @@ public class ESMsgs {
                                 } catch (SQLException e) {}
                             }
                             // we're out of comments to fetch, so just do the action
+                            Log.d(TAG, "Didn't find reply comment, just do action for " + topic.getTopicTitle());
                             do_action(ta, topic, null);
                         }
                     }

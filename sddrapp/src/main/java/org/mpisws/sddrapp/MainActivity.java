@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        String testEid = new String("TopicTest3".getBytes());
+        String testEid = new String("TopicTest4".getBytes());
         final TextView notiftext = MainActivity.this.findViewById(R.id.new_notifs);
         final TextView msgtext = MainActivity.this.findViewById(R.id.new_messages);
         final String[] notifCursor = {null};
@@ -113,8 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.SendMsg:
                 final EditText msg = MainActivity.this.findViewById(R.id.Msg);
-                List<String> encounters = encountersService.getEncounters(null);
-                Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.size() + " encounters");
+                Log.d(TAG, "Sending message " + msg.getText().toString());
                 List<String> list = new LinkedList<>();
                 for (int i = 0; i < 100; i++)
                     list.add(msg.getText().toString() + i);
