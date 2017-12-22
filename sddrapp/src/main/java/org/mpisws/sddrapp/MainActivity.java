@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onReceiveNotifications(List<ESNotifs.Notif> notifs) {
                 for (ESNotifs.Notif notif : notifs) {
-                    notifCursor[0] = notif.getNotifCursor();
+                    notifCursor[0] = notif.getCursor();
                 }
                 Log.d(TAG, "Notif: Calling getNotifsCallback of " + notifs.size() + " notifs");
                 encountersService.getEncountersOfNotifs(notifs, getEncountersOfNotifsCallback);
