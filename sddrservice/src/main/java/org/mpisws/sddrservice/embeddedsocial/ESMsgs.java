@@ -106,6 +106,9 @@ public class ESMsgs {
         public boolean isNewerThan(Msg msg) {
             return handle.compareTo(msg.handle) < 0;
         }
+        public String getCursor() {
+            return handle;
+        }
     }
 
     public interface GetMessagesCallback {

@@ -44,9 +44,9 @@ public class ESNotifs {
         }
 
         public boolean isNewerThan(Notif notif) {
-            return activityView.getHandle().compareTo(notif.getNotifCursor()) < 0;
+            return activityView.getHandle().compareTo(notif.getCursor()) < 0;
         }
-        public String getNotifCursor() {
+        public String getCursor() {
             return activityView.getHandle();
         }
     }
