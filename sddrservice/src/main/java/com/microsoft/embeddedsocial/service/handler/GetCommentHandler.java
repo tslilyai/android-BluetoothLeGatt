@@ -5,9 +5,7 @@
 
 package com.microsoft.embeddedsocial.service.handler;
 
-import android.app.Notification;
 import android.content.Intent;
-import android.util.Log;
 
 import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
@@ -21,9 +19,6 @@ import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentRequ
 import com.microsoft.embeddedsocial.server.model.content.comments.GetCommentResponse;
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
-
-import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
-import org.mpisws.sddrservice.lib.Identifier;
 
 /**
  * Get single comment.

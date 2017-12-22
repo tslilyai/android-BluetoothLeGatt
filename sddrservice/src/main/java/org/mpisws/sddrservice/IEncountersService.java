@@ -6,7 +6,6 @@ import com.microsoft.embeddedsocial.autorest.models.Reason;
 
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
-import org.mpisws.sddrservice.lib.Identifier;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public interface IEncountersService {
 
     public void sendMsgs(String encounterID, List<String> msgs);
 
-    public void getMsgsWithCursor(String encounterID, ESMsgs.GetMessagesCallback callback);
+    public void getMsgsWithCursor(String encounterID, ESMsgs.GetMessagesCallback callback, String cursor);
 
     public void getNewMsgs(String encounterID, ESMsgs.GetMessagesCallback callback);
 

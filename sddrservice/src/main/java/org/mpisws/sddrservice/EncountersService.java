@@ -8,9 +8,9 @@ import android.util.Log;
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.autorest.models.Reason;
 
-import org.mpisws.sddrservice.embeddedsocial.ESUser;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
+import org.mpisws.sddrservice.embeddedsocial.ESUser;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
@@ -118,13 +118,17 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void getMsgsWithCursor(String encounterID, ESMsgs.GetMessagesCallback callback) {
+    public void getMsgsWithCursor(String encounterID, ESMsgs.GetMessagesCallback callback, String cursor) {
         if (!shouldRunCommand(true)) return;
+        esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
+                ESMsgs.TopicAction.TATyp.GetMsgs, encounterID, cursor, false /*is_new*/, callback));
     }
 
     @Override
     public void getNewMsgs(String encounterID, ESMsgs.GetMessagesCallback callback) {
         if (!shouldRunCommand(true)) return;
+        esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
+                ESMsgs.TopicAction.TATyp.GetMsgs, encounterID, null, true /*is_new*/, callback));
     }
 
     @Override

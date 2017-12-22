@@ -20,9 +20,6 @@ import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRespons
 import com.microsoft.embeddedsocial.service.IntentExtras;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 
-import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
-import org.mpisws.sddrservice.lib.Identifier;
-
 /**
  * Get single reply.
  */

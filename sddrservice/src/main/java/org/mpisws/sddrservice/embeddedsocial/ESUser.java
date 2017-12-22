@@ -23,8 +23,6 @@ import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
 import org.mpisws.sddrservice.R;
 
-import java.util.List;
-
 /**
  * Created by tslilyai on 12/8/17.
  */

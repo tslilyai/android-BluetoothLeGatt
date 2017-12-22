@@ -15,7 +15,6 @@ import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.fetcher.base.FetcherState;
 import com.microsoft.embeddedsocial.server.model.view.CommentView;
-import com.microsoft.embeddedsocial.server.model.view.ReplyView;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
@@ -23,8 +22,11 @@ import com.microsoft.embeddedsocial.service.WorkerService;
 import org.mpisws.sddrservice.lib.Utils;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.microsoft.embeddedsocial.fetcher.base.FetcherState.DATA_ENDED;
 
 /**
  * Created by tslilyai on 12/8/17.
@@ -32,6 +34,7 @@ import java.util.Map;
 
 public class ESMsgs {
     private static final String TAG = ESMsgs.class.getSimpleName();
+    private static final String DUMMY_TOPIC_TEXT = "DummyTopicText";
     private final PostStorage postStorage;
     private final Context context;
     private final Object lock = new Object();
@@ -52,6 +55,8 @@ public class ESMsgs {
         List<String> msgs;
         GetMessagesCallback getMessagesCallback;
         String eid;
+        String cursor;
+        boolean isNew;
 
         public TopicAction(TATyp typ, String eid, List<String> msgs) {
             Utils.myAssert(typ == TATyp.SendMsg);
@@ -60,10 +65,12 @@ public class ESMsgs {
             this.msgs = msgs;
         }
 
-        public TopicAction(TATyp typ, String eid, GetMessagesCallback getMessagesCallback) {
+        public TopicAction(TATyp typ, String eid, String cursor, boolean isNew, GetMessagesCallback getMessagesCallback) {
             Utils.myAssert(typ == TATyp.GetMsgs);
             this.eid = eid;
             this.typ = typ;
+            this.cursor = cursor;
+            this.isNew = isNew;
             this.getMessagesCallback = getMessagesCallback;
         }
 
@@ -102,7 +109,7 @@ public class ESMsgs {
     }
 
     public interface GetMessagesCallback {
-        void onReceiveMessage(Msg messages);
+        void onReceiveMessages(List<Msg> messages);
     }
 
     public void report_msg(Msg msg, Reason reason) {
@@ -148,21 +155,21 @@ public class ESMsgs {
             // If we've already tried, this means the post is still not synced. Don't do anything.
             // But if we haven't tried to create this topic yet! Add a pending request to do so and
             // store the message to be sent.
-            // Store the message to be sent
             if (ta.typ == TopicAction.TATyp.SendMsg) {
                 synchronized(lock) {
                     UserAccount.getInstance().getAccountDetails().addUnsentMsgs(ta.eid, ta.msgs);
                 }
             }
+            // Remember that we're trying to create this topic so we don't create it twice. Then
+            // actually try and create the topic
             if (!UserAccount.getInstance().getAccountDetails().pendingTopic(ta.eid)) {
                 UserAccount.getInstance().getAccountDetails().addPendingTopic(ta.eid);
-                postStorage.storePost(ta.eid, ta.eid, null, PublisherType.USER);
+                postStorage.storePost(ta.eid, DUMMY_TOPIC_TEXT, null, PublisherType.USER);
                 WorkerService.getLauncher(context).launchService((ServiceAction.SYNC_DATA));
             }
         } else {
             // We've created this topic but run into a race condition with the other encounter partner
-            // who also created the topic. Remove the topic, but post the comments to the remaining topic
-            // anyway
+            // who also created the topic. Remove the bad topic, but post the comments to the remaining topic
             TopicView topicToComment;
             if (topiclist.size() > 1) {
                 Utils.myAssert(topiclist.size() == 2);
@@ -177,151 +184,154 @@ public class ESMsgs {
             } else {
                 topicToComment = topiclist.get(0);
             }
-            // Post the comments (or replies)
-            final Fetcher<Object> commentFeedFetcher = FetchersFactory.createCommentFeedFetcher(topicToComment.getHandle(), topicToComment);
-            Callback callback = new Callback() {
-                @Override
-                public void onStateChanged(FetcherState newState) {
-                super.onStateChanged(newState);
-                switch (newState) {
-                    case LOADING:
-                        break;
-                    case DATA_ENDED:
-                        do_action(ta, topicToComment, commentFeedFetcher.getAllData());
-                        break;
-                    default:
-                        commentFeedFetcher.requestMoreData();
-                        break;
-                }
-                }
-            };
-            commentFeedFetcher.setCallback(callback);
+            if (ta.typ == TopicAction.TATyp.GetMsgs) {
+                get_msgs_helper(ta, topicToComment);
+            } else {
+                find_reply_comment_and_do_action(ta, topicToComment);
+            }
         }
     }
 
-    private void do_action(TopicAction ta, TopicView topic, List<Object> comments) {
-        final boolean is_my_topic = UserAccount.getInstance().isCurrentUser(topic.getUser().getHandle()) ? true : false;
-        Log.d(TAG, "Doing action on topic " + topic.getTopicTitle() + " that is mine? " + is_my_topic);
-
-        /* Find the comment that acts as the "response" thread for the user that did not create the topic */
-        CommentView reply_comment = null;
-        for (Object obj : comments) {
-            if (!CommentView.class.isInstance(obj)) {
-                Log.d(TAG, "Fetcher did not return an instance of commentview! It's a " + obj.getClass().getSimpleName());
-                continue;
-            }
-            CommentView comment = CommentView.class.cast(obj);
-            Log.d(TAG, "Comment is my comment? " + UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()));
-            if ((is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
-                    || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
-                if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
-                    reply_comment = comment;
-                    Log.d(TAG, "Found reply comment " + reply_comment.getCommentText() + " for " + topic.getTopicTitle());
-                    break;
-                }
-            }
-        }
-
-        try {
-            PostStorage postStorage = new PostStorage(context);
-            switch (ta.typ) {
-                case GetMsgs: {
-                    get_msgs_helper(reply_comment, comments, ta);
-                    break;
-                }
-                case SendMsg: {
-                    // we add the reply comment if there is none and we're not the topic owner
-                    if (!is_my_topic && reply_comment == null) {
-                        postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicText(), null));
-                        Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
-                    }
-                    // if either (1) there is no reply comment and we're the topic owner
-                    // or (2) we're not the topic owner, then post a comment
-                    if ((is_my_topic && reply_comment == null) || !is_my_topic) {
-                        for (String msg : ta.msgs) {
-                            postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), msg, null));
-                            Log.d(TAG, "Add comment for " + topic.getTopicTitle());
-                        }
-                    }
-                    // post a reply to the reply comment if it exists and we're the topic owner
-                    else if (is_my_topic && reply_comment != null) {
-                        for (String msg : ta.msgs) {
-                            postStorage.storeDiscussionItem(DiscussionItem.newReply(reply_comment.getHandle(), msg));
-                            Log.d(TAG, "Add reply for " + topic.getTopicTitle());
-                        }
-                    }
-                    break;
-                }
-                case CreateOnly: {
-                    // create the reply comment if none exists
-                    if (!is_my_topic || reply_comment == null) {
-                        postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicText(), null));
-                        Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
-                    }
-                    break;
-                }
-            }
-            WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void get_msgs_helper(CommentView reply_comment, List<Object> comments, final TopicAction ta) {
-        // get all the messages associated with the topic thread
-        for (Object obj : comments) {
-            if (!CommentView.class.isInstance(obj)) {
-                Log.d(TAG, "Fetcher returned something that is not a comment! It's a " + obj.getClass().getSimpleName());
-                continue;
-            }
-            CommentView comment = (CommentView) obj;
-            if (comment != reply_comment) {
-                Log.d(TAG, "Got comment " + comment.getCommentText());
-                ta.getMessagesCallback.onReceiveMessage(new Msg(
-                        comment.getHandle(),
-                        ContentType.COMMENT,
-                        comment.getCommentText(),
-                        ta.eid,
-                        UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
-                );
-            }
-        }
-
-        if (reply_comment == null) {
+    private void find_reply_comment_and_do_action(TopicAction ta, TopicView topic) {
+        if (topic.getTopicText() != DUMMY_TOPIC_TEXT) {
+            Log.d(TAG, "Found replyHandle in topic text!");
+            do_action(ta, topic, topic.getTopicText());
             return;
         }
-        // get all the messages associated with reply_comment
-        final Fetcher<Object> replyFetcher = FetchersFactory.createReplyFeedFetcher(reply_comment.getHandle(), reply_comment);
+
+        /* we haven't found the reply comment yet. we have to go through all comments to either
+            1) find the reply comment and update the topic text
+            2) create the reply comment
+
+            In either case, once we've completed that action, we simply either get messages,
+            send messages, or do nothing (if the task was to just create the topic).
+            If the reply comment doesn't exist, we don't notify the other side (makes sense).
+        */
+        final Fetcher<Object> commentFeedFetcher = FetchersFactory.createCommentFeedFetcher(topic.getHandle(), topic);
         Callback callback = new Callback() {
+            boolean is_my_topic = UserAccount.getInstance().isCurrentUser(topic.getUser().getHandle()) ? true : false;
+
             @Override
             public void onStateChanged(FetcherState newState) {
                 super.onStateChanged(newState);
                 switch (newState) {
                     case LOADING:
                         break;
-                    case DATA_ENDED:
-                        for (Object obj : replyFetcher.getAllData()) {
-                            if (!ReplyView.class.isInstance(obj)) {
-                                Log.d(TAG, "Fetcher returned something that is not a reply! It's a " + obj.getClass().getSimpleName());
-                                continue;
+                    default: {
+                        // look for the reply comment in the feed
+                        // if we found it, update the topic view to hold the comment handle and then perform the action
+                        for (Object obj : commentFeedFetcher.getAllData()) {
+                            if (CommentView.class.isInstance(obj)) {
+                                CommentView comment = CommentView.class.cast(obj);
+                                if ((is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
+                                        || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
+                                    if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
+                                        // this is the reply comment!
+                                        Log.d(TAG, "Found reply comment " + comment.getCommentText() + " for " + topic.getTopicTitle());
+                                        topic.setTopicText(comment.getHandle());
+                                        new UserActionProxy(context).updateTopic(topic);
+                                        do_action(ta, topic, comment.getHandle());
+                                        return;
+                                    }
+                                }
                             }
-                            ReplyView reply = (ReplyView) obj;
-                            Log.d(TAG, "Got reply " + reply.getReplyText());
-                            ta.getMessagesCallback.onReceiveMessage(new Msg(
-                                    reply.getHandle(),
-                                    ContentType.REPLY,
-                                    reply.getReplyText(),
-                                    ta.eid,
-                                    UserAccount.getInstance().isCurrentUser(reply.getUser().getHandle()))
-                            );
                         }
-                        break;
-                    default:
-                        replyFetcher.requestMoreData();
-                        break;
+                        // we reach this point then this set of comments doesn't contain the reply comment
+                        if (newState != DATA_ENDED) {
+                            // see if unfetched comments contain the reply comment (clear our data too)
+                            commentFeedFetcher.clearData();
+                            commentFeedFetcher.requestMoreData();
+                        } else {
+                            // we know the reply comment doesn't exist yet. create if we will be the owner
+                            if (!is_my_topic) {
+                                try {
+                                    postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicTitle(), null));
+                                    Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
+                                } catch (SQLException e) {}
+                            }
+                            // we're out of comments to fetch, so just do the action
+                            do_action(ta, topic, null);
+                        }
+                    }
                 }
             }
         };
-        replyFetcher.setCallback(callback);
+        commentFeedFetcher.setCallback(callback);
+    }
+
+    private void do_action(TopicAction ta, TopicView topic, String replyCommentHandle) {
+        try {
+            PostStorage postStorage = new PostStorage(context);
+            switch (ta.typ) {
+                case GetMsgs: {
+                    get_msgs_helper(ta, topic);
+                    break;
+                }
+                case SendMsg: {
+                    boolean is_my_topic = UserAccount.getInstance().isCurrentUser(topic.getUser().getHandle()) ? true : false;
+                    for (String msg : ta.msgs) {
+                        postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), msg, null));
+                        Log.d(TAG, "Send comment for " + topic.getTopicTitle());
+                    }
+                    if (is_my_topic && replyCommentHandle != null) {
+                        postStorage.storeDiscussionItem(DiscussionItem.newReply(replyCommentHandle, "Notify"));
+                        Log.d(TAG, "Send reply to notify for " + topic.getTopicTitle());
+                    }
+                    break;
+                }
+                case CreateOnly: {
+                    break;
+                }
+            }
+            WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
+        } catch (SQLException e) {}
+    }
+
+    private void get_msgs_helper(TopicAction ta, TopicView topic) {
+        Fetcher<Object> commentFeedFetcher = FetchersFactory.createCommentFeedFetcher(topic.getHandle(), topic);
+         if (commentFeedFetcher.isLoading()) { return; }
+         Callback callback = new Callback() {
+            @Override
+            public void onStateChanged(FetcherState newState) {
+                List<Msg> comments = new ArrayList<>();
+                super.onStateChanged(newState);
+                switch (newState) {
+                    case LOADING:
+                        break;
+                    case LAST_ATTEMPT_FAILED:
+                        Log.d(TAG, "Last attempt failed");
+                        commentFeedFetcher.requestMoreData();
+                        break;
+                    default: // ENDED or MORE_DATA
+                        Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
+                        Log.d(TAG, "Found " + commentFeedFetcher.getAllData().size() + " comments");
+                        for (Object obj : commentFeedFetcher.getAllData()) {
+                            if (CommentView.class.isInstance(obj)) {
+                                CommentView comment = CommentView.class.cast(obj);
+                                comments.add(new Msg(
+                                        comment.getHandle(),
+                                        ContentType.COMMENT,
+                                        comment.getCommentText(),
+                                        topic.getTopicTitle(),
+                                        UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
+                                );
+                            }
+                        }
+                        ta.getMessagesCallback.onReceiveMessages(comments);
+                }
+            }
+        };
+        commentFeedFetcher.setCallbackSilent(callback);
+        commentFeedFetcher.clearData();
+
+        if (ta.isNew) {
+            // this will call the callback after a new page is gotten from the beginning
+            commentFeedFetcher.refreshData();
+        } else if (commentFeedFetcher.hasMoreData()) {
+            if (ta.cursor != null) {
+                commentFeedFetcher.setCursor(ta.cursor);
+            }
+            commentFeedFetcher.requestMoreData();
+        }
     }
 }

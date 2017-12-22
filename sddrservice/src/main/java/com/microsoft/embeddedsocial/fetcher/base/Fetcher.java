@@ -14,7 +14,6 @@ import com.microsoft.embeddedsocial.base.utils.thread.BackgroundThreadFactory;
 import com.microsoft.embeddedsocial.base.utils.thread.ThreadUtils;
 import com.microsoft.embeddedsocial.server.model.FeedUserRequest;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;

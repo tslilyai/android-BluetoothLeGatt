@@ -67,21 +67,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        String testEid = new String("TopicTest2".getBytes());
+        String testEid = new String("TopicTest3".getBytes());
         final TextView notiftext = MainActivity.this.findViewById(R.id.new_notifs);
         final TextView msgtext = MainActivity.this.findViewById(R.id.new_messages);
         final String[] notifCursor = {null};
         final ESMsgs.GetMessagesCallback msgsCallback = new ESMsgs.GetMessagesCallback() {
             @Override
-            public void onReceiveMessage(final ESMsgs.Msg msg) {
+            public void onReceiveMessages(final List<ESMsgs.Msg> msgs) {
                 handler.post(new Runnable() {
                     public void run() {
-                        if ((msg.isFromMe())) {
-                            msgtext.append("Me: ");
-                        } else {
-                            msgtext.append(msg.getEid() + ": ");
+                        for (ESMsgs.Msg msg : msgs) {
+                            if ((msg.isFromMe())) {
+                                msgtext.append("Me: ");
+                            } else {
+                                msgtext.append(msg.getEid() + ": ");
+                            }
+                            msgtext.append(msg.getMsg() + "\n");
                         }
-                        msgtext.append(msg.getMsg());
                     }
                 });
             }

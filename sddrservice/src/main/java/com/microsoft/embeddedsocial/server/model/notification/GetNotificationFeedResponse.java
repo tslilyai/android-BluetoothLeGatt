@@ -5,14 +5,10 @@
 
 package com.microsoft.embeddedsocial.server.model.notification;
 
-import android.util.Log;
-
 import com.microsoft.embeddedsocial.autorest.models.FeedResponseActivityView;
 import com.microsoft.embeddedsocial.server.model.FeedUserResponse;
 import com.microsoft.embeddedsocial.server.model.ListResponse;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
-
-import org.mpisws.sddrservice.lib.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

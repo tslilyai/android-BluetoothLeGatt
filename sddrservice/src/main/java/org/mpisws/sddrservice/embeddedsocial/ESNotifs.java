@@ -34,7 +34,7 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 public class ESNotifs {
     private static final String TAG = ESNotifs.class.getSimpleName();
     private final Fetcher<ActivityView> notifFeedFetcher;
-    private final ExecutorService executorService;
+    private ExecutorService executorService;
 
     public static class Notif {
         private ActivityView activityView;
