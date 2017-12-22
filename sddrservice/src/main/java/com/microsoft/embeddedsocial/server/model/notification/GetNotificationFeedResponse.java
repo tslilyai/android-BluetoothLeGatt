@@ -22,7 +22,6 @@ public class GetNotificationFeedResponse extends FeedUserResponse implements Lis
 
 	private List<ActivityView> activities;
 	private String deliveredActivityHandle;
-	private String cursor;
 
 	public GetNotificationFeedResponse(List<ActivityView> activities) {
 		this.activities = activities;
@@ -33,13 +32,9 @@ public class GetNotificationFeedResponse extends FeedUserResponse implements Lis
 		activities = new ArrayList<>();
 		for (com.microsoft.embeddedsocial.autorest.models.ActivityView view : response.getData()) {
 			activities.add(new ActivityView(view));
-			if (deliveredActivityHandle == null || view.getActivityHandle().compareTo(deliveredActivityHandle) < 0)
-				deliveredActivityHandle = view.getActivityHandle();
 		}
+		this.deliveredActivityHandle = (activities.isEmpty() ? "" : activities.get(0).getHandle());
 		setContinuationKey(response.getCursor());
-		Utils.myAssert(this.deliveredActivityHandle == activities.get(0).getHandle());
-		Utils.myAssert(deliveredActivityHandle.compareTo(this.cursor) < 0);
-		Log.d("NOTIFS", "Got cursor " + cursor);
 	}
 
 	@Override

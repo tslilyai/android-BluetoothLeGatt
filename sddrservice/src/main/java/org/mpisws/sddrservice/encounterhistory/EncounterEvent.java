@@ -164,17 +164,17 @@ public abstract class EncounterEvent implements Serializable {
     private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
         Log.d(TAG, "Inserting shared secrets " + sharedSecrets.size());
         for (Identifier sharedSecret : sharedSecrets) {
-            byte[] encounterID = MEncounter.convertSharedSecretToEncounterID(sharedSecret).getBytes();
+            Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret);
             final ContentValues values = new ContentValues();
             values.put(PSharedSecrets.Columns.encounterPKID, pkid);
             values.put(PSharedSecrets.Columns.sharedSecret, sharedSecret.getBytes());
-            values.put(PSharedSecrets.Columns.encounterID, encounterID);
+            values.put(PSharedSecrets.Columns.encounterID, eid.getBytes());
             values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
 
             // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
-            Log.d(TAG, "Calling create topic for " + encounterID);
-            EncountersService.getInstance().createEncounterMsgingChannel(new Identifier(encounterID));
+            Log.d(TAG, "Calling create topic for " + eid.toString());
+            EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
         }
     }
 

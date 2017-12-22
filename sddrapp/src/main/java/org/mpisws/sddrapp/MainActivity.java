@@ -32,6 +32,7 @@ import org.mpisws.sddrservice.lib.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -66,26 +67,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        Identifier testEid = new Identifier("TopicTest2".getBytes());
+        String testEid = new String("TopicTest2".getBytes());
         final TextView notiftext = MainActivity.this.findViewById(R.id.new_notifs);
         final TextView msgtext = MainActivity.this.findViewById(R.id.new_messages);
         final String[] notifCursor = {null};
+        final ESMsgs.GetMessagesCallback msgsCallback = new ESMsgs.GetMessagesCallback() {
+            @Override
+            public void onReceiveMessage(final ESMsgs.Msg msg) {
+                handler.post(new Runnable() {
+                    public void run() {
+                        if ((msg.isFromMe())) {
+                            msgtext.append("Me: ");
+                        } else {
+                            msgtext.append(msg.getEid() + ": ");
+                        }
+                        msgtext.append(msg.getMsg());
+                    }
+                });
+            }
+        };
+        final ESNotifs.GetEncountersOfNotifsCallback getEncountersOfNotifsCallback = new ESNotifs.GetEncountersOfNotifsCallback() {
+            @Override
+            public void onReceiveEncounters(Set<String> encounterIds) {
+                Log.d(TAG, "Notif: Calling onReceiveEncounter of " + encounterIds.size() + " encounters");
+                for (String eid : encounterIds) {
+                    encountersService.getNewMsgs(eid, msgsCallback);
+                }
+            }
+        };
+        final ESNotifs.GetNotificationsCallback notifcallback = new ESNotifs.GetNotificationsCallback() {
+            @Override
+            public void onReceiveNotifications(List<ESNotifs.Notif> notifs) {
+                for (ESNotifs.Notif notif : notifs) {
+                    notifCursor[0] = notif.getNotifCursor();
+                }
+                Log.d(TAG, "Notif: Calling getNotifsCallback of " + notifs.size() + " notifs");
+                encountersService.getEncountersOfNotifs(notifs, getEncountersOfNotifsCallback);
+            }
+        };
 
         switch (v.getId()) {
             case R.id.AddLink:
                 break;
             case R.id.SendMsg:
                 final EditText msg = MainActivity.this.findViewById(R.id.Msg);
-                List<Identifier> encounters = encountersService.getEncounters(null);
-                if (encounters.size() > 0) {
-                    Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.size() + " encounters");
-                    List<String> list = new LinkedList<>();
-                    for (int i = 0; i < 100; i++)
-                        list.add(msg.getText().toString() + i);
-                    for (Identifier e : encounters) {
-                        encountersService.sendMsgs(testEid, list);
-                    }
-                }
+                List<String> encounters = encountersService.getEncounters(null);
+                Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.size() + " encounters");
+                List<String> list = new LinkedList<>();
+                for (int i = 0; i < 100; i++)
+                    list.add(msg.getText().toString() + i);
+                encountersService.sendMsgs(testEid, list);
                 break;
             case R.id.sign_in_button:
                 if (GoogleToken.getToken() == null) {
@@ -103,77 +134,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.get_notifs_old:
                Log.d(TAG, "Getting notifs old");
                 notiftext.setText("");
-
-                final ESMsgs.MsgCallback callback = new ESMsgs.MsgCallback() {
-                    @Override
-                    public void onReceiveMessage(final ESMsgs.Msg msg) {
-                        handler.post(new Runnable() {
-                            public void run() {
-                                if ((msg.isFromMe())) {
-                                    notiftext.append("Me: ");
-                                } else {
-                                    notiftext.append(msg.getEid().toString() + ": ");
-                                }
-                                notiftext.append(msg.getMsg() + '\n');
-                            }
-                        });
-                    }
-                };
-                ESNotifs.NotificationCallback notifcallback1 = new ESNotifs.NotificationCallback() {
-                    @Override
-                    public void onReceiveNotification(ESNotifs.Notif notif) {
-                        notifCursor[0] = notif.getNotifCursor();
-                    }
-                };
-                encountersService.getNotifsWithCursor(notifcallback1, notifCursor[0]);
+                encountersService.getNotifsWithCursor(notifcallback, notifCursor[0]);
                 break;
             case R.id.get_notifs_new:
                 notiftext.setText("");
                 Log.d(TAG, "Getting notifs new");
-
-                final ESMsgs.MsgCallback callback3 = new ESMsgs.MsgCallback() {
-                    @Override
-                    public void onReceiveMessage(final ESMsgs.Msg msg) {
-                        handler.post(new Runnable() {
-                            public void run() {
-                                final TextView text = MainActivity.this.findViewById(R.id.new_notifs);
-                                if ((msg.isFromMe())) {
-                                    text.append("Me: ");
-                                } else {
-                                    text.append(msg.getEid().toString() + ": ");
-                                }
-                                text.append(msg.getMsg() + '\n');
-                            }
-                        });
-                    }
-                };
-                ESNotifs.NotificationCallback notifcallback2 = new ESNotifs.NotificationCallback() {
-                    @Override
-                    public void onReceiveNotification(ESNotifs.Notif notif) {
-                        notifCursor[0] = notif.getNotifCursor();
-                    }
-                };
-                encountersService.getNewNotifs(notifcallback2);
+                encountersService.getNewNotifs(notifcallback);
                 break;
 
             case R.id.get_msgs:
                 msgtext.setText("");
-                ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
-                    @Override
-                    public void onReceiveMessage(final ESMsgs.Msg msg) {
-                        handler.post(new Runnable() {
-                            public void run() {
-                                if ((msg.isFromMe())) {
-                                    msgtext.append("Me: ");
-                                } else {
-                                    msgtext.append(msg.getEid() + ": ");
-                                }
-                                msgtext.append(msg.getMsg());
-                            }
-                        });
-                    }
-                };
-                encountersService.getNewMsgs(testEid, callback2);
+               encountersService.getNewMsgs(testEid, msgsCallback);
         break;
             default:
                 // Unknown id.

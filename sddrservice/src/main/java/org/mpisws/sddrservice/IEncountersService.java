@@ -20,7 +20,7 @@ public interface IEncountersService {
 
     public void addLinkableID(String linkID);
 
-    public List<Identifier> getEncounters(EncountersService.Filter filter);
+    public List<String> getEncounters(EncountersService.Filter filter);
 
     public void registerGoogleUser(String googletoken, String firstname, String lastname);
 
@@ -28,19 +28,21 @@ public interface IEncountersService {
 
     public void signOut();
 
-    public void sendMsgs(Identifier encounterID, List<String> msgs);
+    public void sendMsgs(String encounterID, List<String> msgs);
 
-    public void getMsgsWithCursor(Identifier encounterID, ESMsgs.MsgCallback callback);
+    public void getMsgsWithCursor(String encounterID, ESMsgs.GetMessagesCallback callback);
 
-    public void getNewMsgs(Identifier encounterID, ESMsgs.MsgCallback callback);
+    public void getNewMsgs(String encounterID, ESMsgs.GetMessagesCallback callback);
 
     public void reportMsg(ESMsgs.Msg msg, Reason reason);
 
-    public void createEncounterMsgingChannel(Identifier eid);
+    public void createEncounterMsgingChannel(String eid);
 
-    public void getNotifsWithCursor(ESNotifs.NotificationCallback notificationCallback, String cursor);
+    public void getNotifsWithCursor(ESNotifs.GetNotificationsCallback getNotificationsCallback, String cursor);
 
-    public void getNewNotifs(ESNotifs.NotificationCallback notificationCallback);
+    public void getNewNotifs(ESNotifs.GetNotificationsCallback getNotificationsCallback);
+
+    public void getEncountersOfNotifs(List<ESNotifs.Notif> notifs, ESNotifs.GetEncountersOfNotifsCallback getEncountersOfNotifsCallback);
 
     /*public void enable_msging_channels();
 

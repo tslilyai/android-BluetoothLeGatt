@@ -7,7 +7,6 @@ import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.autorest.models.Reason;
-import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.data.model.DiscussionItem;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
 import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
@@ -24,7 +23,6 @@ import com.microsoft.embeddedsocial.service.WorkerService;
 import org.mpisws.sddrservice.lib.Utils;
 
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +50,7 @@ public class ESMsgs {
 
         TATyp typ;
         List<String> msgs;
-        MsgCallback msgCallback;
+        GetMessagesCallback getMessagesCallback;
         String eid;
 
         public TopicAction(TATyp typ, String eid, List<String> msgs) {
@@ -62,11 +60,11 @@ public class ESMsgs {
             this.msgs = msgs;
         }
 
-        public TopicAction(TATyp typ, String eid, MsgCallback msgCallback) {
+        public TopicAction(TATyp typ, String eid, GetMessagesCallback getMessagesCallback) {
             Utils.myAssert(typ == TATyp.GetMsgs);
             this.eid = eid;
             this.typ = typ;
-            this.msgCallback = msgCallback;
+            this.getMessagesCallback = getMessagesCallback;
         }
 
         public TopicAction(TATyp typ, String eid) {
@@ -103,7 +101,7 @@ public class ESMsgs {
         }
     }
 
-    public interface MsgCallback {
+    public interface GetMessagesCallback {
         void onReceiveMessage(Msg messages);
     }
 
@@ -279,7 +277,7 @@ public class ESMsgs {
             CommentView comment = (CommentView) obj;
             if (comment != reply_comment) {
                 Log.d(TAG, "Got comment " + comment.getCommentText());
-                ta.msgCallback.onReceiveMessage(new Msg(
+                ta.getMessagesCallback.onReceiveMessage(new Msg(
                         comment.getHandle(),
                         ContentType.COMMENT,
                         comment.getCommentText(),
@@ -309,7 +307,7 @@ public class ESMsgs {
                             }
                             ReplyView reply = (ReplyView) obj;
                             Log.d(TAG, "Got reply " + reply.getReplyText());
-                            ta.msgCallback.onReceiveMessage(new Msg(
+                            ta.getMessagesCallback.onReceiveMessage(new Msg(
                                     reply.getHandle(),
                                     ContentType.REPLY,
                                     reply.getReplyText(),

@@ -67,7 +67,7 @@ public class EncountersService implements IEncountersService {
 
     @Override
     public void addLinkableID(String linkID) {
-        if (!shouldRunCommand()) return;
+        if (!shouldRunCommand(true)) return;
         Log.v(TAG, "Adding linkID " + linkID);
 
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
@@ -78,81 +78,89 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public List<Identifier> getEncounters(Filter filter) {
-        if (!shouldRunCommand()) return null;
+    public List<String> getEncounters(Filter filter) {
+        if (!shouldRunCommand(true)) return null;
 
         /* TODO this can be made more efficient? */
         List<MEncounter> encounters = new EncounterBridge(context).getEncountersFiltered(filter);
-        List<Identifier> encounterIds = new LinkedList<>();
+        List<String> encounterIds = new LinkedList<>();
         for (MEncounter e : encounters) {
             List<Identifier> receivedEids = e.getEncounterIDs(context);
             if (receivedEids.size() > 0)
-                encounterIds.add(e.getEncounterIDs(context).get(0));
+                encounterIds.add(e.getEncounterIDs(context).get(0).toString());
         }
         return encounterIds;
     }
 
     @Override
     public void registerGoogleUser(String googletoken, String firstname, String lastname) {
-        if (!shouldRunCommand()) return;
+        if (!shouldRunCommand(false)) return;
         esUser.register_google_user(googletoken, firstname, lastname);
     }
 
     @Override
     public void signIn() {
-        if (!shouldRunCommand()) return;
+        if (!shouldRunCommand(false)) return;
         esUser.sign_in();
     }
 
     @Override
     public void signOut() {
-        if (!shouldRunCommand()) return;
+        if (!shouldRunCommand(true)) return;
         esUser.sign_out();
     }
 
     @Override
-    public void sendMsgs(Identifier encounterID, List<String> msgs) {
-        if (!shouldRunCommand()) return;
+    public void sendMsgs(String encounterID, List<String> msgs) {
+        if (!shouldRunCommand(true)) return;
         esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
-                ESMsgs.TopicAction.TATyp.SendMsg, encounterID.toString(), msgs));
+                ESMsgs.TopicAction.TATyp.SendMsg, encounterID, msgs));
     }
 
     @Override
-    public void getMsgsWithCursor(Identifier encounterID, ESMsgs.MsgCallback callback) {
-        if (!shouldRunCommand()) return;
+    public void getMsgsWithCursor(String encounterID, ESMsgs.GetMessagesCallback callback) {
+        if (!shouldRunCommand(true)) return;
     }
 
     @Override
-    public void getNewMsgs(Identifier encounterID, ESMsgs.MsgCallback callback) {
-        if (!shouldRunCommand()) return;
+    public void getNewMsgs(String encounterID, ESMsgs.GetMessagesCallback callback) {
+        if (!shouldRunCommand(true)) return;
     }
 
     @Override
     public void reportMsg(ESMsgs.Msg msg, Reason reason) {
-        if (!shouldRunCommand()) return;
+        if (!shouldRunCommand(true)) return;
         esMsgs.report_msg(msg, reason);
     }
 
     @Override
-    public void createEncounterMsgingChannel(Identifier encounterId) {
-        if (!shouldRunCommand()) return;
+    public void createEncounterMsgingChannel(String encounterId) {
+        if (!shouldRunCommand(true)) return;
         esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
-                ESMsgs.TopicAction.TATyp.CreateOnly, encounterId.toString()));
+                ESMsgs.TopicAction.TATyp.CreateOnly, encounterId));
     }
 
     @Override
-    public void getNotifsWithCursor(ESNotifs.NotificationCallback notificationCallback, String cursor) {
-        if (!shouldRunCommand()) return;
-        esNotifs.get_notifications_from_cursor(notificationCallback, cursor, false/*is_new*/);
+    public void getNotifsWithCursor(ESNotifs.GetNotificationsCallback getNotificationsCallback, String cursor) {
+        if (!shouldRunCommand(true)) return;
+        esNotifs.get_notifications_from_cursor(getNotificationsCallback, cursor, false/*is_new*/);
     }
 
     @Override
-    public void getNewNotifs(ESNotifs.NotificationCallback notificationCallback) {
-        if (!shouldRunCommand()) return;
-        esNotifs.get_notifications_from_cursor(notificationCallback, null, true/*is_new*/);
+    public void getNewNotifs(ESNotifs.GetNotificationsCallback getNotificationsCallback) {
+        if (!shouldRunCommand(true)) return;
+        esNotifs.get_notifications_from_cursor(getNotificationsCallback, null, true/*is_new*/);
     }
 
-    private boolean shouldRunCommand() {
-        return (isRunning && UserAccount.getInstance().isSignedIn());
+    @Override
+    public void getEncountersOfNotifs(List<ESNotifs.Notif> notifs, ESNotifs.GetEncountersOfNotifsCallback getEncountersOfNotifsCallback) {
+        if (!shouldRunCommand(true)) return;
+        esNotifs.get_encounters_of_notifications(notifs, getEncountersOfNotifsCallback);
+    }
+
+    private boolean shouldRunCommand(boolean should_be_signed_in) {
+        return (isRunning &&
+                ((should_be_signed_in && UserAccount.getInstance().isSignedIn())
+                    || (!should_be_signed_in)));
     }
 }

@@ -18,6 +18,10 @@ import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRespons
 import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicRequest;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
@@ -39,8 +43,8 @@ public class ESNotifs {
             this.activityView = activityView;
         }
 
-        public long getNotifTime() {
-            return activityView.getElapsedSeconds();
+        public boolean isNewerThan(Notif notif) {
+            return activityView.getHandle().compareTo(notif.getNotifCursor()) < 0;
         }
         public String getNotifCursor() {
             return activityView.getHandle();
@@ -52,12 +56,18 @@ public class ESNotifs {
         executorService = newCachedThreadPool();
     }
 
-    public interface NotificationCallback {
-        void onReceiveNotification(Notif notif);
+    public interface GetNotificationsCallback {
+        /* Called when new notifications are fetched */
+        void onReceiveNotifications(List<Notif> notifs);
+    }
+
+    public interface GetEncountersOfNotifsCallback {
+        /* Called when the encounters for a provided list of notifications are fetched */
+        void onReceiveEncounters(Set<String> encounterIds);
     }
 
     public void get_notifications_from_cursor(
-            NotificationCallback notificationCallback,
+            GetNotificationsCallback getNotificationsCallback,
             String cursor,
             boolean is_new)
     {
@@ -65,21 +75,25 @@ public class ESNotifs {
         Callback callback = new Callback() {
             @Override
             public void onStateChanged(FetcherState newState) {
+                List<Notif> notifications = new ArrayList<>();
                 super.onStateChanged(newState);
                 switch (newState) {
                     case LOADING:
                         break;
                     case LAST_ATTEMPT_FAILED:
+                        Log.d(TAG, "Last attempt failed");
                         notifFeedFetcher.requestMoreData();
                         break;
                     default: // ENDED or MORE_DATA
                         Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
+                        Log.d(TAG, "Found " + notifFeedFetcher.getAllData().size() + " notifs");
                         for (ActivityView av : notifFeedFetcher.getAllData()) {
                             if (!av.isUnread() && is_new) {
                                 break;
                             }
-                            notificationCallback.onReceiveNotification(new Notif(av));
+                            notifications.add(new Notif(av));
                         }
+                        getNotificationsCallback.onReceiveNotifications(notifications);
                 }
             }
         };
@@ -95,5 +109,45 @@ public class ESNotifs {
             }
             notifFeedFetcher.requestMoreData();
         }
+    }
+
+    public void get_encounters_of_notifications(List<Notif> notifs, GetEncountersOfNotifsCallback getEncountersOfNotifsCallback) {
+        IContentService contentService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
+        Runnable r = () -> {
+            Set<String> encounters = new HashSet<>();
+            for (Notif notif : notifs) {
+                ActivityView n = notif.activityView;
+
+                try {
+                    String eid;
+                    if (n.getActivityType() == ActivityType.REPLY) {
+                        Log.d(TAG, "Notification of type reply");
+                        final GetReplyRequest request = new GetReplyRequest(n.getHandle());
+                        GetReplyResponse response = contentService.getReply(request);
+
+                        final GetCommentRequest req = new GetCommentRequest(response.getReply().getCommentHandle());
+                        eid = contentService.getComment(req).getComment().getCommentText();
+                    } else if (n.getActivityType() == ActivityType.COMMENT) {
+                        Log.d(TAG, "Notification of type comment");
+                        final GetCommentRequest request = new GetCommentRequest(n.getHandle());
+                        GetCommentResponse response = contentService.getComment(request);
+
+                        final GetTopicRequest req = new GetTopicRequest(response.getComment().getTopicHandle());
+                        eid = contentService.getTopic(req).getTopic().getTopicTitle();
+
+                        if (eid.compareTo(response.getComment().getCommentText()) == 0) {
+                            Log.d(TAG, "This is the reply comment: " + response.getComment().getCommentText());
+                            continue;
+                        }
+                    } else {
+                        Log.e(TAG, "Notif of no known activity type!");
+                        continue;
+                    }
+                    encounters.add(eid);
+                } catch (NetworkRequestException e) {}
+            }
+            getEncountersOfNotifsCallback.onReceiveEncounters(encounters);
+        };
+        executorService.execute(r);
     }
 }
