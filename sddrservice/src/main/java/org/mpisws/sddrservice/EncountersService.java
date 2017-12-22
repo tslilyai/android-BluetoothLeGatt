@@ -28,6 +28,7 @@ import java.util.List;
 public class EncountersService implements IEncountersService {
     private static final String TAG = EncountersService.class.getSimpleName();
     private static final EncountersService instance = new EncountersService();
+    private EncountersService(){};
 
     public static class Filter {
         public Date start_date;
