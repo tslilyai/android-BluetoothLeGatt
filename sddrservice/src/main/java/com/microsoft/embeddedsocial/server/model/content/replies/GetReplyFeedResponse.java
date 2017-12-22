@@ -16,7 +16,6 @@ import java.util.List;
 public class GetReplyFeedResponse extends FeedUserResponse implements ListResponse<ReplyView> {
 
 	private List<ReplyView> replies;
-	private String cursor;
 
 	public GetReplyFeedResponse(List<ReplyView> replies) {
 		this.replies = replies;
@@ -27,12 +26,7 @@ public class GetReplyFeedResponse extends FeedUserResponse implements ListRespon
 		for (com.microsoft.embeddedsocial.autorest.models.ReplyView reply : response.getData()) {
 			replies.add(new ReplyView(reply));
 		}
-		cursor = response.getCursor();
-	}
-
-	@Override
-	public String getContinuationKey() {
-		return this.cursor;
+		setContinuationKey(response.getCursor());
 	}
 
 	@Override

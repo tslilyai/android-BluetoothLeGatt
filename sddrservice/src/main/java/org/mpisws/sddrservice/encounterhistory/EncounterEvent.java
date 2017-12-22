@@ -12,7 +12,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import org.mpisws.sddrservice.SDDR_API;
+import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.encounters.SDDR_Proto;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.FacebookEventStatus;
@@ -174,7 +174,7 @@ public abstract class EncounterEvent implements Serializable {
 
             // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
             Log.d(TAG, "Calling create topic for " + encounterID);
-            SDDR_API.create_topic(new Identifier(encounterID));
+            EncountersService.getInstance().createEncounterMsgingChannel(new Identifier(encounterID));
         }
     }
 

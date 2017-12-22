@@ -4,7 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.autorest.models.ContentType;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
+import com.microsoft.embeddedsocial.autorest.models.Reason;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.data.model.DiscussionItem;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
@@ -76,17 +78,17 @@ public class ESMsgs {
 
     public static class Msg {
         private String handle;
+        private ContentType typ;
         private String msg;
         private String eid;
         private boolean fromMe;
-        private long timestamp;
 
-        Msg(String handle, String msg, String eid, boolean fromMe, long timestamp) {
+        Msg(String handle, ContentType typ, String msg, String eid, boolean fromMe) {
             this.handle = handle;
+            this.typ = typ;
             this.msg = msg;
             this.eid = eid;
             this.fromMe = fromMe;
-            this.timestamp = timestamp;
         }
 
         public String getMsg() {
@@ -96,14 +98,17 @@ public class ESMsgs {
         public boolean isFromMe() {
             return fromMe;
         }
-        public long getTimestamp() {
-            return timestamp;
+        public boolean isNewerThan(Msg msg) {
+            return handle.compareTo(msg.handle) < 0;
         }
-        protected String getHandle() {return handle;}
     }
 
     public interface MsgCallback {
         void onReceiveMessage(Msg messages);
+    }
+
+    public void report_msg(Msg msg, Reason reason) {
+        new UserActionProxy(context).reportContent(msg.handle, msg.typ, reason);
     }
 
     public void sendUnsentMsgs() {
@@ -276,10 +281,11 @@ public class ESMsgs {
                 Log.d(TAG, "Got comment " + comment.getCommentText());
                 ta.msgCallback.onReceiveMessage(new Msg(
                         comment.getHandle(),
+                        ContentType.COMMENT,
                         comment.getCommentText(),
                         ta.eid,
-                        UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()),
-                        comment.getElapsedSeconds()));
+                        UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
+                );
             }
         }
 
@@ -305,10 +311,11 @@ public class ESMsgs {
                             Log.d(TAG, "Got reply " + reply.getReplyText());
                             ta.msgCallback.onReceiveMessage(new Msg(
                                     reply.getHandle(),
+                                    ContentType.REPLY,
                                     reply.getReplyText(),
                                     ta.eid,
-                                    UserAccount.getInstance().isCurrentUser(reply.getUser().getHandle()),
-                                    reply.getElapsedSeconds()));
+                                    UserAccount.getInstance().isCurrentUser(reply.getUser().getHandle()))
+                            );
                         }
                         break;
                     default:

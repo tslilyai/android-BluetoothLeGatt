@@ -29,6 +29,7 @@ public class ActivityFeedResponse extends FeedUserResponse implements ListRespon
 		for (com.microsoft.embeddedsocial.autorest.models.ActivityView view : response.getData()) {
 			activities.add(new ActivityView(view));
 		}
+		setContinuationKey(response.getCursor());
 	}
 
 	@Override

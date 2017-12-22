@@ -16,7 +16,6 @@ import java.util.List;
 public class GetCommentFeedResponse extends FeedUserResponse implements ListResponse<CommentView> {
 
 	private List<CommentView> comments;
-	private String cursor;
 
 	public GetCommentFeedResponse(List<CommentView> comments) {
 		this.comments = comments;
@@ -27,12 +26,7 @@ public class GetCommentFeedResponse extends FeedUserResponse implements ListResp
 		for (com.microsoft.embeddedsocial.autorest.models.CommentView comment : response.getData()) {
 			comments.add(new CommentView(comment));
 		}
-		this.cursor = response.getCursor();
-	}
-
-	@Override
-	public String getContinuationKey() {
-		return this.cursor;
+		setContinuationKey(response.getCursor());
 	}
 
 	@Override

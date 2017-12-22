@@ -29,16 +29,10 @@ import java.util.List;
  * Created by tslilyai on 12/8/17.
  */
 
-public class ESCore {
-    private final Context context;
-    private final ESMsgs esMsgs;
-    private final ESNotifs esNotifs;
-
+public class ESUser {
     private SocialNetworkAccount socialNetworkAccount;
-    private int defaultCreateMsgChannels;
 
-    public ESCore(Context context) {
-        this.context = context;
+    public ESUser(Context context) {
         Options options = new Options(context.getString(R.string.es_api_key), context.getString(R.string.es_server_url));
         options.verify();
 
@@ -57,23 +51,16 @@ public class ESCore {
         NetworkAvailability networkAccessibility = new NetworkAvailability();
         networkAccessibility.startMonitoring(context);
         GlobalObjectRegistry.addObject(networkAccessibility);
-        // TODO gcm?
         WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
-
-        esMsgs = new ESMsgs(context);
-        esNotifs = new ESNotifs();
-        this.defaultCreateMsgChannels = 0;
     }
 
     public void setDefaultCreateMsgChannels() {
-        defaultCreateMsgChannels++;
     }
 
     public void unsetDefaultCreateMsgChannels() {
-        defaultCreateMsgChannels--;
     }
 
-    public void register_user_details(String googletoken, String firstname, String lastname) {
+    public void register_google_user(String googletoken, String firstname, String lastname) {
         AccountData accountData = new AccountData();
         accountData.setFirstName(firstname);
         accountData.setLastName(lastname);
@@ -84,48 +71,11 @@ public class ESCore {
     }
 
     public void sign_in() {
-        GlobalObjectRegistry.getObject(UserAccount.class).signInUsingThirdParty(socialNetworkAccount);
+        if (UserAccount.getInstance().isSignedIn()) return;
+        else GlobalObjectRegistry.getObject(UserAccount.class).signInUsingThirdParty(socialNetworkAccount);
     }
 
     public void sign_out() {
         GlobalObjectRegistry.getObject(UserAccount.class).signOut();
-    }
-
-    public void create_topic(String eid) {
-        if (!UserAccount.getInstance().isSignedIn()) {
-            return;
-        }
-        if (defaultCreateMsgChannels > 0) {
-            esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.CreateOnly, eid));
-        }
-    }
-
-    public void send_msgs(String eid, List<String> msgs) {
-        if (!UserAccount.getInstance().isSignedIn()) {
-            return;
-        }
-        esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, eid, msgs));
-    }
-
-    public void get_msgs(String eid, ESMsgs.MsgCallback msgsCallback) {
-        if (!UserAccount.getInstance().isSignedIn()) {
-            return;
-        }
-        esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.GetMsgs, eid, msgsCallback));
-    }
-
-    public void get_new_notifications(ESNotifs.NotificationCallback notificationCallback) {
-        if (!UserAccount.getInstance().isSignedIn()) return;
-        esNotifs.get_notifications_from_cursor(notificationCallback, null, true /*is_new*/);
-    }
-
-    public void get_notifications_from_cursor(ESNotifs.NotificationCallback notificationCallback, String cursor) {
-        if (!UserAccount.getInstance().isSignedIn()) return;
-        esNotifs.get_notifications_from_cursor(notificationCallback, cursor, false /*is_new*/);
-    }
-
-    public void get_msg_of_notification(ESNotifs.Notif notif, ESMsgs.MsgCallback msgCallback) {
-        if (!UserAccount.getInstance().isSignedIn()) return;
-        esNotifs.get_msg_of_notification(notif, msgCallback);
     }
 }

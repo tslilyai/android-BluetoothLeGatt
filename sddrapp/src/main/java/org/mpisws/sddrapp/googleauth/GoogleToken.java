@@ -2,7 +2,7 @@ package org.mpisws.sddrapp.googleauth;
 
 import android.util.Log;
 
-import org.mpisws.sddrservice.SDDR_API;
+import org.mpisws.sddrservice.EncountersService;
 
 /**
  * Created by tslilyai on 11/14/17.
@@ -19,6 +19,6 @@ public class GoogleToken {
         Log.v(TAG, "Set access token " + newtoken);
         token = newtoken;
         Log.v(TAG, "Registering with SDDR with new token");
-        SDDR_API.register_user(GoogleToken.getToken(), "Lily", "Tsai");
+        EncountersService.getInstance().registerGoogleUser(GoogleToken.getToken(), "Lily", "Tsai");
     }
 }

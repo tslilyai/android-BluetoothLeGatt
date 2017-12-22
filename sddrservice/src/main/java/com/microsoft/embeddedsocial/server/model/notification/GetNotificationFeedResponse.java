@@ -26,9 +26,7 @@ public class GetNotificationFeedResponse extends FeedUserResponse implements Lis
 
 	public GetNotificationFeedResponse(List<ActivityView> activities) {
 		this.activities = activities;
-
-		// XXX fix setting this handle not sure if this is right
-		this.deliveredActivityHandle = activities.get(activities.size()-1).getHandle();
+		this.deliveredActivityHandle = activities.get(0).getHandle();
 	}
 
 	public GetNotificationFeedResponse (FeedResponseActivityView response) {
@@ -38,14 +36,10 @@ public class GetNotificationFeedResponse extends FeedUserResponse implements Lis
 			if (deliveredActivityHandle == null || view.getActivityHandle().compareTo(deliveredActivityHandle) < 0)
 				deliveredActivityHandle = view.getActivityHandle();
 		}
-		this.cursor = response.getCursor();
+		setContinuationKey(response.getCursor());
+		Utils.myAssert(this.deliveredActivityHandle == activities.get(0).getHandle());
 		Utils.myAssert(deliveredActivityHandle.compareTo(this.cursor) < 0);
 		Log.d("NOTIFS", "Got cursor " + cursor);
-	}
-
-	@Override
-	public String getContinuationKey() {
-		return this.cursor;
 	}
 
 	@Override

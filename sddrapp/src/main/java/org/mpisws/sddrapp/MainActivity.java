@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,19 +24,19 @@ import android.widget.Toast;
 import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
-import org.mpisws.sddrservice.SDDR_API;
+import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final String TAG = "SDDR_API: " + MainActivity.class.getSimpleName();
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static Handler handler;
+    private static EncountersService encountersService = EncountersService.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +51,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, mPendingIntent);
             System.exit(0);
         }
-        SDDR_API.start_service(this);
-        SDDR_API.enable_msging_channels();
+        encountersService.startEncounterService(this);
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
@@ -75,19 +73,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (v.getId()) {
             case R.id.AddLink:
-                EditText linkID = MainActivity.this.findViewById(R.id.linkID);
-                SDDR_API.add_linkid(linkID.getText().toString());
                 break;
             case R.id.SendMsg:
                 final EditText msg = MainActivity.this.findViewById(R.id.Msg);
-                List<Identifier> encounters = SDDR_API.get_encounters(null);
+                List<Identifier> encounters = encountersService.getEncounters(null);
                 if (encounters.size() > 0) {
                     Log.d(TAG, "Sending message " + msg.getText().toString() + " for " + encounters.size() + " encounters");
                     List<String> list = new LinkedList<>();
                     for (int i = 0; i < 100; i++)
                         list.add(msg.getText().toString() + i);
                     for (Identifier e : encounters) {
-                        SDDR_API.send_msgs(testEid, list);
+                        encountersService.sendMsgs(testEid, list);
                     }
                 }
                 break;
@@ -97,12 +93,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();
                 } else {
-                    SDDR_API.sign_in();
-                    SDDR_API.create_topic(testEid);
+                    encountersService.signIn();
+                    encountersService.createEncounterMsgingChannel(testEid);
                 }
                 break;
             case R.id.sign_out_button:
-                SDDR_API.sign_out();
+                encountersService.signOut();
                 break;
             case R.id.get_notifs_old:
                Log.d(TAG, "Getting notifs old");
@@ -118,8 +114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 } else {
                                     notiftext.append(msg.getEid().toString() + ": ");
                                 }
-                                notiftext.append(msg.getMsg());
-                                notiftext.append("\t" + msg.getTimestamp() + "\n");
+                                notiftext.append(msg.getMsg() + '\n');
                             }
                         });
                     }
@@ -127,11 +122,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ESNotifs.NotificationCallback notifcallback1 = new ESNotifs.NotificationCallback() {
                     @Override
                     public void onReceiveNotification(ESNotifs.Notif notif) {
-                        SDDR_API.get_msg_of_notification(notif, callback);
                         notifCursor[0] = notif.getNotifCursor();
                     }
                 };
-                SDDR_API.get_notifications_from_cursor(notifcallback1, notifCursor[0]);
+                encountersService.getNotifsWithCursor(notifcallback1, notifCursor[0]);
                 break;
             case R.id.get_notifs_new:
                 notiftext.setText("");
@@ -148,8 +142,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 } else {
                                     text.append(msg.getEid().toString() + ": ");
                                 }
-                                text.append(msg.getMsg());
-                                text.append("\t" + msg.getTimestamp() + "\n");
+                                text.append(msg.getMsg() + '\n');
                             }
                         });
                     }
@@ -157,40 +150,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ESNotifs.NotificationCallback notifcallback2 = new ESNotifs.NotificationCallback() {
                     @Override
                     public void onReceiveNotification(ESNotifs.Notif notif) {
-                        SDDR_API.get_msg_of_notification(notif, callback3);
                         notifCursor[0] = notif.getNotifCursor();
                     }
                 };
-                SDDR_API.get_new_notifications(notifcallback2);
+                encountersService.getNewNotifs(notifcallback2);
                 break;
 
             case R.id.get_msgs:
-                /*Log.d(TAG, "Getting messages");
-                final List<Identifier> encounters2 = SDDR_API.get_encounters(null);
-                Log.d(TAG, "Getting messages for " + encounters2.size() + " encounters");
-                if (encounters2.size() > 0) {
-                   for (Identifier e : encounters2) {
-                       final Identifier e1 = e;
-                       ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
-                            @Override
-                            public void onReceiveMessage(final ESMsgs.Msg msg) {
-                                handler.post(new Runnable() {
-                                    public void run() {
-                                        final TextView text = MainActivity.this.findViewById(R.id.new_messages);
-                                        if ((msg.isFromMe())) {
-                                            text.append("Me: ");
-                                        } else {
-                                            text.append(e1.toString() + ": ");
-                                        }
-                                        text.append(msg.getMsg());
-                                        text.append("\t" + msg.getTimestamp() + "\n");
-                                    }
-                                });
-                            }
-                        };
-                        SDDR_API.get_msgs(e, callback2);
-                    }
-                }*/
                 msgtext.setText("");
                 ESMsgs.MsgCallback callback2 = new ESMsgs.MsgCallback() {
                     @Override
@@ -203,12 +169,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     msgtext.append(msg.getEid() + ": ");
                                 }
                                 msgtext.append(msg.getMsg());
-                                msgtext.append("\t" + msg.getTimestamp() + "\n");
                             }
                         });
                     }
                 };
-                SDDR_API.get_msgs(testEid, callback2);
+                encountersService.getNewMsgs(testEid, callback2);
         break;
             default:
                 // Unknown id.
@@ -220,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onActivityResult (int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_CANCELED) {
             Log.d(TAG, "Bluetooth not enabled");
-            Toast.makeText(this, "Exiting SDDR_API: Bluetooth required", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Exiting encountersService: Bluetooth required", Toast.LENGTH_SHORT).show();
             finishAndRemoveTask();
         } else {
             Toast.makeText(this, "Bad Response", Toast.LENGTH_SHORT).show();
@@ -241,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 };
                 new AlertDialog.Builder(MainActivity.this)
-                        .setMessage("SDDR_API requires location access for Bluetooth protocol; please grant and then restart the application (Note to self: this should be handled better by the actual application using the library)")
+                        .setMessage("encountersService requires location access for Bluetooth protocol; please grant and then restart the application (Note to self: this should be handled better by the actual application using the library)")
                         .setPositiveButton("OK", listener)
                         .setNegativeButton("Cancel", null)
                         .create()
@@ -265,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     // permission denied!
                     Log.d(TAG, "No access to fine location");
-                    Toast.makeText(this, "Exiting SDDR_API: Location access required", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Exiting encountersService: Location access required", Toast.LENGTH_SHORT).show();
                     finishAndRemoveTask();
                 }
                 return;

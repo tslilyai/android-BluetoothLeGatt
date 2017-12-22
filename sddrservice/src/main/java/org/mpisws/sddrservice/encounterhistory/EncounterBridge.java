@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.util.Log;
 
-import org.mpisws.sddrservice.SDDR_API;
+import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.dbplatform.AbstractBridge;
 import org.mpisws.sddrservice.dbplatform.JavaItemFilter;
 import org.mpisws.sddrservice.dbplatform.PersistenceModel;
@@ -107,7 +107,7 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
      * Gets all encounters that overlap with the requested filtered results. Not efficient since it's filtering the results after
      * retrieving them.
      */
-    public List<MEncounter> getEncountersFiltered(final SDDR_API.Filter filter) {
+    public List<MEncounter> getEncountersFiltered(final EncountersService.Filter filter) {
         if (filter == null) {
             return getAllItems();
         }
