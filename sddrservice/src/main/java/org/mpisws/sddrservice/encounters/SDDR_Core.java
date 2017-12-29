@@ -154,14 +154,6 @@ public class SDDR_Core implements Runnable {
         mScanner.stopScanning();
     }
 
-    private boolean hasConnectivity() {
-        ConnectivityManager cm =
-                (ConnectivityManager)mService.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-
-    }
-
     protected void addNewLink(Identifier id, LinkabilityEntryMode mode) {
         addNewLinkabilityEntryIfAbsent(new MLinkabilityEntry(null, id, id.toString(), mode, 0));
         mLinks = mLinkBridge.getAllItems();

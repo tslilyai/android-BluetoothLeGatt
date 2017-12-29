@@ -59,6 +59,10 @@ public class UserAccount {
 		return ActionsLauncher.signInUsingThirdParty(context, thirdPartyAccount);
 	}
 
+	public void deleteAccount() {
+		ActionsLauncher.deleteAccount(context);
+	}
+
 	/**
 	 * Called on sign-in process completed.
 	 * @param newUserHandle current user's handle

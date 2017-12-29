@@ -1,12 +1,14 @@
 package org.mpisws.sddrservice;
 
 import android.content.Context;
+import android.location.Location;
 
 import com.microsoft.embeddedsocial.autorest.models.Reason;
 
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,6 +21,32 @@ import java.util.List;
  * of class EncountersService. All interface functions can be invoked on the object.
  */
 public interface IEncountersService {
+
+    public static class Filter {
+        private Date start_date;
+        private Date end_date;
+        private Location location;
+        private float radius;
+        private List<String> matches;
+
+        Filter() {};
+        public void setTimeInterval(Date start_date, Date end_date) {
+            this.start_date = start_date;
+            this.end_date = end_date;
+        }
+        public void setCircularRegion(Location location, float radius) {
+            this.location = location;
+            this.radius = radius;
+        }
+        public void setMatches(List<String> matches) {
+            this.matches = matches;
+        }
+    }
+
+    public enum GetNotificationsRequestFlag {
+        ONLY_UNREAD,
+        ALL
+    }
 
     /**
      * Starts up the encounter-formation service that begins encounter formation
@@ -52,16 +80,20 @@ public interface IEncountersService {
 
 
     /**
-     * Registers user details using a google token and the user's name.
+     * Register a google token to use to sign in the user.
      *
      * @param googletoken the authentication token retrieved from the Google OAuth service
-     * @param firstname user's first name
-     * @param lastname user's last name
      */
-    public void registerGoogleUser(String googletoken, String firstname, String lastname);
+    public void registerGoogleUser(String googletoken);
 
     /**
-     * Uses the registered user's details to create (if not created) or sign into their Encounters account
+     * Determines if the user is signed in; if false, the user must be registered with Google again
+     * @return a boolean representing whether the user is signed in or not
+     */
+    public boolean isSignedIn();
+
+    /**
+     * Uses the registered user's details to create an account (if not created) or sign into their Encounters account
      */
     public void signIn();
 
@@ -71,30 +103,38 @@ public interface IEncountersService {
     public void signOut();
 
     /**
-     * Sends a list of messages to the specified encounter.
-     * @param encounterID the String name for the encounter
-     * @param msgs a list of Strings that represent the messages to be sent to this encounter
+     * Deletes the currently-logged-in user's account and the user's content.
      */
-    public void sendMsgs(String encounterID, List<String> msgs);
+    public void deleteAccount();
 
     /**
-     * Gets the messages of this encounter from a given point in the encounter thread, and invokes
-     * the GetMessagesCallback parameter on the retrieved list.
+     * Sends a message to the specified encounter.
      *
      * @param encounterID the String name for the encounter
-     * @param getMessagesCallback a callback to be called with the list of retrieved messages
-     * @param cursor the point in the thread at which to start retrieving messages; each message is associated with a cursor (see the getCursor() method for a Msg)
+     * @param msg a string that represents the message to be sent to this encounter
      */
-    public void getMsgsWithCursor(String encounterID, ESMsgs.GetMessagesCallback getMessagesCallback, String cursor);
+    public void sendMsg(String encounterID, String msg);
 
     /**
      * Gets the newest messages of this encounter thread, and invokes
      * the GetMessagesCallback parameter on the retrieved list.
      *
      * @param encounterID the String name for the encounter
+     * @param thresholdMessageAge a timestamp (ms) representing the oldest message to be retrieved
      * @param getMessagesCallback a callback to be called with the list of retrieved messages
      */
-    public void getNewMsgs(String encounterID, ESMsgs.GetMessagesCallback getMessagesCallback);
+    public void getMsgsFromBeginning(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback);
+
+    /**
+     * Gets the messages of this encounter from a given point in the encounter thread, and invokes
+     * the GetMessagesCallback parameter on the retrieved list.
+     *
+     * @param encounterID the String name for the encounter
+     * @param thresholdMessageAge a timestamp (ms) representing the oldest message to be retrieved
+     * @param getMessagesCallback a callback to be called with the list of retrieved messages
+     * @param cursor the point in the thread at which to start retrieving messages; each message is associated with a cursor (see the getCursor() method for a Msg)
+     */
+    public void getMsgsFromCursor(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback, String cursor);
 
     /**
      * Report a particular message for its content.
@@ -104,40 +144,77 @@ public interface IEncountersService {
     public void reportMsg(ESMsgs.Msg msg, Reason reason);
 
     /**
-     * Gets the notifications a given point in the notifications feed, and invokes
+     * Gets a page of notifications in the notifications feed from the newest notification, and invokes
      * the GetNotificationsCallback parameter on the retrieved list.
      *
-     * @param getNotificationsCallback a callback to be called with the list of retrieved notifications
-     * @param cursor the point in the feed at which to start retrieving notifications; each notification is associated with a cursor (see the getCursor() method for a Notif)
+     * @param getNotificationsCallback a callback to be called with the page of retrieved notifications
+     * @param flag Indicates the type of notifications to be fetched
      */
-    public void getNotifsWithCursor(ESNotifs.GetNotificationsCallback getNotificationsCallback, String cursor);
+    public void getNotificationsFromBeginning(ESNotifs.GetNotificationsCallback getNotificationsCallback, GetNotificationsRequestFlag flag);
 
     /**
-     * Gets the newest notifications in the notifications feed, and invokes
+     * Gets a page of notifications in the notifications feed from the given cursor, and invokes
      * the GetNotificationsCallback parameter on the retrieved list.
      *
-     * @param getNotificationsCallback a callback to be called with the list of retrieved notifications
+     * @param getNotificationsCallback a callback to be called with the page of retrieved notifications
+     * @param flag indicates the type of notifications to be fetched
+     * @param cursor a string corresponding to the first notification from where notifications should be retrieved
      */
-    public void getNewNotifs(ESNotifs.GetNotificationsCallback getNotificationsCallback);
+    public void getNotificationsWithCursor(ESNotifs.GetNotificationsCallback getNotificationsCallback, GetNotificationsRequestFlag flag, String cursor);
 
     /**
-     * Gets the set of encounter names associated with the provided list of notifications (i.e., encounter names for which
-     * the user has received a message), and invokes the GetEncountersOfNotifsCallback parameter on the retrieved set.
+     * Gets the messages associated with each notification in the provided list. All messages that exist in the encounter topic
+     * associated with the notification, and occurred at or after the time of the notification, are retrieved. The
+     * callback is invoked on the retrieved list of messages for each notification.
      *
      * @param notifs the notifications for which their corresponding encounters will be retrieved
-     * @param getEncountersOfNotifsCallback a callback to be called with the set of retrieved encounter names
+     * @param getMessagesCallback a callback to be called with the messages for the notification
      */
-    public void getEncountersOfNotifs(List<ESNotifs.Notif> notifs, ESNotifs.GetEncountersOfNotifsCallback getEncountersOfNotifsCallback);
+    public void getMessagesFromNotifications(List<ESNotifs.Notif> notifs, ESMsgs.GetMessagesCallback getMessagesCallback);
 
     /**
-     * Creates a thread to communicate with this particular encounter
+     * Marks all notifications prior to and including the specified notification as read.
+     *
+     * @param notif the notification that sets the upper bound on read notifications
+     */
+    public void markAllPreviousNotificationsAsRead(ESNotifs.Notif notif);
+
+    /**
+     * Creates a topic for communication with this particular encounter
      *
      * @param encounterID the String name for the encounter
      */
-     public void createEncounterMsgingChannel(String encounterID);
+    public void createEncounterMsgingChannel(String encounterID);
 
-    /*public void enable_msging_channels();
+    /**
+     * Sends a message to all encounters that meet the requirement specified by filter,
+     * and additionally indicates that those encounters should forward the message to any
+     * of their encounters that fit the filter. This forwarding continues within the bounds of the filter..
+     *
+     * @param msg a string representing the message to be sent
+     * @param filter a filter to specify the time interval, location range, and/or link matches
+     *               of encounters to which the message should be forwarded
+     */
+    public void sendBroadcastMsg(String msg, EncountersService.Filter filter);
 
-    public void disable_msging_channels();*/
+    /**
+     * Sends a message to all encounters that meet the requirement specified by filter,
+     * and additionally indicates that those encounters should forward the message to any
+     * of their encounters that fit the filter. This forwarding continues for the specified
+     * number of encounter hops.
+     *
+     * @param msg a string representing the message to be sent
+     * @param filter a filter to specify the time interval, location range, and/or link matches
+     *               of encounters to which the message should be forwarded
+     * @param numHopsThreshold the limit of the number of hops this message should be sent
+     */
+    public void sendBroadcastMsg(String msg, EncountersService.Filter filter, int numHopsThreshold);
+
+    /**
+     * Processes a message to see if it should be broadcasted
+     *
+     * @param msg the message to be processed
+     */
+    public void processMessageForBroadcasts(ESMsgs.Msg msg);
 
 }

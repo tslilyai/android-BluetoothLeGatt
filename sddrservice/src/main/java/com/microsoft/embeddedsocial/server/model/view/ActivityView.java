@@ -153,6 +153,10 @@ public class ActivityView implements UniqueItem, TimedItem {
 		return TimeUtils.elapsedSeconds(createdTime);
 	}
 
+	public long getCreatedTime() {
+		return createdTime;
+	}
+
 	public void setActorUsers(List<UserCompactView> actors) {
 		this.actorUsers = actors;
 	}

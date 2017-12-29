@@ -19,6 +19,9 @@ import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
+import org.mpisws.sddrservice.EncountersService;
+import org.mpisws.sddrservice.encounterhistory.MEncounter;
+import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.lib.Utils;
 
 import java.sql.SQLException;
@@ -35,13 +38,16 @@ import static com.microsoft.embeddedsocial.fetcher.base.FetcherState.DATA_ENDED;
 public class ESMsgs {
     private static final String TAG = ESMsgs.class.getSimpleName();
     private static final String DUMMY_TOPIC_TEXT = "DummyTopicText";
+    private static final long THRESHOLD_BUFFER_MS = 1000;
     private final PostStorage postStorage;
     private final Context context;
+    private final SSBridge ssBridge;
     private final Object lock = new Object();
 
     public ESMsgs(Context context) {
         this.context = context;
         postStorage = new PostStorage(context);
+        ssBridge = new SSBridge(context);
     }
 
     public static class TopicAction     {
@@ -52,25 +58,26 @@ public class ESMsgs {
         }
 
         TATyp typ;
-        List<String> msgs;
+        String msg;
         GetMessagesCallback getMessagesCallback;
         String eid;
         String cursor;
-        boolean isNew;
+        long thresholdAge;
 
-        public TopicAction(TATyp typ, String eid, List<String> msgs) {
+        public TopicAction(TATyp typ, String eid, String msg) {
             Utils.myAssert(typ == TATyp.SendMsg);
             this.eid = eid;
             this.typ = typ;
-            this.msgs = msgs;
+            this.msg = msg;
         }
 
-        public TopicAction(TATyp typ, String eid, String cursor, boolean isNew, GetMessagesCallback getMessagesCallback) {
+        public TopicAction(TATyp typ, long thresholdAge, String eid, String cursor,
+                           GetMessagesCallback getMessagesCallback) {
             Utils.myAssert(typ == TATyp.GetMsgs);
             this.eid = eid;
             this.typ = typ;
             this.cursor = cursor;
-            this.isNew = isNew;
+            this.thresholdAge = thresholdAge;
             this.getMessagesCallback = getMessagesCallback;
         }
 
@@ -82,15 +89,17 @@ public class ESMsgs {
     }
 
     public static class Msg {
-        private String handle;
         private ContentType typ;
+        private long createdTime;
+        private String handle;
         private String msg;
         private String eid;
         private boolean fromMe;
 
-        Msg(String handle, ContentType typ, String msg, String eid, boolean fromMe) {
+        Msg(ContentType typ, long createdTime, String handle, String msg, String eid, boolean fromMe) {
             this.handle = handle;
             this.typ = typ;
+            this.createdTime = createdTime;
             this.msg = msg;
             this.eid = eid;
             this.fromMe = fromMe;
@@ -103,8 +112,8 @@ public class ESMsgs {
         public boolean isFromMe() {
             return fromMe;
         }
-        public boolean isNewerThan(Msg msg) {
-            return handle.compareTo(msg.handle) < 0;
+        public boolean isNewerThan(long time) {
+            return createdTime > time;
         }
         public String getCursor() {
             return handle;
@@ -123,7 +132,9 @@ public class ESMsgs {
         Map<String, List<String>> unsentMsgs = UserAccount.getInstance().getAccountDetails().getUnsentMsgs();
         synchronized(lock) {
             for (String eid : unsentMsgs.keySet()) {
-                find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, eid, unsentMsgs.get(eid)));
+                for (String msg : unsentMsgs.get(eid)) {
+                    find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, eid, msg));
+                }
                 unsentMsgs.remove(eid);
             }
         }
@@ -160,7 +171,7 @@ public class ESMsgs {
             // store the message to be sent.
             if (ta.typ == TopicAction.TATyp.SendMsg) {
                 synchronized(lock) {
-                    UserAccount.getInstance().getAccountDetails().addUnsentMsgs(ta.eid, ta.msgs);
+                    UserAccount.getInstance().getAccountDetails().addUnsentMsg(ta.eid, ta.msg);
                 }
             }
             // Remember that we're trying to create this topic so we don't create it twice. Then
@@ -273,10 +284,9 @@ public class ESMsgs {
                 }
                 case SendMsg: {
                     boolean is_my_topic = UserAccount.getInstance().isCurrentUser(topic.getUser().getHandle()) ? true : false;
-                    for (String msg : ta.msgs) {
-                        postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), msg, null));
-                        Log.d(TAG, "Send comment for " + topic.getTopicTitle());
-                    }
+                    String encrypted_msg = Utils.encrypt(ta.msg, ssBridge.getSharedSecretByEncounterID(ta.eid));
+                    postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), encrypted_msg, null));
+                    Log.d(TAG, "Send comment for " + topic.getTopicTitle());
                     if (is_my_topic && replyCommentHandle != null) {
                         postStorage.storeDiscussionItem(DiscussionItem.newReply(replyCommentHandle, "Notify"));
                         Log.d(TAG, "Send reply to notify for " + topic.getTopicTitle());
@@ -293,8 +303,8 @@ public class ESMsgs {
 
     private void get_msgs_helper(TopicAction ta, TopicView topic) {
         Fetcher<Object> commentFeedFetcher = FetchersFactory.createCommentFeedFetcher(topic.getHandle(), topic);
-         if (commentFeedFetcher.isLoading()) { return; }
-         Callback callback = new Callback() {
+        if (commentFeedFetcher.isLoading()) { return; }
+        Callback callback = new Callback() {
             @Override
             public void onStateChanged(FetcherState newState) {
                 List<Msg> comments = new ArrayList<>();
@@ -309,32 +319,44 @@ public class ESMsgs {
                     default: // ENDED or MORE_DATA
                         Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
                         Log.d(TAG, "Found " + commentFeedFetcher.getAllData().size() + " comments");
+
+                        boolean pastThreshold = false;
                         for (Object obj : commentFeedFetcher.getAllData()) {
                             if (CommentView.class.isInstance(obj)) {
                                 CommentView comment = CommentView.class.cast(obj);
-                                comments.add(new Msg(
-                                        comment.getHandle(),
-                                        ContentType.COMMENT,
-                                        comment.getCommentText(),
-                                        topic.getTopicTitle(),
-                                        UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
-                                );
+                                if (comment.getCreatedTime() < ta.thresholdAge - THRESHOLD_BUFFER_MS) {
+                                    pastThreshold = true;
+                                    break;
+                                } else {
+                                    String decrypted_msg = Utils.decrypt(comment.getCommentText(), ssBridge.getSharedSecretByEncounterID(ta.eid));
+                                    comments.add(new Msg(
+                                            ContentType.COMMENT,
+                                            comment.getCreatedTime(),
+                                            comment.getHandle(),
+                                            decrypted_msg,
+                                            topic.getTopicTitle(),
+                                            UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
+                                    );
+                                }
                             }
                         }
-                        ta.getMessagesCallback.onReceiveMessages(comments);
+                        if (pastThreshold || newState == FetcherState.DATA_ENDED)
+                            ta.getMessagesCallback.onReceiveMessages(comments);
+                        else {
+                            commentFeedFetcher.clearData();
+                            commentFeedFetcher.requestMoreData();
+                        }
                 }
             }
         };
         commentFeedFetcher.setCallbackSilent(callback);
         commentFeedFetcher.clearData();
 
-        if (ta.isNew) {
+        if (ta.cursor != null) {
             // this will call the callback after a new page is gotten from the beginning
             commentFeedFetcher.refreshData();
         } else if (commentFeedFetcher.hasMoreData()) {
-            if (ta.cursor != null) {
-                commentFeedFetcher.setCursor(ta.cursor);
-            }
+            commentFeedFetcher.setCursor(ta.cursor);
             commentFeedFetcher.requestMoreData();
         }
     }

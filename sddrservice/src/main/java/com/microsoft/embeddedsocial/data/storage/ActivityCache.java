@@ -280,7 +280,6 @@ public class ActivityCache {
 		 */
 		public boolean isActivityUnread(String activityHandle) {
 			String lastActivityHandle = getLastActivityHandle();
-			Log.d("NOTIFS", "Last activity handle in cache is " + getLastActivityHandle());
 			return TextUtils.isEmpty(lastActivityHandle)
 				|| activityHandle.compareTo(lastActivityHandle) < 0;
 		}

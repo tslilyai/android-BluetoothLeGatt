@@ -28,7 +28,9 @@ public interface INotificationService {
 	GetNotificationFeedResponse getNotificationFeed(GetNotificationFeedRequest request)
 			throws NetworkRequestException;
 
-	Response registerPushNotification(RegisterPushNotificationRequest request)
+    void updateReadNotifications(String latestHandle);
+
+    Response registerPushNotification(RegisterPushNotificationRequest request)
 			throws NetworkRequestException;
 
 	Response unregisterPushNotification(UnRegisterPushNotificationRequest request)

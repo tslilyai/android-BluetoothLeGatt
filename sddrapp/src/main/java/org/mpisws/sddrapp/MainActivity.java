@@ -28,7 +28,6 @@ import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
-import org.mpisws.sddrservice.lib.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             System.exit(0);
         }
         encountersService.startEncounterService(this);
-
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.get_notifs_old).setOnClickListener(this);
@@ -120,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 encountersService.sendMsgs(testEid, list);
                 break;
             case R.id.sign_in_button:
-                if (GoogleToken.getToken() == null) {
+                if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
                     Log.d(TAG, "Not registered with Google yet");
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();

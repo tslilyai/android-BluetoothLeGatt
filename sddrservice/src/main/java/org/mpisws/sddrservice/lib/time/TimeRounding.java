@@ -66,10 +66,10 @@ public class TimeRounding {
 
         Utils.myAssert(distanceFromPlus < TimeConversion.min2ms(6),
                 "TimeRounding: distanceFromPlus too big: cPlus " + cPlus.getTimeInMillis()
-                + " orig " + timeInMillis + " distance " + distanceFromPlus);
+                + " orig " + timeInMillis + " radius " + distanceFromPlus);
         Utils.myAssert(distanceFromMinus < TimeConversion.min2ms(6),
                 "TimeRounding: distanceFromMinus too big: cMinus " + cMinus.getTimeInMillis()
-                + " orig " + timeInMillis + " distance " + distanceFromMinus);
+                + " orig " + timeInMillis + " radius " + distanceFromMinus);
 
         final Calendar result = (distanceFromPlus <= distanceFromMinus) ? cPlus : cMinus;
         return result.getTimeInMillis();

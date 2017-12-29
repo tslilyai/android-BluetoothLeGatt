@@ -183,12 +183,12 @@ public class AccountData implements Parcelable {
 		this.followedStatus = followedStatus;
 	}
 
-	public void addUnsentMsgs(String eid, List<String> msgs) {
-		Log.d(TAG, "Adding " + msgs.size() + " unsent messages to " + eid);
+	public void addUnsentMsg(String eid, String msg) {
+		Log.d(TAG, "Adding " + msg + " unsent for " + eid);
 		if (!unsentMsgs.containsKey(eid)) {
 			this.unsentMsgs.put(eid, new LinkedList<>());
 		}
-		unsentMsgs.get(eid).addAll(msgs);
+		unsentMsgs.get(eid).add(msg);
 	}
 
 	public Map<String, List<String>> getUnsentMsgs() {

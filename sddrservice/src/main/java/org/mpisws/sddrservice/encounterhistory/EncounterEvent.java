@@ -173,7 +173,7 @@ public abstract class EncounterEvent implements Serializable {
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
 
             // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
-            Log.d(TAG, "Calling create topic for " + eid.toString());
+            Log.d(TAG, "Create topic for " + eid.toString());
             EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
         }
     }

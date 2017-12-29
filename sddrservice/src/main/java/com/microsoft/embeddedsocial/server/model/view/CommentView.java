@@ -153,6 +153,8 @@ public class CommentView implements Parcelable, UniqueItem, TimedItem {
 		return TimeUtils.elapsedSeconds(createdTime);
 	}
 
+	public long getCreatedTime() { return createdTime; }
+
 	public long getTotalLikes() {
 		return totalLikes;
 	}

@@ -5,22 +5,34 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Utils {
 
@@ -181,8 +193,71 @@ public class Utils {
         outStream.close();
     }
     
-    public static void copyFile(final File input, final File output) throws IOException {
-        streamCopy(new FileInputStream(input), new FileOutputStream(output));
+    public static String serializeObjectToString(Object object) throws IOException {
+        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+        GZIPOutputStream gzipOutputStream = new GZIPOutputStream(arrayOutputStream);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(gzipOutputStream);
+        objectOutputStream.writeObject(object);
+        objectOutputStream.flush();
+        return Base64.encode(arrayOutputStream.toByteArray(), Base64.DEFAULT).toString();
     }
 
+    public static Object deserializeObjectFromString(String objectString) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(Base64.decode(objectString, Base64.DEFAULT));
+        GZIPInputStream gzipInputStream = new GZIPInputStream(arrayInputStream);
+        ObjectInputStream objectInputStream = new ObjectInputStream(gzipInputStream);
+        return objectInputStream.readObject();
+    }
+
+    public static String encrypt(String strToEncrypt, String secret) {
+        if (secret == null) {
+            return null;
+        }
+        try
+        {
+            SecretKeySpec secretKey;
+            byte[] key;
+            MessageDigest sha = null;
+            key = secret.getBytes("UTF-8");
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16);
+            secretKey = new SecretKeySpec(key, "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            return Base64.encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")), Base64.DEFAULT);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error while encrypting: " + e.toString());
+        }
+        return null;
+    }
+
+    public static String decrypt(String strToDecrypt, String secret)
+    {
+        if (secret == null)
+            return null;
+        try
+        {
+            SecretKeySpec secretKey;
+            byte[] key;
+            MessageDigest sha = null;
+            key = secret.getBytes("UTF-8");
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16);
+            secretKey = new SecretKeySpec(key, "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            return new String(cipher.doFinal(Base64.decode(strToDecrypt, Base64.DEFAULT)));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error while decrypting: " + e.toString());
+        }
+        return null;
+    }
 }

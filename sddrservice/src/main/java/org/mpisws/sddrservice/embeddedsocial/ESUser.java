@@ -58,10 +58,8 @@ public class ESUser {
     public void unsetDefaultCreateMsgChannels() {
     }
 
-    public void register_google_user(String googletoken, String firstname, String lastname) {
+    public void register_google_user(String googletoken) {
         AccountData accountData = new AccountData();
-        accountData.setFirstName(firstname);
-        accountData.setLastName(lastname);
         accountData.setIdentityProvider(IdentityProvider.GOOGLE);
         accountData.setThirdPartyAccessToken(googletoken);
         GlobalObjectRegistry.getObject(UserAccount.class).updateAccountDetails(accountData);
@@ -71,6 +69,10 @@ public class ESUser {
     public void sign_in() {
         if (UserAccount.getInstance().isSignedIn()) return;
         else GlobalObjectRegistry.getObject(UserAccount.class).signInUsingThirdParty(socialNetworkAccount);
+    }
+
+    public void delete_account() {
+        UserAccount.getInstance().deleteAccount();
     }
 
     public void sign_out() {

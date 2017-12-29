@@ -63,6 +63,14 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 	}
 
 	@Override
+	public void updateReadNotifications(String latestHandle) {
+        if (activityCache.storeLastActivityHandle(latestHandle)) {
+            launchSync();
+        }
+        Preferences.getInstance().resetNotificationCount();
+	}
+
+	@Override
 	public Response registerPushNotification(RegisterPushNotificationRequest request)
 		throws NetworkRequestException {
 
@@ -97,33 +105,6 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 			Log.d("NOTIFS", "Calling network response received");
 			for (ActivityView activityView : response.getData()) {
 				activityView.setUnread(activityCache.isActivityUnread(activityView.getHandle()));
-			}
-
-			if (isFirstDataRequest(request)) {
-				updateLastActivityHandle(response);
-				Preferences.getInstance().resetNotificationCount();
-			}
-		}
-
-		private void updateLastActivityHandle(GetNotificationFeedResponse response) {
-			String deliveredActivityHandle = response.getDeliveredActivityHandle();
-			String latestHandle;
-
-			if (!response.getData().isEmpty()) {
-				String firstItemHandle = response.getData().get(0).getHandle();
-
-				if (!TextUtils.isEmpty(response.getDeliveredActivityHandle())) {
-					latestHandle = firstItemHandle.compareTo(deliveredActivityHandle) < 0
-						? firstItemHandle : deliveredActivityHandle;
-				} else {
-					latestHandle = firstItemHandle;
-				}
-			} else {
-				latestHandle = deliveredActivityHandle;
-			}
-			Log.d("NOTIFS", "Got last activity handle " + latestHandle);
-			if (activityCache.storeLastActivityHandle(latestHandle)) {
-				launchSync();
 			}
 		}
 

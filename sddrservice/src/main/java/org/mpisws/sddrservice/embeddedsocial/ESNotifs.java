@@ -18,9 +18,13 @@ import com.microsoft.embeddedsocial.server.model.content.replies.GetReplyRespons
 import com.microsoft.embeddedsocial.server.model.content.topics.GetTopicRequest;
 import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 
+import org.mpisws.sddrservice.IEncountersService;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -33,6 +37,7 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 
 public class ESNotifs {
     private static final String TAG = ESNotifs.class.getSimpleName();
+
     private final Fetcher<ActivityView> notifFeedFetcher;
     private ExecutorService executorService;
 
@@ -43,8 +48,12 @@ public class ESNotifs {
             this.activityView = activityView;
         }
 
-        public boolean isNewerThan(Notif notif) {
-            return activityView.getHandle().compareTo(notif.getCursor()) < 0;
+        public long getCreatedTime() {
+            return activityView.getCreatedTime();
+        }
+
+        public boolean isNewerThan(long time) {
+            return activityView.getCreatedTime() > time;
         }
         public String getCursor() {
             return activityView.getHandle();
@@ -61,15 +70,10 @@ public class ESNotifs {
         void onReceiveNotifications(List<Notif> notifs);
     }
 
-    public interface GetEncountersOfNotifsCallback {
-        /* Called when the encounters for a provided list of notifications are fetched */
-        void onReceiveEncounters(Set<String> encounterIds);
-    }
-
     public void get_notifications_from_cursor(
             GetNotificationsCallback getNotificationsCallback,
             String cursor,
-            boolean is_new)
+            IEncountersService.GetNotificationsRequestFlag flag)
     {
         if (notifFeedFetcher.isLoading()) { return; }
         Callback callback = new Callback() {
@@ -88,7 +92,7 @@ public class ESNotifs {
                         Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
                         Log.d(TAG, "Found " + notifFeedFetcher.getAllData().size() + " notifs");
                         for (ActivityView av : notifFeedFetcher.getAllData()) {
-                            if (!av.isUnread() && is_new) {
+                            if (!av.isUnread() && flag == IEncountersService.GetNotificationsRequestFlag.ONLY_UNREAD) {
                                 break;
                             }
                             notifications.add(new Notif(av));
@@ -100,21 +104,18 @@ public class ESNotifs {
         notifFeedFetcher.setCallbackSilent(callback);
         notifFeedFetcher.clearData();
 
-        if (is_new) {
+        if (cursor == null) {
             // this will call the callback after a new page is gotten from the beginning
             notifFeedFetcher.refreshData();
         } else if (notifFeedFetcher.hasMoreData()) {
-            if (cursor != null) {
-                notifFeedFetcher.setCursor(cursor);
-            }
+            notifFeedFetcher.setCursor(cursor);
             notifFeedFetcher.requestMoreData();
         }
     }
 
-    public void get_encounters_of_notifications(List<Notif> notifs, GetEncountersOfNotifsCallback getEncountersOfNotifsCallback) {
+    public void get_messages_of_notifications(List<Notif> notifs, ESMsgs.GetMessagesCallback getMessagesCallback, ESMsgs esMsgs) {
         IContentService contentService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
         Runnable r = () -> {
-            Set<String> encounters = new HashSet<>();
             for (Notif notif : notifs) {
                 ActivityView n = notif.activityView;
 
@@ -143,10 +144,10 @@ public class ESNotifs {
                         Log.e(TAG, "Notif of no known activity type!");
                         continue;
                     }
-                    encounters.add(eid);
+                    esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
+                            ESMsgs.TopicAction.TATyp.GetMsgs, notif.getCreatedTime(), eid, null, getMessagesCallback));
                 } catch (NetworkRequestException e) {}
             }
-            getEncountersOfNotifsCallback.onReceiveEncounters(encounters);
         };
         executorService.execute(r);
     }

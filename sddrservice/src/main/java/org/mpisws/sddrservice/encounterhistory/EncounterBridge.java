@@ -122,7 +122,7 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
                 float distance = results[0];
                 return encounter.getTimeInterval().overlapsWith(new TimeInterval(filter.start_date, filter.end_date))
                         && encounter.getCommonIDs().containsAll(filter.matches)
-                        &&  distance < filter.distance;
+                        &&  distance < filter.radius;
             }
         };
         return getFilteredItems(dbfilter);
