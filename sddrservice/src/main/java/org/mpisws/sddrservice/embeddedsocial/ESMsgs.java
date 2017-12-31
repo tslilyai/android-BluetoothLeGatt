@@ -19,8 +19,6 @@ import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
-import org.mpisws.sddrservice.EncountersService;
-import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.lib.Utils;
 
@@ -37,6 +35,7 @@ import static com.microsoft.embeddedsocial.fetcher.base.FetcherState.DATA_ENDED;
 
 public class ESMsgs {
     private static final String TAG = ESMsgs.class.getSimpleName();
+    private static final String REPLY_COMMENT_TEXT = "ThisIsTheReplyCommentText";
     private static final String DUMMY_TOPIC_TEXT = "DummyTopicText";
     private static final long THRESHOLD_BUFFER_MS = 1000;
     private final PostStorage postStorage;
@@ -239,7 +238,7 @@ public class ESMsgs {
                                 CommentView comment = CommentView.class.cast(obj);
                                 if ((is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
                                         || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
-                                    if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
+                                    if (comment.getCommentText().compareTo(REPLY_COMMENT_TEXT) == 0) {
                                         // this is the reply comment!
                                         Log.d(TAG, "Found reply comment " + comment.getCommentText() + " for " + topic.getTopicTitle() + " , updating topic text to be handle");
                                         topic.setTopicText(comment.getHandle());
@@ -259,7 +258,7 @@ public class ESMsgs {
                             // we know the reply comment doesn't exist yet. create if we will be the owner
                             if (!is_my_topic) {
                                 try {
-                                    postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicTitle(), null));
+                                    postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), REPLY_COMMENT_TEXT, null));
                                     Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
                                 } catch (SQLException e) {}
                             }
@@ -317,18 +316,21 @@ public class ESMsgs {
                         commentFeedFetcher.requestMoreData();
                         break;
                     default: // ENDED or MORE_DATA
-                        Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
-                        Log.d(TAG, "Found " + commentFeedFetcher.getAllData().size() + " comments");
-
                         boolean pastThreshold = false;
                         for (Object obj : commentFeedFetcher.getAllData()) {
                             if (CommentView.class.isInstance(obj)) {
                                 CommentView comment = CommentView.class.cast(obj);
-                                if (comment.getCreatedTime() < ta.thresholdAge - THRESHOLD_BUFFER_MS) {
+                                if (ta.thresholdAge > 0 && comment.getCreatedTime() < ta.thresholdAge - THRESHOLD_BUFFER_MS) {
+                                    Log.d(TAG, "Comment created before the threshold time");
                                     pastThreshold = true;
                                     break;
                                 } else {
                                     String decrypted_msg = Utils.decrypt(comment.getCommentText(), ssBridge.getSharedSecretByEncounterID(ta.eid));
+                                    Log.d(TAG, "Decrypted " + decrypted_msg);
+                                    if (comment.getCommentText().compareTo(REPLY_COMMENT_TEXT) == 0) {
+                                        Log.d(TAG, "Found reply comment");
+                                        continue;
+                                    }
                                     comments.add(new Msg(
                                             ContentType.COMMENT,
                                             comment.getCreatedTime(),
@@ -340,9 +342,10 @@ public class ESMsgs {
                                 }
                             }
                         }
-                        if (pastThreshold || newState == FetcherState.DATA_ENDED)
+                        if (pastThreshold || newState == FetcherState.DATA_ENDED) {
+                            Log.d(TAG, "Found " + commentFeedFetcher.getAllData().size() + " comments for eid " + ta.eid);
                             ta.getMessagesCallback.onReceiveMessages(comments);
-                        else {
+                        } else {
                             commentFeedFetcher.clearData();
                             commentFeedFetcher.requestMoreData();
                         }
@@ -352,7 +355,7 @@ public class ESMsgs {
         commentFeedFetcher.setCallbackSilent(callback);
         commentFeedFetcher.clearData();
 
-        if (ta.cursor != null) {
+        if (ta.cursor == null) {
             // this will call the callback after a new page is gotten from the beginning
             commentFeedFetcher.refreshData();
         } else if (commentFeedFetcher.hasMoreData()) {

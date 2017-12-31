@@ -21,11 +21,7 @@ import com.microsoft.embeddedsocial.server.model.view.ActivityView;
 import org.mpisws.sddrservice.IEncountersService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
@@ -92,7 +88,7 @@ public class ESNotifs {
                         Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
                         Log.d(TAG, "Found " + notifFeedFetcher.getAllData().size() + " notifs");
                         for (ActivityView av : notifFeedFetcher.getAllData()) {
-                            if (!av.isUnread() && flag == IEncountersService.GetNotificationsRequestFlag.ONLY_UNREAD) {
+                            if (!av.isUnread() && flag == IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY) {
                                 break;
                             }
                             notifications.add(new Notif(av));
@@ -122,14 +118,14 @@ public class ESNotifs {
                 try {
                     String eid;
                     if (n.getActivityType() == ActivityType.REPLY) {
-                        Log.d(TAG, "Notification of type reply");
+                        Log.d(TAG, "Got notification of type reply");
                         final GetReplyRequest request = new GetReplyRequest(n.getHandle());
                         GetReplyResponse response = contentService.getReply(request);
 
                         final GetCommentRequest req = new GetCommentRequest(response.getReply().getCommentHandle());
                         eid = contentService.getComment(req).getComment().getCommentText();
                     } else if (n.getActivityType() == ActivityType.COMMENT) {
-                        Log.d(TAG, "Notification of type comment");
+                        Log.d(TAG, "Got notif of type comment");
                         final GetCommentRequest request = new GetCommentRequest(n.getHandle());
                         GetCommentResponse response = contentService.getComment(request);
 
@@ -144,6 +140,7 @@ public class ESNotifs {
                         Log.e(TAG, "Notif of no known activity type!");
                         continue;
                     }
+                    Log.d(TAG, "Got eid for notif " + eid);
                     esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
                             ESMsgs.TopicAction.TATyp.GetMsgs, notif.getCreatedTime(), eid, null, getMessagesCallback));
                 } catch (NetworkRequestException e) {}

@@ -25,13 +25,12 @@ import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.EncountersService;
+import org.mpisws.sddrservice.IEncountersService;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -54,27 +53,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         encountersService.startEncounterService(this);
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.get_notifs_old).setOnClickListener(this);
-        findViewById(R.id.get_notifs_new).setOnClickListener(this);
-        findViewById(R.id.get_msgs).setOnClickListener(this);
+        findViewById(R.id.get_all_notifs_old).setOnClickListener(this);
+        findViewById(R.id.get_all_notifs_new).setOnClickListener(this);
+        findViewById(R.id.get_unread_notifs_old).setOnClickListener(this);
+        findViewById(R.id.get_unread_notifs_new).setOnClickListener(this);
+        findViewById(R.id.GetMsgs).setOnClickListener(this);
         findViewById(R.id.SendMsg).setOnClickListener(this);
-        findViewById(R.id.AddLink).setOnClickListener(this);
+        findViewById(R.id.SendBroadcastMsg).setOnClickListener(this);
+        findViewById(R.id.set_notifs).setOnClickListener(this);
 
         handler = new Handler();
    }
 
     @Override
     public void onClick(View v) {
-        String testEid = new String("TopicTest4".getBytes());
-        final TextView notiftext = MainActivity.this.findViewById(R.id.new_notifs);
+        String testEid = "TopicTest6";
         final TextView msgtext = MainActivity.this.findViewById(R.id.new_messages);
-        final String[] notifCursor = {null};
+        final ESNotifs.Notif[] notifHolder = {null};
         final ESMsgs.GetMessagesCallback msgsCallback = new ESMsgs.GetMessagesCallback() {
             @Override
             public void onReceiveMessages(final List<ESMsgs.Msg> msgs) {
                 handler.post(new Runnable() {
                     public void run() {
+                        msgtext.setText("");
                         for (ESMsgs.Msg msg : msgs) {
+                            encountersService.processMessageForBroadcasts(msg);
                             if ((msg.isFromMe())) {
                                 msgtext.append("Me: ");
                             } else {
@@ -86,38 +89,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
             }
         };
-        final ESNotifs.GetEncountersOfNotifsCallback getEncountersOfNotifsCallback = new ESNotifs.GetEncountersOfNotifsCallback() {
-            @Override
-            public void onReceiveEncounters(Set<String> encounterIds) {
-                Log.d(TAG, "Notif: Calling onReceiveEncounter of " + encounterIds.size() + " encounters");
-                for (String eid : encounterIds) {
-                    encountersService.getNewMsgs(eid, msgsCallback);
-                }
-            }
-        };
+
         final ESNotifs.GetNotificationsCallback notifcallback = new ESNotifs.GetNotificationsCallback() {
             @Override
             public void onReceiveNotifications(List<ESNotifs.Notif> notifs) {
-                for (ESNotifs.Notif notif : notifs) {
-                    notifCursor[0] = notif.getCursor();
-                }
                 Log.d(TAG, "Notif: Calling getNotifsCallback of " + notifs.size() + " notifs");
-                encountersService.getEncountersOfNotifs(notifs, getEncountersOfNotifsCallback);
+                long newestNotifCursorTime = -1;
+                for (ESNotifs.Notif notif : notifs) {
+                    if (newestNotifCursorTime < 0 || notif.isNewerThan(newestNotifCursorTime)) {
+                        newestNotifCursorTime = notif.getCreatedTime();
+                        notifHolder[0] = notif;
+                    }
+                }
+                encountersService.getMessagesFromNotifications(notifs, msgsCallback);
             }
         };
 
+        final EditText msg = MainActivity.this.findViewById(R.id.Msg);
         switch (v.getId()) {
-            case R.id.AddLink:
-                break;
-            case R.id.SendMsg:
-                final EditText msg = MainActivity.this.findViewById(R.id.Msg);
-                Log.d(TAG, "Sending message " + msg.getText().toString());
-                List<String> list = new LinkedList<>();
-                for (int i = 0; i < 100; i++)
-                    list.add(msg.getText().toString() + i);
-                encountersService.sendMsgs(testEid, list);
-                break;
-            case R.id.sign_in_button:
+           case R.id.sign_in_button:
                 if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
                     Log.d(TAG, "Not registered with Google yet");
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
@@ -127,24 +117,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     encountersService.createEncounterMsgingChannel(testEid);
                 }
                 break;
-            case R.id.sign_out_button:
+           case R.id.sign_out_button:
                 encountersService.signOut();
                 break;
-            case R.id.get_notifs_old:
-               Log.d(TAG, "Getting notifs old");
-                notiftext.setText("");
-                encountersService.getNotifsWithCursor(notifcallback, notifCursor[0]);
+           case R.id.GetMsgs:
+               msgtext.setText("");
+               encountersService.getMsgsFromNewest(testEid, -1, msgsCallback);
+               break;
+           case R.id.SendMsg:
+                encountersService.sendMsg(testEid, msg.getText().toString());
                 break;
-            case R.id.get_notifs_new:
-                notiftext.setText("");
-                Log.d(TAG, "Getting notifs new");
-                encountersService.getNewNotifs(notifcallback);
+           case R.id.SendBroadcastMsg:
+                encountersService.sendBroadcastMsg(msg.getText().toString(), null, 5);
                 break;
-
-            case R.id.get_msgs:
-                msgtext.setText("");
-               encountersService.getNewMsgs(testEid, msgsCallback);
-        break;
+           case R.id.get_all_notifs_old:
+               if (notifHolder[0] == null)
+                   encountersService.getNotificationsWithCursor(notifcallback, IEncountersService.GetNotificationsRequestFlag.ALL, null);
+               else
+                   encountersService.getNotificationsWithCursor(notifcallback, IEncountersService.GetNotificationsRequestFlag.ALL, notifHolder[0].getCursor());
+               break;
+           case R.id.get_all_notifs_new:
+               encountersService.getNotificationsFromNewest(notifcallback, IEncountersService.GetNotificationsRequestFlag.ALL);
+               break;
+           case R.id.get_unread_notifs_old:
+               if (notifHolder[0] == null)
+                   encountersService.getNotificationsWithCursor(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY, null);
+               else
+                   encountersService.getNotificationsWithCursor(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY, notifHolder[0].getCursor());
+               break;
+            case R.id.set_notifs:
+                encountersService.markAllPreviousNotificationsAsRead(notifHolder[0]);
+                break;
             default:
                 // Unknown id.
                 Log.d(TAG, "Unknown button press");

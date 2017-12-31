@@ -23,11 +23,11 @@ import java.util.List;
 public interface IEncountersService {
 
     public static class Filter {
-        private Date start_date;
-        private Date end_date;
-        private Location location;
-        private float radius;
-        private List<String> matches;
+        public Date start_date;
+        public Date end_date;
+        public Location location;
+        public float radius;
+        public List<String> matches;
 
         Filter() {};
         public void setTimeInterval(Date start_date, Date end_date) {
@@ -44,7 +44,7 @@ public interface IEncountersService {
     }
 
     public enum GetNotificationsRequestFlag {
-        ONLY_UNREAD,
+        UNREAD_ONLY,
         ALL
     }
 
@@ -120,17 +120,17 @@ public interface IEncountersService {
      * the GetMessagesCallback parameter on the retrieved list.
      *
      * @param encounterID the String name for the encounter
-     * @param thresholdMessageAge a timestamp (ms) representing the oldest message to be retrieved
+     * @param thresholdMessageAge a timestamp (ms) representing the oldest message to be retrieved. If this is negative, all messages are retrieved.
      * @param getMessagesCallback a callback to be called with the list of retrieved messages
      */
-    public void getMsgsFromBeginning(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback);
+    public void getMsgsFromNewest(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback);
 
     /**
      * Gets the messages of this encounter from a given point in the encounter thread, and invokes
      * the GetMessagesCallback parameter on the retrieved list.
      *
      * @param encounterID the String name for the encounter
-     * @param thresholdMessageAge a timestamp (ms) representing the oldest message to be retrieved
+     * @param thresholdMessageAge a timestamp (ms) representing the oldest message to be retrieved. If this is negative, all messages are retrieved.
      * @param getMessagesCallback a callback to be called with the list of retrieved messages
      * @param cursor the point in the thread at which to start retrieving messages; each message is associated with a cursor (see the getCursor() method for a Msg)
      */
@@ -150,7 +150,7 @@ public interface IEncountersService {
      * @param getNotificationsCallback a callback to be called with the page of retrieved notifications
      * @param flag Indicates the type of notifications to be fetched
      */
-    public void getNotificationsFromBeginning(ESNotifs.GetNotificationsCallback getNotificationsCallback, GetNotificationsRequestFlag flag);
+    public void getNotificationsFromNewest(ESNotifs.GetNotificationsCallback getNotificationsCallback, GetNotificationsRequestFlag flag);
 
     /**
      * Gets a page of notifications in the notifications feed from the given cursor, and invokes

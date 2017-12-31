@@ -211,7 +211,7 @@ public class Utils {
 
     public static String encrypt(String strToEncrypt, String secret) {
         if (secret == null) {
-            return null;
+            return strToEncrypt;
         }
         try
         {
@@ -238,7 +238,7 @@ public class Utils {
     public static String decrypt(String strToDecrypt, String secret)
     {
         if (secret == null)
-            return null;
+            return strToDecrypt;
         try
         {
             SecretKeySpec secretKey;

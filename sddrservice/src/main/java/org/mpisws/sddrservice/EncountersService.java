@@ -129,7 +129,7 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void getMsgsFromBeginning(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback) {
+    public void getMsgsFromNewest(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback) {
         if (!shouldRunCommand(true)) return;
         esMsg.find_and_act_on_topic(new ESMsgs.TopicAction(
                 ESMsgs.TopicAction.TATyp.GetMsgs, thresholdMessageAge, encounterID, null, getMessagesCallback));
@@ -149,7 +149,7 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void getNotificationsFromBeginning(ESNotifs.GetNotificationsCallback getNotificationsCallback, GetNotificationsRequestFlag flag) {
+    public void getNotificationsFromNewest(ESNotifs.GetNotificationsCallback getNotificationsCallback, GetNotificationsRequestFlag flag) {
         if (!shouldRunCommand(true)) return;
         esNotifs.get_notifications_from_cursor(getNotificationsCallback, null, flag);
 
@@ -206,6 +206,7 @@ public class EncountersService implements IEncountersService {
             Utils.myAssert(msg_parts.length == 2);
 
             String msgText = msg_parts[1];
+            Log.d(TAG, "Processing msg " + msgText + " for broadcasts");
             int numHopsThreshold = Integer.parseInt(msg_parts[0].split("NUMHOPS_END_STR")[0]);
             if (numHopsThreshold > 0) {
                 Filter filter = null;
