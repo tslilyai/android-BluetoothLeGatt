@@ -169,6 +169,8 @@ public class EncountersService implements IEncountersService {
 
     @Override
     public void markAllPreviousNotificationsAsRead(ESNotifs.Notif notif) {
+        if (notif == null)
+            return;
         GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getNotificationService().updateReadNotifications(notif.getCursor());
     }
 

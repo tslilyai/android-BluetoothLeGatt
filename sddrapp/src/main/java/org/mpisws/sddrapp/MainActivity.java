@@ -145,6 +145,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                else
                    encountersService.getNotificationsWithCursor(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY, notifHolder[0].getCursor());
                break;
+           case R.id.get_unread_notifs_new:
+               if (notifHolder[0] == null)
+                   encountersService.getNotificationsWithCursor(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY, null);
+               else
+                   encountersService.getNotificationsWithCursor(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY, notifHolder[0].getCursor());
+               break;
             case R.id.set_notifs:
                 encountersService.markAllPreviousNotificationsAsRead(notifHolder[0]);
                 break;
