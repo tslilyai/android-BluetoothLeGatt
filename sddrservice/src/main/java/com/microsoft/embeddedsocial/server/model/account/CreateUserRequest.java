@@ -5,6 +5,8 @@
 
 package com.microsoft.embeddedsocial.server.model.account;
 
+import android.util.Log;
+
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.autorest.models.PostUserRequest;
 import com.microsoft.embeddedsocial.autorest.models.PostUserResponse;
@@ -33,6 +35,7 @@ public final class CreateUserRequest extends UserRequest {
 		ServiceResponse<PostUserResponse> serviceResponse;
 		authorization = createThirdPartyAuthorization(identityProvider, accessToken, requestToken);
 		try {
+			Log.d("UserRequest", "Posting user");
 			serviceResponse = USERS.postUser(body, authorization);
 		} catch (ServiceException|IOException e) {
 			throw new NetworkRequestException(e.getMessage());
@@ -72,6 +75,7 @@ public final class CreateUserRequest extends UserRequest {
 		}
 
 		public Builder setAccessToken(String accessToken) {
+			Log.d("UserRequest", "Set access token to " + accessToken);
 			request.accessToken = accessToken;
 			return this;
 		}
@@ -87,10 +91,12 @@ public final class CreateUserRequest extends UserRequest {
 		}
 
 		public CreateUserRequest build() {
-			if (request.body.getFirstName() == null
-					|| request.body.getLastName() == null
-					|| request.accessToken == null
+			//if (request.body.getFirstName() == null
+					//|| request.body.getLastName() == null
+			// only require the access token and instance id
+			if( request.accessToken == null
 					|| request.body.getInstanceId() == null) {
+				Log.d("UserRequest", "No access token");
 				throw new IllegalArgumentException("one of the required fields was empty");
 			}
 			return request;

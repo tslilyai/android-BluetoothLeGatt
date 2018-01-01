@@ -30,6 +30,12 @@
                 android:layout_height="wrap_content"
                 android:text="Sign Out" />
 
+            <Button
+                android:id="@+id/deleteMe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete Account" />
+
             <EditText
                 android:id="@+id/Msg"
                 android:layout_width="match_parent"

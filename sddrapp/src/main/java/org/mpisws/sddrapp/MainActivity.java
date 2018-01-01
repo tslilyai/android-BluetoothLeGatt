@@ -57,10 +57,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.get_all_notifs_new).setOnClickListener(this);
         findViewById(R.id.get_unread_notifs_old).setOnClickListener(this);
         findViewById(R.id.get_unread_notifs_new).setOnClickListener(this);
+        findViewById(R.id.set_notifs).setOnClickListener(this);
         findViewById(R.id.GetMsgs).setOnClickListener(this);
         findViewById(R.id.SendMsg).setOnClickListener(this);
         findViewById(R.id.SendBroadcastMsg).setOnClickListener(this);
-        findViewById(R.id.set_notifs).setOnClickListener(this);
+        findViewById(R.id.deleteMe).setOnClickListener(this);
 
         handler = new Handler();
    }
@@ -107,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         final EditText msg = MainActivity.this.findViewById(R.id.Msg);
         switch (v.getId()) {
+            case R.id.deleteMe:
+                encountersService.deleteAccount();
+                break;
            case R.id.sign_in_button:
                 if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
                     Log.d(TAG, "Not registered with Google yet");

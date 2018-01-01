@@ -8,6 +8,7 @@ package com.microsoft.embeddedsocial.account;
 import android.content.Context;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.actions.Action;
 import com.microsoft.embeddedsocial.actions.ActionsLauncher;
@@ -60,6 +61,7 @@ public class UserAccount {
 	}
 
 	public void deleteAccount() {
+		Log.d("UserAccount", "Deleting account");
 		ActionsLauncher.deleteAccount(context);
 	}
 
@@ -78,6 +80,7 @@ public class UserAccount {
 			postponedAction.execute(context);
 		}
 		Preferences.getInstance().clearPendingAction();
+        Log.d("UserAccount", "User signed in!");
 	}
 
 	private void setNewAccountData(String newUserHandle, String sessionToken,

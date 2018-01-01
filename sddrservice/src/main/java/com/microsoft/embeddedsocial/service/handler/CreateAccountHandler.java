@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.actions.Action;
@@ -24,6 +25,7 @@ import com.microsoft.embeddedsocial.server.IAuthenticationService;
 import com.microsoft.embeddedsocial.server.exception.NetworkRequestException;
 import com.microsoft.embeddedsocial.server.model.UserRequest;
 import com.microsoft.embeddedsocial.server.model.account.CreateUserRequest;
+import com.microsoft.embeddedsocial.server.model.account.DeleteUserRequest;
 import com.microsoft.embeddedsocial.server.model.account.GetUserAccountRequest;
 import com.microsoft.embeddedsocial.server.model.account.GetUserAccountResponse;
 import com.microsoft.embeddedsocial.server.model.auth.AuthenticationResponse;
@@ -52,27 +54,26 @@ public class CreateAccountHandler extends ActionHandler {
 
     public CreateAccountHandler(Context context) {
         this.context = context;
+        Log.d("UserAccount", "CreateAccountHandlerCreated");
     }
 
     @Override
     protected void handleAction(Action action, ServiceAction serviceAction, Intent intent) {
         Bundle extras = intent.getExtras();
         CreateAccountData createAccountData = extras.getParcelable(IntentExtras.CREATE_ACCOUNT_DATA);
-
         CreateUserRequest createUserRequest = new CreateUserRequest.Builder()
-                .setFirstName(createAccountData.getFirstName())
-                .setLastName(createAccountData.getLastName())
-                .setBio(createAccountData.getBio())
+                .setFirstName("First_Name")
+                .setLastName("Last_Name")
+                .setInstanceId("SDDR_ID")
                 .setIdentityProvider(createAccountData.getIdentityProvider())
                 .setAccessToken(createAccountData.getThirdPartyAccessToken())
-                .setRequestToken(createAccountData.getThirdPartyRequestToken())
                 .build();
         try {
+            Log.d("UserAccount", "Creating account");
             AuthenticationResponse createUserResponse = accountService.createUser(createUserRequest);
             handleSuccessfulResult(action, createUserResponse);
-
-            uploadPhoto(createAccountData.getPhotoUri());
-        } catch (IOException | NetworkRequestException e) {
+        } catch (NetworkRequestException e) {
+            Log.d("UserAccount", "Account creation failed " + e.getMessage());
             DebugLog.logException(e);
             UserAccount.getInstance().onCreateUserFailed();
             action.fail();
@@ -82,6 +83,7 @@ public class CreateAccountHandler extends ActionHandler {
     private void handleSuccessfulResult(Action action, AuthenticationResponse response)
             throws NetworkRequestException {
 
+        Log.d("UserAccount", "Account created");
         String userHandle = response.getUserHandle();
         String sessionToken = UserRequest.createSessionAuthorization(response.getSessionToken());
         GetUserAccountRequest getUserRequest = new GetUserAccountRequest(sessionToken);
@@ -90,19 +92,7 @@ public class CreateAccountHandler extends ActionHandler {
         if (!action.isCompleted()) {
             int messageId = R.string.es_msg_general_create_user_success;
             UserAccount.getInstance().onSignedIn(userHandle, sessionToken, accountData, messageId);
-            WorkerService.getLauncher(context).launchService(ServiceAction.GCM_REGISTER);
-        }
-    }
-
-    /**
-     * Uploads the profile photo
-     */
-    private void uploadPhoto(Uri photoUri) throws IOException, NetworkRequestException {
-        // TODO this is a separate call which could fail and leave the wrong public access
-        if (photoUri != null) {
-            AccountDataDifference difference = new AccountDataDifference();
-            difference.setNewPhoto(photoUri);
-            ActionsLauncher.updateAccount(context, difference);
+            //WorkerService.getLauncher(context).launchService(ServiceAction.GCM_REGISTER);
         }
     }
 

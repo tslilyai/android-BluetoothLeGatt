@@ -26,6 +26,8 @@ public final class ActionsLauncher {
 	}
 
 	public static Action signInUsingThirdParty(Context context, SocialNetworkAccount thirdPartyAccount) {
+
+		Log.d("UserAccount", thirdPartyAccount.getThirdPartyAccessToken());
 		return ActionIntentBuilder.forActionWithTag(Action.Tags.SIGN_IN)
 				.setThirdPartyAccount(thirdPartyAccount)
 				.launch(context, ServiceAction.SIGN_IN);

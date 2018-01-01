@@ -5,6 +5,8 @@
 
 package com.microsoft.embeddedsocial.server.model;
 
+import android.util.Log;
+
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.autorest.HashtagsOperations;
 import com.microsoft.embeddedsocial.autorest.HashtagsOperationsImpl;
@@ -128,7 +130,14 @@ public class UserRequest extends BaseRequest {
 			case 401: // unauthorized
 				// invalidate session token
 				UserAccount.getInstance().signOut();
+				Log.d("UserRequest", "Unauthorized");
 				throw new UnauthorizedException(serviceResponse.getResponse().message());
+			case 409:
+				Log.d("UserRequest", "Duplicate");
+				//break;
+			case 500:
+				Log.d("UserRequest", "Server Error");
+				//break;
 			default:
 				super.checkResponseCode(serviceResponse);
 		}

@@ -8,12 +8,15 @@ package com.microsoft.embeddedsocial.service.handler;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.actions.Action;
+import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.utils.debug.DebugLog;
 import com.microsoft.embeddedsocial.data.model.AccountData;
+import com.microsoft.embeddedsocial.data.model.CreateAccountData;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 import com.microsoft.embeddedsocial.server.IAccountService;
 import com.microsoft.embeddedsocial.server.IAuthenticationService;
@@ -78,13 +81,13 @@ public class SignInHandler extends ActionHandler {
 			AuthenticationResponse signInResponse = authenticationService.signInWithThirdParty(signInWithThirdPartyRequest);
 			handleSuccessfulResult(action, signInResponse);
 		} catch (NotFoundException e) {
-			// User handle not found; create an account
-			Intent i = new Intent(context, CreateProfileActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			Bundle extras = new Bundle();
-			extras.putParcelable(IntentExtras.THIRD_PARTY_ACCOUNT, thirdPartyAccount);
-			i.putExtras(extras);
-			context.startActivity(i);
+             CreateAccountData createAccountData = new CreateAccountData.Builder()
+                    .setIdentityProvider(thirdPartyAccount.getAccountType())
+                    .setThirdPartyAccessToken(thirdPartyAccount.getThirdPartyAccessToken())
+                    .setThirdPartyRequestToken(thirdPartyAccount.getThirdPartyRequestToken())
+                    .build();
+            thirdPartyAccount.clearTokens();
+           ActionsLauncher.createAccount(context, createAccountData);
 		} catch (Exception e) {
 			DebugLog.logException(e);
 			UserAccount.getInstance().onSignInWithThirdPartyFailed();
