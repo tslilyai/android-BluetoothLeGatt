@@ -35,7 +35,6 @@ import static com.microsoft.embeddedsocial.fetcher.base.FetcherState.DATA_ENDED;
 
 public class ESMsgs {
     private static final String TAG = ESMsgs.class.getSimpleName();
-    private static final String REPLY_COMMENT_TEXT = "ThisIsTheReplyCommentText";
     private static final String DUMMY_TOPIC_TEXT = "DummyTopicText";
     private static final long THRESHOLD_BUFFER_MS = 1000;
     private final PostStorage postStorage;
@@ -238,7 +237,7 @@ public class ESMsgs {
                                 CommentView comment = CommentView.class.cast(obj);
                                 if ((is_my_topic && !UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
                                         || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
-                                    if (comment.getCommentText().compareTo(REPLY_COMMENT_TEXT) == 0) {
+                                    if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
                                         // this is the reply comment!
                                         Log.d(TAG, "Found reply comment " + comment.getCommentText() + " for " + topic.getTopicTitle() + " , updating topic text to be handle");
                                         topic.setTopicText(comment.getHandle());
@@ -258,7 +257,7 @@ public class ESMsgs {
                             // we know the reply comment doesn't exist yet. create if we will be the owner
                             if (!is_my_topic) {
                                 try {
-                                    postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), REPLY_COMMENT_TEXT, null));
+                                    postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicTitle(), null));
                                     Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
                                 } catch (SQLException e) {}
                             }
@@ -327,7 +326,7 @@ public class ESMsgs {
                                 } else {
                                     String decrypted_msg = Utils.decrypt(comment.getCommentText(), ssBridge.getSharedSecretByEncounterID(ta.eid));
                                     Log.d(TAG, "Decrypted " + decrypted_msg);
-                                    if (comment.getCommentText().compareTo(REPLY_COMMENT_TEXT) == 0) {
+                                    if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
                                         Log.d(TAG, "Found reply comment");
                                         continue;
                                     }

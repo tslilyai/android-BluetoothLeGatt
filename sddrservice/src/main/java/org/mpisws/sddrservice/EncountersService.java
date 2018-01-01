@@ -203,17 +203,17 @@ public class EncountersService implements IEncountersService {
 
     @Override
     public void processMessageForBroadcasts(ESMsgs.Msg msg) {
-        if (msg.getMsg().contains("FILTER_END_STR")) {
-            String[] msg_parts = msg.getMsg().split("FILTER_END_STR");
+        if (msg.getMsg().contains(FILTER_END_STR) && !msg.isFromMe()) {
+            Log.d(TAG, "Processing msg for broadcasts");
+            String[] msg_parts = msg.getMsg().split(FILTER_END_STR);
             Utils.myAssert(msg_parts.length == 2);
 
             String msgText = msg_parts[1];
-            Log.d(TAG, "Processing msg " + msgText + " for broadcasts");
-            int numHopsThreshold = Integer.parseInt(msg_parts[0].split("NUMHOPS_END_STR")[0]);
+            int numHopsThreshold = Integer.parseInt(msg_parts[0].split(NUMHOPS_END_STR)[0]);
             if (numHopsThreshold > 0) {
                 Filter filter = null;
                 try {
-                    filter = Filter.class.cast(Utils.deserializeObjectFromString(msg_parts[0].split("NUMHOPS_END_STR")[1]));
+                    filter = Filter.class.cast(Utils.deserializeObjectFromString(msg_parts[0].split(NUMHOPS_END_STR)[1]));
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
