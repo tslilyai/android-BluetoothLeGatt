@@ -199,14 +199,22 @@ public class Utils {
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(gzipOutputStream);
         objectOutputStream.writeObject(object);
         objectOutputStream.flush();
-        return Base64.encode(arrayOutputStream.toByteArray(), Base64.DEFAULT).toString();
+        String str = Base64.encode(arrayOutputStream.toByteArray(), Base64.DEFAULT).toString();
+        gzipOutputStream.close();
+        arrayOutputStream.close();
+        objectOutputStream.close();
+        return str;
     }
 
     public static Object deserializeObjectFromString(String objectString) throws IOException, ClassNotFoundException {
         ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(Base64.decode(objectString, Base64.DEFAULT));
         GZIPInputStream gzipInputStream = new GZIPInputStream(arrayInputStream);
         ObjectInputStream objectInputStream = new ObjectInputStream(gzipInputStream);
-        return objectInputStream.readObject();
+        Object obj = objectInputStream.readObject();
+        objectInputStream.close();
+        arrayInputStream.close();
+        gzipInputStream.close();
+        return obj;
     }
 
     public static String encrypt(String strToEncrypt, String secret) {
