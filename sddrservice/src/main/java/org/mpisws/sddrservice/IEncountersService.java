@@ -108,6 +108,20 @@ public interface IEncountersService {
     public void deleteAccount();
 
     /**
+     * Blocks all notifications and messages from whomever sent this message
+     *
+     * @param msg The message sent by the to-be-blocked party
+     */
+    public void blockSender(ESMsgs.Msg msg);
+
+    /**
+     * Unblocks all notifications and messages from whomever sent this message
+     *
+     * @param msg The message sent by the to-be-unblocked party
+     */
+    public void unblockSender(ESMsgs.Msg msg);
+
+    /**
      * Sends a message to the specified encounter.
      *
      * @param encounterID the String name for the encounter

@@ -1,13 +1,13 @@
 package org.mpisws.sddrservice.embeddedsocial;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.microsoft.embeddedsocial.account.UserAccount;
+import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.data.Preferences;
@@ -30,8 +30,10 @@ import org.mpisws.sddrservice.R;
 
 public class ESUser {
     private SocialNetworkAccount socialNetworkAccount;
+    private final Context context;
 
     public ESUser(Context context) {
+        this.context = context;
         Options options = new Options(context.getString(R.string.es_api_key), context.getString(R.string.es_server_url));
         options.verify();
 
@@ -74,6 +76,14 @@ public class ESUser {
 
     public void delete_account() {
         UserAccount.getInstance().deleteAccount();
+    }
+
+    public void block_sender(ESMsgs.Msg msg) {
+        ActionsLauncher.blockCommentUser(context, msg.getCursor());
+    }
+
+    public void unblock_sender(ESMsgs.Msg msg) {
+        ActionsLauncher.unblockCommentUser(context, msg.getCursor());
     }
 
     public void sign_out() {

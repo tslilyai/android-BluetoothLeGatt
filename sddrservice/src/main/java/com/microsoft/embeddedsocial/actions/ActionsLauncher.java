@@ -39,6 +39,18 @@ public final class ActionsLauncher {
 				.launch(context, ServiceAction.GET_COMMENT);
 	}
 
+	public static Action blockCommentUser(Context context, String commentHandle) {
+		return ActionIntentBuilder.forActionWithTag(Action.Tags.BLOCK_COMMENT_USER)
+				.setCommentHandle(commentHandle)
+				.launch(context, ServiceAction.BLOCK_COMMENT_USER);
+	}
+
+	public static Action unblockCommentUser(Context context, String commentHandle) {
+		return ActionIntentBuilder.forActionWithTag(Action.Tags.UNBLOCK_COMMENT_USER)
+				.setCommentHandle(commentHandle)
+				.launch(context, ServiceAction.UNBLOCK_COMMENT_USER);
+	}
+
 	public static Action getReply(Context context, String replyHandle) {
 		return ActionIntentBuilder.forActionWithTag(Action.Tags.GET_REPLY)
 				.setReplyHandle(replyHandle)

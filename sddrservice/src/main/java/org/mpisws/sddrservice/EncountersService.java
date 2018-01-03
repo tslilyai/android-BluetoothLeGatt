@@ -92,11 +92,6 @@ public class EncountersService implements IEncountersService {
         return encounterIds;
     }
 
-    @Override
-    public void deleteAccount() {
-        if (!shouldRunCommand(true)) return;
-        esUser.delete_account();
-    }
 
     @Override
     public void registerGoogleUser(String googletoken) {
@@ -119,6 +114,24 @@ public class EncountersService implements IEncountersService {
     public void signOut() {
         if (!shouldRunCommand(true)) return;
         esUser.sign_out();
+    }
+
+    @Override
+    public void deleteAccount() {
+        if (!shouldRunCommand(true)) return;
+        esUser.delete_account();
+    }
+
+    @Override
+    public void blockSender(ESMsgs.Msg msg) {
+        if (!shouldRunCommand(true)) return;
+        esUser.block_sender(msg);
+    }
+
+    @Override
+    public void unblockSender(ESMsgs.Msg msg) {
+        if (!shouldRunCommand(true)) return;
+        esUser.unblock_sender(msg);
     }
 
     @Override

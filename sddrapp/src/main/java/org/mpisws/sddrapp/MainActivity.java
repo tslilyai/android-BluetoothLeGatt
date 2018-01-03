@@ -78,6 +78,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void run() {
                         msgtext.setText("");
                         for (ESMsgs.Msg msg : msgs) {
+                            if (msg.getMsg().contains("ew")) {
+                                encountersService.blockSender(msg);
+                                encountersService.unblockSender(msg);
+                            }
                             encountersService.processMessageForBroadcasts(msg);
                             if ((msg.isFromMe())) {
                                 msgtext.append("Me: ");

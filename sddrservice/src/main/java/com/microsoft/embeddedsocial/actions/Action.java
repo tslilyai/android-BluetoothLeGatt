@@ -22,6 +22,8 @@ public class Action {
 		public static final String UPDATE_ACCOUNT = "updateAccount";
 		public static final String DELETE_ACCOUNT = "deleteAccount";
 		public static final String GET_COMMENT = "getComment";
+		public static final String BLOCK_COMMENT_USER = "blockCommentUser";
+		public static final String UNBLOCK_COMMENT_USER = "unblockCommentUser";
 		public static final String GET_REPLY = "getReply";
 		public static final String REMOVE_FOLLOWER = "removeFollower";
 	}
