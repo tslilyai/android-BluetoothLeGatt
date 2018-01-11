@@ -294,7 +294,7 @@ public class ActivityCache {
 			boolean result = false;
 
 			if (!TextUtils.isEmpty(newActivityHandle) && isActivityUnread(newActivityHandle)) {
-				Log.d("NOTIFS", "storing last activity handle");
+				Log.v("NOTIFS", "storing last activity handle");
 				dataStorage.edit()
 					.putString(KEY_LAST_HANDLE, newActivityHandle)
 					.putBoolean(KEY_SYNCED, false)

@@ -12,7 +12,7 @@ public class EncounterEventReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "Intent received: " + intent.getAction());
+        Log.v(TAG, "Intent received: " + intent.getAction());
         if (!intent.hasExtra("encounterEvent")) {
             Log.w(TAG, "!!!!!!!!!!!!!!!!!!!!!!! Ignoring invalid intent !!!!!!!!!!!!!!!!!!!!!!!!!");
             Utils.printIntent(TAG, intent);
@@ -20,6 +20,6 @@ public class EncounterEventReceiver extends BroadcastReceiver {
         }
         final EncounterEvent encounterEvent = (EncounterEvent) intent.getSerializableExtra("encounterEvent");
         encounterEvent.persistIntoDatabase(context);
-        Log.d(TAG, "Onreceive done");
+        Log.v(TAG, "Onreceive done");
     }
 }

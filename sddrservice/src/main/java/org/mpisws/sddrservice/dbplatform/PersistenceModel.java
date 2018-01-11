@@ -39,7 +39,7 @@ public abstract class PersistenceModel {
 
     public void createTable(final SQLiteDatabase db) {
         final StringBuilder sb = new StringBuilder();
-        Log.d("PersistenceModel", "Creating table " + getTableName());
+        Log.v("PersistenceModel", "Creating table " + getTableName());
         sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName()).append(" (");
         sb.append(Utils.collectionToStringV2(getColumns(), ","));
         sb.append(")");

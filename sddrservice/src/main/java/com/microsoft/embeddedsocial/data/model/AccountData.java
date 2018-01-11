@@ -184,7 +184,7 @@ public class AccountData implements Parcelable {
 	}
 
 	public void addUnsentMsg(String eid, String msg) {
-		Log.d(TAG, "Adding " + msg + " unsent for " + eid);
+		Log.v(TAG, "Adding " + msg + " unsent for " + eid);
 		if (!unsentMsgs.containsKey(eid)) {
 			this.unsentMsgs.put(eid, new LinkedList<>());
 		}
@@ -196,7 +196,7 @@ public class AccountData implements Parcelable {
 	}
 
 	public void addPendingTopic(String eid) {
-		Log.d(TAG, "Adding pending topic " + eid);
+		Log.v(TAG, "Adding pending topic " + eid);
 		this.pendingTopics.add(eid);
 	}
 
@@ -205,7 +205,7 @@ public class AccountData implements Parcelable {
 	}
 
 	public void removePendingTopic(String eid) {
-		Log.d(TAG, "Removing pending topic " + eid);
+		Log.v(TAG, "Removing pending topic " + eid);
 		pendingTopics.remove(eid);
 	}
 

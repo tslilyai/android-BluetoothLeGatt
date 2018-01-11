@@ -163,7 +163,7 @@ public class Scanner {
             } else {
                 Map<ParcelUuid, byte[]> datamap = record.getServiceData();
                 if (datamap.size() != 1) {
-                    Log.d(TAG, "Scan Result (not SDDR: not one service!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
+                    Log.v(TAG, "Scan Result (not SDDR: not one service!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                     return;
                 }
 
@@ -178,7 +178,7 @@ public class Scanner {
                     int len = datatail.length + datahead.length;
                     Utils.myAssert(datahead.length == Constants.PUUID_LENGTH);
                     if (len != Constants.PUUID_LENGTH + Constants.ADVERT_LENGTH) {
-                        Log.d(TAG, "Scan Result (not SDDR: wrong advert length " + len + "!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
+                        Log.v(TAG, "Scan Result (not SDDR: wrong advert length " + len + "!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                         return;
                     }
                     byte[] ID = Arrays.copyOfRange(datahead, 0, Constants.ADDR_LENGTH);
@@ -188,7 +188,7 @@ public class Scanner {
                     System.arraycopy(datatail, 0, advert, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH, Constants.ADVERT_LENGTH);
 
                     int rssi = result.getRssi();
-                    Log.d(TAG, "Scan Result (SDDR): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
+                    Log.v(TAG, "Scan Result (SDDR): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi);

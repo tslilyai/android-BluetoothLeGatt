@@ -26,8 +26,6 @@ public final class ActionsLauncher {
 	}
 
 	public static Action signInUsingThirdParty(Context context, SocialNetworkAccount thirdPartyAccount) {
-
-		Log.d("UserAccount", thirdPartyAccount.getThirdPartyAccessToken());
 		return ActionIntentBuilder.forActionWithTag(Action.Tags.SIGN_IN)
 				.setThirdPartyAccount(thirdPartyAccount)
 				.launch(context, ServiceAction.SIGN_IN);
@@ -140,7 +138,7 @@ public final class ActionsLauncher {
 
 		Action launch(Context context, ServiceAction serviceAction) {
 			WorkerService.getLauncher(context).launchService(serviceAction, extras);
-			Log.d(TAG, "Launched serviceaction " + serviceAction.name());
+			Log.v(TAG, "Launched serviceaction " + serviceAction.name());
 			return action;
 		}
 

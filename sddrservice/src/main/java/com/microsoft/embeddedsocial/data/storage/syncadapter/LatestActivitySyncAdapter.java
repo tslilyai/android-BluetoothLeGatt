@@ -36,9 +36,9 @@ public class LatestActivitySyncAdapter implements ISynchronizable {
 			GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class)
 				.getNotificationService()
 				.updateNotificationStatus(request);
-			Log.d("NOTIFS", "Updated notification status!");
+			Log.v("NOTIFS", "Updated notification status!");
 		} catch (BadRequestException e) {
-			Log.d("NOTIFS", "Bad update request!");
+			Log.v("NOTIFS", "Bad update request!");
 			metadataStorage.clearLastActivityHandle();
 			throw new OperationRejectedException(e);
 		} catch (NetworkRequestException e) {

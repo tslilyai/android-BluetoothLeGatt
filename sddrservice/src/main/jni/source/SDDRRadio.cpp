@@ -40,9 +40,9 @@ SDDRRadio::SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, MemoryScheme m
      hystPolicy_(hystPolicy),
      rssiReportInterval_(rssiReportInterval)
 {
-    LOG_D(TAG, "General Parameters: ADV_N = %zu, ADV_N_LOG2 = %zu", ADV_N, ADV_N_LOG2);
-    LOG_D(TAG, "RS Parameters: W = %zu, K = %zu, M = %zu", RS_W, RS_K, RS_M);
-    LOG_D(TAG, "BF Parameters: SM = %zu", BF_SM);
+    LOG_P(TAG, "General Parameters: ADV_N = %zu, ADV_N_LOG2 = %zu", ADV_N, ADV_N_LOG2);
+    LOG_P(TAG, "RS Parameters: W = %zu, K = %zu, M = %zu", RS_W, RS_K, RS_M);
+    LOG_P(TAG, "BF Parameters: SM = %zu", BF_SM);
 
     // initialize the random number generator
     FILE *urand = fopen("/dev/urandom", "r");
@@ -68,12 +68,12 @@ char const* SDDRRadio::changeAndGetAdvert() {
     BitMap newAdvert;
     if(advertNum_ >= ADV_N)
     {
-        LOG_D(TAG, "Reached last unique advert, waiting for epoch change\n");
+        LOG_P(TAG, "Reached last unique advert, waiting for epoch change\n");
         newAdvert = lastAdvert_;
     } else {
         newAdvert = generateAdvert(advertNum_);
         lastAdvert_ = newAdvert;
-        LOG_D(TAG, "New Advert #%ld -- %s", advertNum_, newAdvert.toHexString().c_str());
+        LOG_P(TAG, "New Advert #%ld -- %s", advertNum_, newAdvert.toHexString().c_str());
         advertNum_++;
     }
     return (char*)newAdvert.toByteArray();
@@ -128,7 +128,7 @@ void SDDRRadio::changeEpoch()
             EbNDevice *device = it->second;
             if(!device->epochs_.empty())
             {
-                LOG_D(TAG, "-- Computing shared secret for id %ld", device->getID());
+                LOG_P(TAG, "-- Computing shared secret for id %ld", device->getID());
                 EbNDevice::Epoch &curEpoch = device->epochs_.back();
                 if(curEpoch.dhDecoder.isDecoded())
                 {
@@ -136,14 +136,14 @@ void SDDRRadio::changeEpoch()
                     if(dhExchange_.computeSharedSecret(sharedSecret, 
                         curEpoch.dhDecoder.decode(), curEpoch.dhExchangeYCoord))
                     {
-                        LOG_D(TAG, "-- Adding shared secret %s for id %ld", 
+                        LOG_P(TAG, "-- Adding shared secret %s for id %ld", 
                                 sharedSecret.toString().c_str(),
                                 device->getID());
                         device->addSharedSecret(sharedSecret);
                     }
                     else
                     {
-                        LOG_D(TAG, "-- Could not compute shared secret for id %ld", device->getID());
+                        LOG_P(TAG, "-- Could not compute shared secret for id %ld", device->getID());
                     }
                 }
                 else
@@ -171,10 +171,10 @@ void SDDRRadio::preDiscovery()
 void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
 {
     BitMap advert(ADVERT_LEN * 8, data);
-    LOG_D(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", addr.toString().c_str() , rssi, advert.toHexString().c_str());
+    LOG_P(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", addr.toString().c_str() , rssi, advert.toHexString().c_str());
     
     if (!addr.verifyChecksum()) {
-        LOG_D(TAG, "Not an SDDR device, address checksum failed");
+        LOG_P(TAG, "Not an SDDR device, address checksum failed");
         return;
     }
 
@@ -187,13 +187,13 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
       device = new EbNDevice(generateDeviceID(), addr, listenSet_);
       deviceMap_.add(addr, device);
 
-      LOG_D(TAG, "-- Discovered new SDDR device (ID %ld, Address %s)", 
+      LOG_P(TAG, "-- Discovered new SDDR device (ID %ld, Address %s)", 
               device->getID(), device->getAddress().toString().c_str());
     }
 
     device->addRSSIMeasurement(scanTime, rssi);
     discovered_.push_back(DiscoverEvent(scanTime, device->getID(), rssi));
-    LOG_D(TAG, "-- Discovered device %d", device->getID());
+    LOG_P(TAG, "-- Discovered device %d", device->getID());
     addRecentDevice(device);
 
     processAdvert(device, scanTime, data);
@@ -203,11 +203,11 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
 vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
 {
     nextDiscover_ += SCAN_INTERVAL + (-1000 + (rand() % 2001));
-    LOG_D(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
+    LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
   
     // discovered_ is set from processScanResult
     // get the encounters from this discovery and store them away
-    LOG_D(TAG, "-- discovered_ %d devices", discovered_.size());
+    LOG_P(TAG, "-- discovered_ %d devices", discovered_.size());
     list<pair<DeviceID, uint64_t> > newlyDiscovered;
     set<DeviceID> toHandshake = hystPolicy_.discovered(discovered_, newlyDiscovered);
     hystPolicy_.encountered(handshake(toHandshake));
@@ -242,7 +242,7 @@ vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
     {
         messages.push_back(encounterToMsg(*encIt)); 
     }
-    LOG_D(TAG, "-- Sending %d encounters", messages.size());
+    LOG_P(TAG, "-- Sending %d encounters", messages.size());
     return messages;
 }
 
@@ -251,31 +251,31 @@ vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
  */
 std::string SDDRRadio::encounterToMsg(const EncounterEvent &event)
 {
-  LOG_D(TAG, "Encounter event took place");
+  LOG_P(TAG, "Encounter event took place");
   switch(event.type)
   {
   case EncounterEvent::UnconfirmedStarted:
-    LOG_D(TAG, "Type = UnconfirmedStarted");
+    LOG_P(TAG, "Type = UnconfirmedStarted");
     break;
   case EncounterEvent::Started:
-    LOG_D(TAG, "Type = Started");
+    LOG_P(TAG, "Type = Started");
     break;
   case EncounterEvent::Updated:
-    LOG_D(TAG, "Type = Updated");
+    LOG_P(TAG, "Type = Updated");
     break;
   case EncounterEvent::Ended:
-    LOG_D(TAG, "Type = Ended");
+    LOG_P(TAG, "Type = Ended");
     break;
   }
-  LOG_D(TAG, "ID = %d", event.id);
-  LOG_D(TAG, "Time = %" PRIu64, event.time);
-  LOG_D(TAG, "# Shared Secrets = %d (Updated = %s)", 
+  LOG_P(TAG, "ID = %d", event.id);
+  LOG_P(TAG, "Time = %" PRIu64, event.time);
+  LOG_P(TAG, "# Shared Secrets = %d (Updated = %s)", 
           event.sharedSecrets.size(), event.sharedSecretsUpdated ? "true" : "false");
-  LOG_D(TAG, "# Matching Set Entries = %d (Updated = %s)", 
+  LOG_P(TAG, "# Matching Set Entries = %d (Updated = %s)", 
           event.matching.size(), event.matchingSetUpdated ? "true" : "false");
-  LOG_D(TAG, "# Bloom Filters = %d (Updated = %s)", 
+  LOG_P(TAG, "# Bloom Filters = %d (Updated = %s)", 
           event.blooms.size(), event.bloomsUpdated? "true" : "false");
-   LOG_D(TAG, "# RSSI Entries = %d", event.rssiEvents.size());
+   LOG_P(TAG, "# RSSI Entries = %d", event.rssiEvents.size());
 
   SDDR::Event_EncounterEvent *encounterEvent = new SDDR::Event_EncounterEvent();
   encounterEvent->set_type((SDDR::Event_EncounterEvent_EventType)event.type);
@@ -294,7 +294,7 @@ std::string SDDRRadio::encounterToMsg(const EncounterEvent &event)
 
   for(auto it = event.matching.begin(); it != event.matching.end(); it++)
   {
-    LOG_D(TAG, "ADDING MATCHING ENTRY TO EVENT");
+    LOG_P(TAG, "ADDING MATCHING ENTRY TO EVENT");
     encounterEvent->add_matchingset(it->get(), it->size());
   }
 
@@ -304,10 +304,10 @@ std::string SDDRRadio::encounterToMsg(const EncounterEvent &event)
   }
 
   SDDR::Event_RetroactiveInfo* info = new SDDR::Event_RetroactiveInfo();
-  LOG_D(TAG, "BLOOM: Adding %d blooms for pkid %lld", event.blooms.size(), event.getPKID());
+  LOG_P(TAG, "BLOOM: Adding %d blooms for pkid %lld", event.blooms.size(), event.getPKID());
   for(auto it = event.blooms.begin(); it != event.blooms.end(); it++)
   {
-    LOG_D(TAG, "BLOOM: Adding for %lld: prefix %s, prefixSize %d, bloom %s", event.getPKID(), it->prefix.toString().c_str(), it->prefix.sizeBytes(), it->bloom.toString().c_str());
+    LOG_P(TAG, "BLOOM: Adding for %lld: prefix %s, prefixSize %d, bloom %s", event.getPKID(), it->prefix.toString().c_str(), it->prefix.sizeBytes(), it->bloom.toString().c_str());
     SDDR::Event_RetroactiveInfo_BloomInfo *binfo = info->add_blooms();
     binfo->set_prefix_bytes((const char*)it->prefix.toByteArray());
     binfo->set_prefix_size(it->prefix.sizeBytes());
@@ -352,7 +352,7 @@ std::set<DeviceID> SDDRRadio::handshake(const std::set<DeviceID> &deviceIDs)
         }
     }
 
-    LOG_D(TAG, "Ending handshake with %d encounters", encountered.size());
+    LOG_P(TAG, "Ending handshake with %d encounters", encountered.size());
     return encountered;
 }
 
@@ -366,7 +366,7 @@ EncounterEvent SDDRRadio::doneWithDevice(DeviceID id)
   deviceMap_.remove(id);
   removeRecentDevice(id);
 
-  LOG_D(TAG, "Done with device %d", id);
+  LOG_P(TAG, "Done with device %d", id);
   return expiredEvent;
 }
 
@@ -374,7 +374,7 @@ bool SDDRRadio::getRetroactiveMatches(LinkValueList& matching, std::list<BloomIn
 {
     matching = listenSet_;
     float matchingPFalse = 1;
-    LOG_D(TAG, "BLOOM: Retroactive querying %d blooms", blooms.size());
+    LOG_P(TAG, "BLOOM: Retroactive querying %d blooms", blooms.size());
     for (BloomInfo bi : blooms) {
         LinkValueList::iterator it = matching.begin();
         while(it != matching.end())
@@ -382,20 +382,20 @@ bool SDDRRadio::getRetroactiveMatches(LinkValueList& matching, std::list<BloomIn
             const LinkValue &value = *it;
             if(!bi.bloom.query(bi.prefix.toByteArray(), bi.prefix.sizeBytes(), value.get(), value.size()))
             {
-                LOG_D(TAG, "---BLOOM: Retroactive didn't find %s", 
+                LOG_P(TAG, "---BLOOM: Retroactive didn't find %s", 
                         BitMap(value.size(), value.get()).toString().c_str());
                 it = matching.erase(it);
             }
             else
             {
-                LOG_D(TAG, "---BLOOM: Retroactive found %s", 
+                LOG_P(TAG, "---BLOOM: Retroactive found %s", 
                         BitMap(value.size(), value.get()).toString().c_str())
                 it++;
             }
         }
         matchingPFalse *= bi.pFalseDelta;
     }
-    LOG_D(TAG, "BLOOM: Retroactive matching set is %d entries (pFalse %g)", matching.size(), matchingPFalse);
+    LOG_P(TAG, "BLOOM: Retroactive matching set is %d entries (pFalse %g)", matching.size(), matchingPFalse);
     // false if not significant enough for us to update matching
     return (matchingPFalse < 0.05);
 }
@@ -480,11 +480,11 @@ bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *d
   }
   advertOffset += ADV_N_LOG2;
 
-  LOG_D(TAG, "Processing advert %u from device %d - '%s'", advertNum, device->getID(), advert.toHexString().c_str());
+  LOG_P(TAG, "Processing advert %u from device %d - '%s'", advertNum, device->getID(), advert.toHexString().c_str());
 
   if(advertNum < (RS_K + RS_M))
   {
-    LOG_D(TAG, "-- advertnum < RS_K + RS_M");
+    LOG_P(TAG, "-- advertnum < RS_K + RS_M");
     EbNDevice::Epoch *curEpoch = NULL;
     EbNDevice::Epoch *prevEpoch = NULL;
     bool isDuplicate = false;
@@ -530,7 +530,7 @@ bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *d
         device->epochs_.push_back(EbNDevice::Epoch(advertNum, time, dhCodeMatrix_, dhExchange_, publicY));
         curEpoch = &device->epochs_.back();
 
-        LOG_D(TAG, "-- Creating new epoch, previous epoch %s", (prevEpoch == NULL) ? "does not exist" : "exists");
+        LOG_P(TAG, "-- Creating new epoch, previous epoch %s", (prevEpoch == NULL) ? "does not exist" : "exists");
       }
 
       // Processing the DH symbol for the current epoch
@@ -580,7 +580,7 @@ bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *d
       // Copying the segment over into the Bloom filter
       bloom->setSegment(advertNum % BF_B, advert.toByteArray(), advertOffset);
 
-      LOG_D(TAG, "-- new bloom filter segment");
+      LOG_P(TAG, "-- new bloom filter segment");
       return true;
     }
   }
@@ -598,7 +598,7 @@ void SDDRRadio::processEpochs(EbNDevice *device)
     // Decoding the DH remote public value when possible
     if(!epoch.dhDecoder.isDecoded() && epoch.dhDecoder.canDecode())
     {
-        LOG_D(TAG, "-- Can decode %d", device->getID());
+        LOG_P(TAG, "-- Can decode %d", device->getID());
       const uint8_t *dhRemotePublic = epoch.dhDecoder.decode();
       epoch.decodeBloomNum = epoch.blooms.back().first;
 
@@ -611,13 +611,13 @@ void SDDRRadio::processEpochs(EbNDevice *device)
           SharedSecret sharedSecret(confirmScheme_.type == ConfirmScheme::None);
           if(dhExchange.computeSharedSecret(sharedSecret, dhRemotePublic, epoch.dhExchangeYCoord))
           {
-            LOG_D(TAG, "-- Adding shared secret %s for device id %d", 
+            LOG_P(TAG, "-- Adding shared secret %s for device id %d", 
                     sharedSecret.toString().c_str(), device->getID());
             device->addSharedSecret(sharedSecret);
           }
           else
           {
-            LOG_D(TAG, "-- Could not compute shared secret for id %d", device->getID());
+            LOG_P(TAG, "-- Could not compute shared secret for id %d", device->getID());
           }
         }
       }
@@ -682,7 +682,7 @@ void SDDRRadio::processEpochs(EbNDevice *device)
         epochIt = device->epochs_.erase(epochIt);
         removed = true;
 
-        LOG_D(TAG, "Finished with a prior epoch [Decoded? %d] [Before Previous? %d]", isDecoded, isBeforePrevious);
+        LOG_P(TAG, "Finished with a prior epoch [Decoded? %d] [Before Previous? %d]", isDecoded, isBeforePrevious);
       }
     }
 
@@ -724,11 +724,11 @@ size_t SDDRRadio::computeRSSymbolSize(size_t keySize, size_t advertBits)
       bestW = w;
       bestNumAdverts = advertsTotal;
 
-      LOG_D(TAG, "Compute RS Symbol Size - New Best (W = %zu, #Advert = %zu)", bestW, bestNumAdverts);
+      LOG_P(TAG, "Compute RS Symbol Size - New Best (W = %zu, #Advert = %zu)", bestW, bestNumAdverts);
     }
   }
 
-    LOG_D(TAG, "Done RSSymbolSize (W = %zu)", bestW);
+    LOG_P(TAG, "Done RSSymbolSize (W = %zu)", bestW);
     return bestW;
 }
 
@@ -821,7 +821,7 @@ void SDDRRadio::fillBloomFilter(BloomFilter *bloom, const LinkValueList &adverti
   // Inserting random link values to ensure constant Bloom filter load
   bloom->addRandom(numRandom);
 
-  LOG_D("SDDRRadio", "Created new Bloom filter (Advertised %d, Passive %d, Random %d)", 
+  LOG_P("SDDRRadio", "Created new Bloom filter (Advertised %d, Passive %d, Random %d)", 
           numAdvert, numPassive, numRandom);
 }
 
@@ -831,7 +831,7 @@ void SDDRRadio::addRecentDevice(EbNDevice *device)
 
   recentDevices_.push_front(device);
   idToRecentDevices_.insert(make_pair(device->getID(), recentDevices_.begin()));
-  LOG_D(TAG, "Recent device %d", device->getID());
+  LOG_P(TAG, "Recent device %d", device->getID());
 }
 
 void SDDRRadio::removeRecentDevice(DeviceID id)
@@ -847,7 +847,7 @@ void SDDRRadio::removeRecentDevice(DeviceID id)
 bool SDDRRadio::getDeviceEvent(EncounterEvent &event, DeviceID id, uint64_t rssiReportInterval)
 {
   IDToRecentDeviceMap::iterator it = idToRecentDevices_.find(id);
-  LOG_D(TAG, "-- getDeviceEvent device %d", id);
+  LOG_P(TAG, "-- getDeviceEvent device %d", id);
   if(it != idToRecentDevices_.end())
   {
     EbNDevice *device = *it->second;

@@ -36,14 +36,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Test ES Active" />
-
-
-<!--            <com.google.android.gms.common.SignInButton
-                android:id="@+id/sign_in_button"
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/signIn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <Button
+<!--             <Button
                 android:id="@+id/sign_out_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

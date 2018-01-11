@@ -197,9 +197,13 @@ public class Utils {
         ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
         GZIPOutputStream gzipOutputStream = new GZIPOutputStream(arrayOutputStream);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(gzipOutputStream);
+        Log.d(TAG, "Serializing Object 0");
         objectOutputStream.writeObject(object);
+        Log.d(TAG, "Serializing Object 0.5");
         objectOutputStream.flush();
+        Log.d(TAG, "Serializing Object 1");
         String str = Base64.encode(arrayOutputStream.toByteArray(), Base64.DEFAULT).toString();
+        Log.d(TAG, "Serializing Object 2");
         gzipOutputStream.close();
         arrayOutputStream.close();
         objectOutputStream.close();
@@ -245,6 +249,7 @@ public class Utils {
 
     public static String decrypt(String strToDecrypt, String secret)
     {
+        Log.d("DEBUG", "Decrypting " + strToDecrypt + " with " + secret);
         if (secret == null)
             return strToDecrypt;
         try

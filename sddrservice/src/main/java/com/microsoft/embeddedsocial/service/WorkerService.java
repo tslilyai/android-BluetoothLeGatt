@@ -22,7 +22,7 @@ public class WorkerService extends AbstractProcessingService {
 
 	@Override
 	protected IServiceIntentProcessor createIntentProcessor() {
-		Log.d(TAG, "Created intent processor");
+		Log.v(TAG, "Created intent processor");
 		return factory.createIntentProcessor();
 	}
 

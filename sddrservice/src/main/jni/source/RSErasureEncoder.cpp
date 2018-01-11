@@ -24,7 +24,7 @@ RSErasureEncoder::RSErasureEncoder(const RSMatrix &matrix)
       partSymbolPtrs_[p][s] = &partSymbols_[p][s * sizeof(long)];
     }
   }
-  LOG_D("SDDR", "RSErasureEncoder initialized");
+  LOG_P("SDDR", "RSErasureEncoder initialized");
 }
 
 RSErasureEncoder::RSErasureEncoder(const RSErasureEncoder &other)
@@ -81,12 +81,12 @@ void RSErasureEncoder::encode(const uint8_t *data)
 
   for(size_t p = 0; p < matrix_.getNumParts(); p++)
   {
-    LOG_D(TAG, "IN LOOP %d, %d, %d, %p, %p", p, matrix_.getPartW(p), matrix_.getMatrix(p),
+    LOG_P(TAG, "IN LOOP %d, %d, %d, %p, %p", p, matrix_.getPartW(p), matrix_.getMatrix(p),
             &partSymbolPtrs_[p], &partSymbolPtrs_[p][matrix_.K()]); 
     jerasure_matrix_encode(matrix_.K(), matrix_.M(), 8 * matrix_.getPartW(p), matrix_.getMatrix(p), partSymbolPtrs_[p].data(), &partSymbolPtrs_[p][matrix_.K()], sizeof(long));
   }
 
-    LOG_D(TAG, "Encoding 3"); 
+    LOG_P(TAG, "Encoding 3"); 
   uint8_t *pSymbols = symbols_.data();
   for(size_t s = 0; s < (matrix_.K() + matrix_.M()); s++)
   {

@@ -61,7 +61,7 @@ public class UserAccount {
 	}
 
 	public void deleteAccount() {
-		Log.d("UserAccount", "Deleting account");
+		Log.v("UserAccount", "Deleting account");
 		ActionsLauncher.deleteAccount(context);
 	}
 
@@ -80,7 +80,7 @@ public class UserAccount {
 			postponedAction.execute(context);
 		}
 		Preferences.getInstance().clearPendingAction();
-        Log.d("UserAccount", "User signed in!");
+        Log.v("UserAccount", "User signed in!");
 	}
 
 	private void setNewAccountData(String newUserHandle, String sessionToken,

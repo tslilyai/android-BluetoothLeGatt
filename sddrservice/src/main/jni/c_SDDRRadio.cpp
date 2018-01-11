@@ -42,13 +42,13 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1ma
     // initialize the logger
     logger->setLogcatEnabled(false);
     logger->setLogcatEnabled(true);
-    LOG_D("SDDR_c", "logger enabled"); 
+    LOG_P("SDDR_c", "logger enabled"); 
  
-    LOG_D("SDDR_c", "calling malloc Radio"); 
+    LOG_P("SDDR_c", "calling malloc Radio"); 
 
     // XXX right now we're not customizing anything
     SDDRRadio* radioPtr = setupRadio(configDefaults);
-    LOG_D("c_encounters_SDDR", "-- set up radio pointer %p", radioPtr);
+    LOG_P("c_encounters_SDDR", "-- set up radio pointer %p", radioPtr);
    
     // initialize all the JNI IDs we will need
     jni_cache.clsRA = (jclass) env->NewGlobalRef(env->FindClass("org/mpisws/sddrservice/encounters/SDDR_Core$RadioAction"));
@@ -56,7 +56,7 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1ma
     jni_cache.clsArray = (jclass) env->NewGlobalRef(env->FindClass("java/util/ArrayList"));
     jni_cache.clsNative = (jclass) env->NewGlobalRef(env->FindClass("org/mpisws/sddrservice/encounters/SDDR_Native"));
     if (!jni_cache.clsAT || !jni_cache.clsRA || !jni_cache.clsArray) {
-        LOG_D("c_encounters_SDDR", "Class not found");
+        LOG_P("c_encounters_SDDR", "Class not found");
         assert(0);
     }
     jni_cache.fidChangeEpoch = env->GetStaticFieldID(jni_cache.clsAT, "ChangeEpoch", "Lorg/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType;");
@@ -68,7 +68,7 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1ma
     jni_cache.addArray = env->GetMethodID(jni_cache.clsArray, "add", "(Ljava/lang/Object;)Z");
     if (!jni_cache.fidChangeEpoch || !jni_cache.fidDiscover || !jni_cache.addArray ||
             !jni_cache.fidc_EncounterMsgs) {
-        LOG_D("c_encounters_SDDR", "Method or FieldID not found");
+        LOG_P("c_encounters_SDDR", "Method or FieldID not found");
         assert(0);
     }
 
@@ -111,13 +111,13 @@ JNIEXPORT jobject JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_
     switch(ai.action) {
         case SDDRRadio::Action::ChangeEpoch:
         {
-            LOG_D("c_encounters_SDDR", "got action ChangeEpoch");
+            LOG_P("c_encounters_SDDR", "got action ChangeEpoch");
             action_type = env->GetStaticObjectField(jni_cache.clsAT, jni_cache.fidChangeEpoch);
             break;
         }
         case SDDRRadio::Action::Discover:
         {
-            LOG_D("c_encounters_SDDR", "got action Discover");
+            LOG_P("c_encounters_SDDR", "got action Discover");
             action_type = env->GetStaticObjectField(jni_cache.clsAT, jni_cache.fidDiscover);
             break;
         }
@@ -164,7 +164,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
 
     Address addr = radioPtr->getRandomAddr();
     uint8_t* bytes = addr.toByteArray();
-    LOG_D("c_encounters_SDDR", "Got Addr %s with len %d", addr.toString().c_str(), addr.len());
+    LOG_P("c_encounters_SDDR", "Got Addr %s with len %d", addr.toString().c_str(), addr.len());
     const jbyte* nativemsg = reinterpret_cast<const jbyte*>(bytes);
     jbyteArray jbytes = env->NewByteArray(ADDR_LEN);
     env->SetByteArrayRegion(jbytes, 0, ADDR_LEN, nativemsg);
@@ -212,7 +212,7 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1pr
  */
  JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1postDiscovery
   (JNIEnv *env, jobject obj) {
-    LOG_D(TAG, "Starting post discovery jni code");
+    LOG_P(TAG, "Starting post discovery jni code");
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
     std::vector<std::string> msgs = radioPtr->postDiscoveryGetEncounters();
 
@@ -220,7 +220,7 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1pr
             jni_cache.fidc_EncounterMsgs); 
     jbyteArray bytes;
     for (std::string m : msgs) {
-        LOG_D(TAG, "-- Adding msg %s to encounter msgs", m.c_str());
+        LOG_P(TAG, "-- Adding msg %s to encounter msgs", m.c_str());
         bytes = env->NewByteArray(m.length());
         env->SetByteArrayRegion(bytes, 0, m.length(), (jbyte*)m.c_str());
         env->CallBooleanMethod(arraylistObj, jni_cache.addArray, bytes);
@@ -237,7 +237,7 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1up
     event.ParseFromArray(reinterpret_cast<uint8_t*>(msg), len);
     if(event.has_linkabilityevent())
     {
-      LOG_D(TAG, "Updating advertised and listen sets");
+      LOG_P(TAG, "Updating advertised and listen sets");
 
       LinkValueList advertisedSet;
       LinkValueList listenSet;
@@ -256,10 +256,10 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1up
         {
         case SDDR::Event_LinkabilityEvent_Entry_ModeType_AdvertAndListen:
           advertisedSet.push_back(linkValue);
-          LOG_D(TAG, "Adding %s to the advertised set", linkValue.toString().c_str()); 
+          LOG_P(TAG, "Adding %s to the advertised set", linkValue.toString().c_str()); 
         case SDDR::Event_LinkabilityEvent_Entry_ModeType_Listen:
           listenSet.push_back(linkValue);
-          LOG_D(TAG, "Adding %s to the listen set", linkValue.toString().c_str()); 
+          LOG_P(TAG, "Adding %s to the listen set", linkValue.toString().c_str()); 
           break; 
         default:
           LOG_E(TAG, "Received invalid mode (%d) in a linkability event entry", mode);
@@ -271,7 +271,7 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1up
       radioPtr->setAdvertisedSet(advertisedSet);
       radioPtr->setListenSet(listenSet);
     } else {
-      LOG_D(TAG, "Not a linkable event");
+      LOG_P(TAG, "Not a linkable event");
     }
 }
 
@@ -310,7 +310,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     if (!matches) {
         return NULL;
     }
-    LOG_D(TAG, "Retroactive: Found %d matches", matching.size());
+    LOG_P(TAG, "Retroactive: Found %d matches", matching.size());
 
     // serialize matching back to java array
     SDDR::Event_RetroactiveInfo *retroactiveinfo = new SDDR::Event_RetroactiveInfo();

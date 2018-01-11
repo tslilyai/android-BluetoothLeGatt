@@ -42,16 +42,16 @@ void EbNController::run()
   {
     EbNRadio::ActionInfo actionInfo = radio_->getNextAction();
 
-    LOG_D("EbNController", "Next action is %s after %" PRIu64 " ms", (actionInfo.action == EbNRadio::Action::ChangeEpoch) ? "ChangeEpoch" : "Discover", actionInfo.timeUntil);
+    LOG_P("EbNController", "Next action is %s after %" PRIu64 " ms", (actionInfo.action == EbNRadio::Action::ChangeEpoch) ? "ChangeEpoch" : "Discover", actionInfo.timeUntil);
 
     if(actionInfo.timeUntil > 0)
     {
-      LOG_D("EbNController", "Sleeping for %" PRIi64 " ms", actionInfo.timeUntil);
+      LOG_P("EbNController", "Sleeping for %" PRIi64 " ms", actionInfo.timeUntil);
       sleepCallback_(actionInfo.timeUntil);
     }
     else
     {
-      LOG_D("EbNController", "Executing the action immediately");
+      LOG_P("EbNController", "Executing the action immediately");
     }
 
     switch(actionInfo.action)
@@ -101,7 +101,7 @@ void EbNController::run()
     }
   }
 
-  LOG_D("EbNController", "Stopped");
+  LOG_P("EbNController", "Stopped");
 }
 
 void EbNController::encounterDefault(const EncounterEvent &event)

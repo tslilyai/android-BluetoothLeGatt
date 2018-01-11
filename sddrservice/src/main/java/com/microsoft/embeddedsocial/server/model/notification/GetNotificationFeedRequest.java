@@ -19,7 +19,7 @@ public class GetNotificationFeedRequest extends FeedUserRequest {
 
     @Override
     public GetNotificationFeedResponse send() throws NetworkRequestException {
-        Log.d("NOTIFS", "Sending getnotificationfeedrequest");
+        Log.v("NOTIFS", "Sending getnotificationfeedrequest");
         ServiceResponse<FeedResponseActivityView> serviceResponse;
         try {
             serviceResponse = NOTIFICATIONS.getNotifications(authorization, getCursor(), getBatchSize());

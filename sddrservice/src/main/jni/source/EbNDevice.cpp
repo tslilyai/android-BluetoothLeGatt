@@ -58,20 +58,20 @@ void EbNDevice::updateMatching(const BloomFilter *bloom, const uint8_t *prefix, 
     const LinkValue &value = *it;
     if(!bloom->query(prefix, prefixSize, value.get(), value.size()))
     {
-        LOG_D(TAG, "-- BLOOM: Update didn't find %s", 
+        LOG_P(TAG, "-- BLOOM: Update didn't find %s", 
                 BitMap(value.size(), value.get()).toString().c_str())
         it = matching_.erase(it);
         updatedMatching_ = true;
     }
     else
     {
-        LOG_D(TAG, "-- BLOOM: Update found %s", 
+        LOG_P(TAG, "-- BLOOM: Update found %s", 
                 BitMap(value.size(), value.get()).toString().c_str());
         it++;
     }
   }
   matchingPFalse_ *= pFalseDelta;
-  LOG_D(TAG, "BLOOM: Updated matching set to %d entries (pFalse %g) for id %llu", matching_.size(), matchingPFalse_, sddrStartTimestamp + id_);
+  LOG_P(TAG, "BLOOM: Updated matching set to %d entries (pFalse %g) for id %llu", matching_.size(), matchingPFalse_, sddrStartTimestamp + id_);
 }
 
 void EbNDevice::addSharedSecret(const SharedSecret &secret)
@@ -135,7 +135,7 @@ void EbNDevice::confirmPassive(const BloomFilter *bloom, const uint8_t *prefix, 
           secret.confirm(SharedSecret::ConfirmScheme::Passive);
           secretsToReport_.push_back(secret);
 
-          LOG_D("EbNDevice", "Confirmed shared secret \'%s\' for id %d", secret.value.toString().c_str(), id_);
+          LOG_P("EbNDevice", "Confirmed shared secret \'%s\' for id %d", secret.value.toString().c_str(), id_);
         }
       }
       else
@@ -145,7 +145,7 @@ void EbNDevice::confirmPassive(const BloomFilter *bloom, const uint8_t *prefix, 
 
       if(!secret.confirmed)
       {
-        LOG_D("EbNDevice", "Shared secret \'%s\' for id %d has pFalse %g", secret.value.toString().c_str(), id_, secret.pFalse);
+        LOG_P("EbNDevice", "Shared secret \'%s\' for id %d has pFalse %g", secret.value.toString().c_str(), id_, secret.pFalse);
       }
     }
   }
@@ -162,7 +162,7 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
 
   if(expired)
   {
-    LOG_D(TAG, "getEncounterInfo -- expired");
+    LOG_P(TAG, "getEncounterInfo -- expired");
     dest.type = EncounterEvent::Ended;
     dest.id = id_;
     dest.address = address_.toString();
@@ -191,7 +191,7 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
     const bool reportRSSI = !rssiToReport_.empty() && ((getTimeMS() - lastReportTime_) > rssiReportingInterval);
 
     const bool isUpdated = confirmed_ && shakenHands_ && (reportSecrets || reportMatching || reportRSSI || reportBlooms);
-    LOG_D(TAG, "getEncounterInfo -- Updated ? %d", isUpdated);
+    LOG_P(TAG, "getEncounterInfo -- Updated ? %d", isUpdated);
     if(isUpdated)
     {
       dest.type = (reported_ ? EncounterEvent::Updated : EncounterEvent::Started);

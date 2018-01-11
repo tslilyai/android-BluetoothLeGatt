@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -51,16 +52,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.testEncountersOnly).setOnClickListener(this);
         findViewById(R.id.testESInactive).setOnClickListener(this);
         findViewById(R.id.testESActive).setOnClickListener(this);
+        findViewById(R.id.signIn).setOnClickListener(this);
 
-        if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
-            Log.d(TAG, "Not registered with Google yet");
-            GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
-            GNA.makeAuthRequest();
-        }
-        while (GoogleToken.getToken() == null && !encountersService.isSignedIn()) {
-            encountersService.registerGoogleUser(GoogleToken.getToken());
-            encountersService.signIn();
-        }
 
         /*encountersService.startEncounterService(this);
         findViewById(R.id.sign_in_button).setOnClickListener(this);
@@ -91,13 +84,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final ESNotifs.Notif[] notifHolder = {null};
 
         switch (v.getId()) {
+            case R.id.signIn:
+                if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
+                    Log.v(TAG, "Not registered with Google yet");
+                    GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
+                    GNA.makeAuthRequest();
+                }
+                break;
             case R.id.testEncountersOnly:
                 encountersService.startTestEncountersOnly(this);
                 break;
             case R.id.testESInactive:
+                encountersService.registerGoogleUser(GoogleToken.getToken());
+                encountersService.signIn();
                 encountersService.startTestESEnabled(this);
                 break;
             case R.id.testESActive:
+                encountersService.registerGoogleUser(GoogleToken.getToken());
+                encountersService.signIn();
                 encountersService.startTestESEnabled(this);
 
                 final ESMsgs.GetMessagesCallback msgsCallback = new ESMsgs.GetMessagesCallback() {
@@ -111,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final ESNotifs.GetNotificationsCallback notifcallback = new ESNotifs.GetNotificationsCallback() {
                     @Override
                     public void onReceiveNotifications(List<ESNotifs.Notif> notifs) {
-                        Log.d(TAG, "Notif: Calling getNotifsCallback of " + notifs.size() + " notifs");
+                        Log.v(TAG, "Notif: Calling getNotifsCallback of " + notifs.size() + " notifs");
                         long newestNotifCursorTime = -1;
                         for (ESNotifs.Notif notif : notifs) {
                             if (newestNotifCursorTime < 0 || notif.isNewerThan(newestNotifCursorTime)) {
@@ -126,8 +130,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 IEncountersService.ForwardingFilter filter = new IEncountersService.ForwardingFilter().setNumHopsLimit(1).setLifetimeTimeMs(Long.MAX_VALUE);
                 encountersService.sendBroadcastMsg("", filter.setIsRepeating(true).setNumHopsLimit(1).setLifetimeTimeMs(Long.MAX_VALUE));
-                Timer timer = new Timer();
-                timer.schedule(new GetNotifs(notifcallback), 0, 15000);
+                final Handler handler = new Handler();
+                final Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        encountersService.getNotificationsFromNewest(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY);
+                        encountersService.sendRepeatingBroadcastMessages();
+                    }
+                };
+                for (int i = 0; i < 100; ++i) {
+                    handler.postDelayed(runnable, i * 15000);
+                }
                 break;
             default:
                 return;
@@ -137,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onActivityResult (int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_CANCELED) {
-            Log.d(TAG, "Bluetooth not enabled");
+            Log.v(TAG, "Bluetooth not enabled");
             Toast.makeText(this, "Exiting encountersService: Bluetooth required", Toast.LENGTH_SHORT).show();
             finishAndRemoveTask();
         } else {
@@ -182,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     // permission denied!
-                    Log.d(TAG, "No access to fine location");
+                    Log.v(TAG, "No access to fine location");
                     Toast.makeText(this, "Exiting encountersService: Location access required", Toast.LENGTH_SHORT).show();
                     finishAndRemoveTask();
                 }
@@ -196,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         BluetoothAdapter btadapter = bluetoothManager.getAdapter();
         if(btadapter == null||!btadapter.isEnabled())
         {
-            Log.d(TAG, "Bluetooth not enabled");
+            Log.v(TAG, "Bluetooth not enabled");
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, Constants.REQUEST_ENABLE_BT);
             return false;

@@ -57,7 +57,7 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 	@Override
 	public GetNotificationFeedResponse getNotificationFeed(GetNotificationFeedRequest request)
 		throws NetworkRequestException {
-		Log.d("NOTIFS", "Calling getnotificationfeed");
+		Log.v("NOTIFS", "Calling getnotificationfeed");
 
 		return notificationFeedWrapper.getResponse(request);
 	}
@@ -102,7 +102,7 @@ public class NotificationServiceCachingWrapper implements INotificationService {
 
 		@Override
 		protected void onNetworkResponseReceived (GetNotificationFeedRequest request, GetNotificationFeedResponse response) {
-			Log.d("NOTIFS", "Calling network response received");
+			Log.v("NOTIFS", "Calling network response received");
 			for (ActivityView activityView : response.getData()) {
 				activityView.setUnread(activityCache.isActivityUnread(activityView.getHandle()));
 			}

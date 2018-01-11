@@ -81,12 +81,12 @@ public class ESNotifs {
                     case LOADING:
                         break;
                     case LAST_ATTEMPT_FAILED:
-                        Log.d(TAG, "Last attempt failed");
+                        Log.v(TAG, "Last attempt failed");
                         notifFeedFetcher.requestMoreData();
                         break;
                     default: // ENDED or MORE_DATA
-                        Log.d(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
-                        Log.d(TAG, "Found " + notifFeedFetcher.getAllData().size() + " notifs");
+                        Log.v(TAG, "Data ended? " + (newState != FetcherState.HAS_MORE_DATA));
+                        Log.v(TAG, "Found " + notifFeedFetcher.getAllData().size() + " notifs");
                         for (ActivityView av : notifFeedFetcher.getAllData()) {
                             if (!av.isUnread() && flag == IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY) {
                                 break;
@@ -118,14 +118,14 @@ public class ESNotifs {
                 try {
                     String eid;
                     if (n.getActivityType() == ActivityType.REPLY) {
-                        Log.d(TAG, "Got notification of type reply");
+                        Log.v(TAG, "Got notification of type reply");
                         final GetReplyRequest request = new GetReplyRequest(n.getHandle());
                         GetReplyResponse response = contentService.getReply(request);
 
                         final GetCommentRequest req = new GetCommentRequest(response.getReply().getCommentHandle());
                         eid = contentService.getComment(req).getComment().getCommentText();
                     } else if (n.getActivityType() == ActivityType.COMMENT) {
-                        Log.d(TAG, "Got notif of type comment");
+                        Log.v(TAG, "Got notif of type comment");
                         final GetCommentRequest request = new GetCommentRequest(n.getHandle());
                         GetCommentResponse response = contentService.getComment(request);
 
@@ -133,14 +133,14 @@ public class ESNotifs {
                         eid = contentService.getTopic(req).getTopic().getTopicTitle();
 
                         if (eid.compareTo(response.getComment().getCommentText()) == 0) {
-                            Log.d(TAG, "This is the reply comment: " + response.getComment().getCommentText());
+                            Log.v(TAG, "This is the reply comment: " + response.getComment().getCommentText());
                             continue;
                         }
                     } else {
                         Log.e(TAG, "Notif of no known activity type!");
                         continue;
                     }
-                    Log.d(TAG, "Got eid for notif " + eid);
+                    Log.v(TAG, "Got eid for notif " + eid);
                     esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
                             ESMsgs.TopicAction.TATyp.GetMsgs, notif.getCreatedTime(), eid, null, getMessagesCallback));
                 } catch (NetworkRequestException e) {}

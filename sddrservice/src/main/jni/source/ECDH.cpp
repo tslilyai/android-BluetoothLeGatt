@@ -15,7 +15,7 @@ ECDH::ECDH(size_t keySize)
      secret_(NULL, &EC_KEY_free),
      localPublic_(((keySize + 7) / 8) + 1)
 {
-  LOG_D("SDDR", "Initializing ECDH");
+  LOG_P("SDDR", "Initializing ECDH");
 
   /*
    * TODO Figure out why 192-key curve is not supported
@@ -23,9 +23,9 @@ ECDH::ECDH(size_t keySize)
   int nitems = 100;
   EC_builtin_curve curves[nitems];
   int total = EC_get_builtin_curves(curves, nitems);
-  LOG_D("SDDR", "%d builtin curves", total);
+  LOG_P("SDDR", "%d builtin curves", total);
   for (int i = 0; i < total; ++i) {
-      LOG_D("SDDR", "curve %s", curves[i].comment);
+      LOG_P("SDDR", "curve %s", curves[i].comment);
   }
 
   switch(keySize)
@@ -35,7 +35,7 @@ ECDH::ECDH(size_t keySize)
     break;
   case 224:
     secret_.reset(EC_KEY_new_by_curve_name(NID_secp224r1), &EC_KEY_free);        // NIST P-224 Curve
-    LOG_D(TAG, "Got secret %s", secret_.get());
+    LOG_P(TAG, "Got secret %s", secret_.get());
     break;
   case 256:
     secret_.reset(EC_KEY_new_by_curve_name(NID_X9_62_prime256v1), &EC_KEY_free); // NIST P-256 Curve
@@ -44,25 +44,25 @@ ECDH::ECDH(size_t keySize)
     secret_.reset(EC_KEY_new_by_curve_name(NID_secp384r1), &EC_KEY_free);        // NIST P-384 Curve
     break;
   default:
-    LOG_D(TAG, "invalid keysize");
+    LOG_P(TAG, "invalid keysize");
     throw std::runtime_error("Invalid KeySize - Select from {192,224,256,384}");
   }
   if(secret_.get() == NULL)
   {
-    LOG_D(TAG, "could not get secret");
+    LOG_P(TAG, "could not get secret");
     throw std::runtime_error("Selected curve is not supported");
   }
 
-  LOG_D("SDDR", "Generating secret");
+  LOG_P("SDDR", "Generating secret");
   generateSecret();
-  LOG_D("SDDR", "ECDH initialized");
+  LOG_P("SDDR", "ECDH initialized");
 }
 
 void ECDH::generateSecret()
 {
   secret_.reset(EC_KEY_dup(secret_.get()), &EC_KEY_free);
   EC_KEY_generate_key(secret_.get());
-  LOG_D("SDDR", "EC_point2oct with secret, group, public key, LP data, LP size: %d, %d, %d, %s, %d", secret_.get(), EC_KEY_get0_group(secret_.get()), EC_KEY_get0_public_key(secret_.get()), 
+  LOG_P("SDDR", "EC_point2oct with secret, group, public key, LP data, LP size: %d, %d, %d, %s, %d", secret_.get(), EC_KEY_get0_group(secret_.get()), EC_KEY_get0_public_key(secret_.get()), 
           localPublic_.data(), localPublic_.size(), NULL);
   EC_POINT_point2oct(EC_KEY_get0_group(secret_.get()), EC_KEY_get0_public_key(secret_.get()), POINT_CONVERSION_COMPRESSED, localPublic_.data(), localPublic_.size(), NULL);
 }

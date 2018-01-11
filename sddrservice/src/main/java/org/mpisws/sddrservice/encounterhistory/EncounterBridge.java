@@ -118,11 +118,11 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
                 isNeeded &= encounter.getTimeInterval().overlapsWith(filter.getTimeInterval());
             }
 
-            if (filter.getLocation() != null) {
+            if (filter.getLatitude() != -1 && filter.getLongitude() != -1) {
                 float[] results = new float[1];
                 Location.distanceBetween(
                         encounter.getLatitude(), encounter.getLongitude(),
-                        filter.getLocation().getLatitude(), filter.getLocation().getLongitude(),
+                        filter.getLatitude(), filter.getLongitude(),
                         results);
                 isNeeded &= results[0] <= filter.getRadius();
             }
@@ -152,9 +152,9 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
     }
 
     public void finalizeAbandonedEncounters() {
-        Log.d(TAG, "FinalizeAbandonedEncounters starting");
+        Log.v(TAG, "FinalizeAbandonedEncounters starting");
         contentResolver.call(EncounterHistoryAPM.encounters.getContentURI(), Methods.FinalizeAbandonedEncounters.name, null, null);
-        Log.d(TAG, "FinalizeAbandonedEncounters done");
+        Log.v(TAG, "FinalizeAbandonedEncounters done");
     }
 
     public void addNewConduit(long encPkid, long evPkid, FacebookEventStatus state) {

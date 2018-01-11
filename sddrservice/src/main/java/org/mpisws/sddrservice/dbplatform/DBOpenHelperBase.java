@@ -17,14 +17,14 @@ public abstract class DBOpenHelperBase extends SQLiteOpenHelper {
     protected abstract AggregatePersistenceModel getAggregatePersistenceModel();
 
     public void recreateDatabase() {
-        Log.d(TAG, "RecreateDatabase");
+        Log.v(TAG, "RecreateDatabase");
         final SQLiteDatabase db = getWritableDatabase();
         try {
             for (PersistenceModel model : getAggregatePersistenceModel().getPersistenceModels()) {
                 model.drop(db);
             }
         } catch (final SQLException ex) {
-            Log.d(getClass().getSimpleName(), "(Drop table failed)", ex);
+            Log.v(getClass().getSimpleName(), "(Drop table failed)", ex);
         }
         onCreate(db);
         db.close();
@@ -38,13 +38,13 @@ public abstract class DBOpenHelperBase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(final SQLiteDatabase db) {
-        Log.d(TAG, "OnCreate");
+        Log.v(TAG, "OnCreate");
         createTables(db);
     }
 
     @Override
     public void onOpen(SQLiteDatabase db) {
-        Log.d(TAG, "OnOpen: creating tables if they don't exist");
+        Log.v(TAG, "OnOpen: creating tables if they don't exist");
         createTables(db);
     }
 

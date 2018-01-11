@@ -73,7 +73,7 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
             try {
                 result.add(SDDR_Proto.Event.RetroactiveInfo.BloomInfo.parseFrom(EncounterHistoryAPM.blooms.extractBloom(cursor)));
             } catch (InvalidProtocolBufferException e) {
-                Log.d(TAG, "Invalid bloom bytes");
+                Log.v(TAG, "Invalid bloom bytes");
                 e.printStackTrace();
                 return null;
             }
@@ -154,10 +154,10 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         final SDDR_Proto.Event eventsend = SDDR_Proto.Event.newBuilder()
                 .setRetroactiveInfo(SDDR_Proto.Event.RetroactiveInfo.newBuilder()
                         .addAllBlooms(blooms).build()).build();
-        Log.d(TAG, "BLOOMS: Retroactive for pkid " + pkid);
+        Log.v(TAG, "BLOOMS: Retroactive for pkid " + pkid);
         byte[] eventBytes = SDDR_Native.c_getRetroactiveMatches(eventsend.toByteArray());
         if (eventBytes == null) {
-            Log.d(TAG, "BLOOMS: No retroactive matches of signficance");
+            Log.v(TAG, "BLOOMS: No retroactive matches of signficance");
             return;
         }
 
@@ -177,8 +177,8 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
             for (com.google.protobuf.ByteString matching : matchingSetPB) {
                 matchingSet.add(new Identifier(matching.toByteArray()));
             }
-            Log.d(TAG, "BLOOMS: Found " + matchingSet.size() + " retroactive matches with Encounter pkid " + pkid);
-            Log.d(TAG, "BLOOMS: Previous " + getCommonIDs().size() + " non-retroactive matches with Encounter pkid " + pkid);
+            Log.v(TAG, "BLOOMS: Found " + matchingSet.size() + " retroactive matches with Encounter pkid " + pkid);
+            Log.v(TAG, "BLOOMS: Previous " + getCommonIDs().size() + " non-retroactive matches with Encounter pkid " + pkid);
 
             EncounterRetroactiveEvent revent = new EncounterRetroactiveEvent(pkid, matchingSet);
             revent.broadcast(context);

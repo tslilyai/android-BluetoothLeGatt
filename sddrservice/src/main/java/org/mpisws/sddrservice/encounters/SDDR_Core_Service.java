@@ -32,7 +32,7 @@ public class SDDR_Core_Service extends Service {
     public boolean was_destroyed = false;
 
     public void restart() {
-        Log.d(TAG, "Restarting SDDR Core");
+        Log.v(TAG, "Restarting SDDR Core");
         Looper.prepare();
         check_and_start_core();
         was_destroyed = false;
@@ -44,30 +44,30 @@ public class SDDR_Core_Service extends Service {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Location permissions required", Toast.LENGTH_SHORT);
-            Log.d(TAG, "Location permissions not enabled");
+            Log.v(TAG, "Location permissions not enabled");
             this.stopSelf();
         }
 
         if (bta == null || !bta.isEnabled()) {
             Toast.makeText(this, "Bluetooth required", Toast.LENGTH_SHORT);
-            Log.d(TAG, "Bluetooth not enabled");
+            Log.v(TAG, "Bluetooth not enabled");
             this.stopSelf();
         }
-        Log.d(TAG, "Bluetooth and location permissions enabled");
+        Log.v(TAG, "Bluetooth and location permissions enabled");
         if (core == null) {
-            Log.d(TAG, "Starting SDDR_API Core");
+            Log.v(TAG, "Starting SDDR_API Core");
             core = new SDDR_Core(this);
-            Log.d(TAG, "Starting SDDR_API Core thread");
+            Log.v(TAG, "Starting SDDR_API Core thread");
             thread = new Thread(core);
             thread.start();
         } else {
-            Log.d(TAG, "SDDR_API already running");
+            Log.v(TAG, "SDDR_API already running");
         };
     }
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "creating service");
+        Log.v(TAG, "creating service");
         check_and_start_core();
     }
 
@@ -90,13 +90,13 @@ public class SDDR_Core_Service extends Service {
             return START_STICKY;
         }
         else {
-            Log.d(TAG, "Unknown intent");
+            Log.v(TAG, "Unknown intent");
             return START_STICKY;
         }
     }
 
     public void onDestroy() {
-        Log.d(TAG, "Destroying service");
+        Log.v(TAG, "Destroying service");
         if (core != null) {
             core.should_run = false;
             core = null;

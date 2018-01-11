@@ -36,7 +36,7 @@ public class BlockCommentUserHandler extends ActionHandler {
 			final GetCommentRequest request = new GetCommentRequest(commentHandle);
 			GetCommentResponse response = contentService.getComment(request);
 			UserAccount.getInstance().blockUser(response.getComment().getUser().getHandle());
-            Log.d("UserAccount", "blocked User");
+            Log.v("UserAccount", "blocked User");
 		} catch (NetworkRequestException e) {
 			DebugLog.logException(e);
 			action.fail(e.getMessage());

@@ -35,7 +35,7 @@ public class SignOutHandler extends ActionHandler {
 
 	@Override
 	protected void handleAction(Action action, ServiceAction serviceAction, Intent intent) {
-		Log.d("SIGNOUT", "Signing out");
+		Log.v("SIGNOUT", "Signing out");
 		String authorization = intent.getStringExtra(IntentExtras.AUTHORIZATION);
 		IAuthenticationService server = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getAuthenticationService();
 		try {

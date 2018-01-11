@@ -29,7 +29,7 @@ public class LinkabilityBridge extends AbstractBridge<MLinkabilityEntry> {
         final ContentValues values = new ContentValues();
         values.put(PLinkabilityEntries.Columns.principalName, principalName);
         updateFromContentValues(entryPKID, values);
-        Log.d(TAG, "Updated linkability entry #" + entryPKID + " with new name " + principalName);
+        Log.v(TAG, "Updated linkability entry #" + entryPKID + " with new name " + principalName);
     }
 
     public void setMode(final long entryPKID, final LinkabilityEntryMode mode) {

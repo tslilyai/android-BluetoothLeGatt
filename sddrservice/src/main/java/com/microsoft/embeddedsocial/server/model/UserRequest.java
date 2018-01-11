@@ -130,13 +130,13 @@ public class UserRequest extends BaseRequest {
 			case 401: // unauthorized
 				// invalidate session token
 				UserAccount.getInstance().signOut();
-				Log.d("UserRequest", "Unauthorized");
+				Log.v("UserRequest", "Unauthorized");
 				throw new UnauthorizedException(serviceResponse.getResponse().message());
 			case 409:
-				Log.d("UserRequest", "Duplicate");
+				Log.v("UserRequest", "Duplicate");
 				//break;
 			case 500:
-				Log.d("UserRequest", "Server Error");
+				Log.v("UserRequest", "Server Error");
 				//break;
 			default:
 				super.checkResponseCode(serviceResponse);

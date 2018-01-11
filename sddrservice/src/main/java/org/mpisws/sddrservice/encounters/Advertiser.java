@@ -35,12 +35,12 @@ public class Advertiser {
 
     public void initialize(BluetoothAdapter btAdapter) {
         mBluetoothLeAdvertiser = btAdapter.getBluetoothLeAdvertiser();
-        Log.d(TAG, "Initialized Advertiser");
+        Log.v(TAG, "Initialized Advertiser");
     }
 
     public void setAddr(byte[] addr) {
         Utils.myAssert(addr.length == Constants.ADDR_LENGTH);
-        Log.d(TAG, "Setting Addr " + Utils.getHexString(addr));
+        Log.v(TAG, "Setting Addr " + Utils.getHexString(addr));
         System.arraycopy(addr, 0, mAddr, 0, Constants.ADDR_LENGTH);
     }
 
@@ -55,8 +55,8 @@ public class Advertiser {
         long high = bb.getLong();
         long low = bb.getLong();
         mUUID = new UUID(high, low);
-        Log.d(TAG, "Setting UUID " +  mUUID.toString());
-        Log.d(TAG, "Setting Advert " +  Utils.getHexString(mAddr) + Utils.getHexString(mAdData));
+        Log.v(TAG, "Setting UUID " +  mUUID.toString());
+        Log.v(TAG, "Setting Advert " +  Utils.getHexString(mAddr) + Utils.getHexString(mAdData));
     }
 
     public void resetAdvertiser() {
@@ -66,7 +66,7 @@ public class Advertiser {
     }
 
     public void startAdvertising() {
-        Log.d(TAG, "Starting Advertising");
+        Log.v(TAG, "Starting Advertising");
 
         if (mAdvertiseCallback == null) {
             mAdvertiseCallback = new SDDRAdvertiseCallback();
@@ -86,7 +86,7 @@ public class Advertiser {
      * Stops BLE Advertising.
      */
     public void stopAdvertising() {
-        Log.d(TAG, "Stopping Advertising");
+        Log.v(TAG, "Stopping Advertising");
         if (mBluetoothLeAdvertiser != null) {
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
             mAdvertiseCallback = null;
@@ -133,15 +133,15 @@ public class Advertiser {
         public void onStartFailure(int errorCode) {
             super.onStartFailure(errorCode);
             if (errorCode == ADVERTISE_FAILED_DATA_TOO_LARGE) {
-                Log.d(TAG, "Advertising failed: Data too large!");
+                Log.v(TAG, "Advertising failed: Data too large!");
             }
-            else Log.d(TAG, "Advertising failed: Unknown");
+            else Log.v(TAG, "Advertising failed: Unknown");
         }
 
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             super.onStartSuccess(settingsInEffect);
-            Log.d(TAG, "Advertising successfully started");
+            Log.v(TAG, "Advertising successfully started");
         }
     }
 }

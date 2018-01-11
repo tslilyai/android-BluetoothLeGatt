@@ -54,7 +54,7 @@ public class CreateAccountHandler extends ActionHandler {
 
     public CreateAccountHandler(Context context) {
         this.context = context;
-        Log.d("UserAccount", "CreateAccountHandlerCreated");
+        Log.v("UserAccount", "CreateAccountHandlerCreated");
     }
 
     @Override
@@ -69,11 +69,11 @@ public class CreateAccountHandler extends ActionHandler {
                 .setAccessToken(createAccountData.getThirdPartyAccessToken())
                 .build();
         try {
-            Log.d("UserAccount", "Creating account");
+            Log.v("UserAccount", "Creating account");
             AuthenticationResponse createUserResponse = accountService.createUser(createUserRequest);
             handleSuccessfulResult(action, createUserResponse);
         } catch (NetworkRequestException e) {
-            Log.d("UserAccount", "Account creation failed " + e.getMessage());
+            Log.v("UserAccount", "Account creation failed " + e.getMessage());
             DebugLog.logException(e);
             UserAccount.getInstance().onCreateUserFailed();
             action.fail();
@@ -83,7 +83,7 @@ public class CreateAccountHandler extends ActionHandler {
     private void handleSuccessfulResult(Action action, AuthenticationResponse response)
             throws NetworkRequestException {
 
-        Log.d("UserAccount", "Account created");
+        Log.v("UserAccount", "Account created");
         String userHandle = response.getUserHandle();
         String sessionToken = UserRequest.createSessionAuthorization(response.getSessionToken());
         GetUserAccountRequest getUserRequest = new GetUserAccountRequest(sessionToken);

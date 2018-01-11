@@ -58,7 +58,7 @@ public abstract class EncounterEvent implements Serializable {
     public abstract void persistIntoDatabase(Context context);
 
     protected ContentValues toContentValues(final Context context, final boolean putPKID) {
-        Log.d(TAG, "\tPKID: " + pkid + "\n\tstartTime: " + startTime + "\n\tlastTimeSeen: " + lastTimeSeen
+        Log.v(TAG, "\tPKID: " + pkid + "\n\tstartTime: " + startTime + "\n\tlastTimeSeen: " + lastTimeSeen
                 + "\n\tendTime: " + endTime);
         final ContentValues values = new ContentValues();
         if (putPKID) {
@@ -100,7 +100,7 @@ public abstract class EncounterEvent implements Serializable {
     }
 
     protected void insertLocation(final Context context) {
-        Log.d(TAG, "Inserting location");
+        Log.v(TAG, "Inserting location");
         FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -115,9 +115,9 @@ public abstract class EncounterEvent implements Serializable {
                             double lat = location.getLatitude();
                             double longi = location.getLongitude();
                             new EncounterBridge(context).updateLocation(pkid, lat, longi);
-                            Log.d(TAG, "Updated location with lat " + lat + " and long " + longi);
+                            Log.v(TAG, "Updated location with lat " + lat + " and long " + longi);
                         } else {
-                            Log.d(TAG, "Location null");
+                            Log.v(TAG, "Location null");
                         }
                     }
                 });
@@ -162,7 +162,7 @@ public abstract class EncounterEvent implements Serializable {
     }
 
     private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
-        Log.d(TAG, "Inserting shared secrets " + sharedSecrets.size());
+        Log.v(TAG, "Inserting shared secrets " + sharedSecrets.size());
         for (Identifier sharedSecret : sharedSecrets) {
             Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret);
             final ContentValues values = new ContentValues();
@@ -173,16 +173,16 @@ public abstract class EncounterEvent implements Serializable {
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
 
             // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
-            Log.d(TAG, "Create topic for " + eid.toString());
+            Log.v(TAG, "Create topic for " + eid.toString());
             EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
         }
     }
 
 
     private void insertBloomFilters(final Context context, final List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms) {
-        Log.d(TAG, "BLOOMS: Inserting " + blooms.size() + " blooms for encounterPKID " + pkid);
+        Log.v(TAG, "BLOOMS: Inserting " + blooms.size() + " blooms for encounterPKID " + pkid);
         for (SDDR_Proto.Event.RetroactiveInfo.BloomInfo bloom : blooms) {
-            Log.d(TAG, "BLOOMS: Insert Bloom Prefix Size " + bloom.getPrefixSize() + " Prefix: " + bloom.getPrefixBytes().toString());
+            Log.v(TAG, "BLOOMS: Insert Bloom Prefix Size " + bloom.getPrefixSize() + " Prefix: " + bloom.getPrefixBytes().toString());
             final ContentValues values = new ContentValues();
             values.put(PBlooms.Columns.encounterPKID, pkid);
             values.put(PBlooms.Columns.bloom, bloom.toByteArray());

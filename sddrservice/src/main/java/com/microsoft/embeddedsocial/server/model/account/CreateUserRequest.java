@@ -35,7 +35,7 @@ public final class CreateUserRequest extends UserRequest {
 		ServiceResponse<PostUserResponse> serviceResponse;
 		authorization = createThirdPartyAuthorization(identityProvider, accessToken, requestToken);
 		try {
-			Log.d("UserRequest", "Posting user");
+			Log.v("UserRequest", "Posting user");
 			serviceResponse = USERS.postUser(body, authorization);
 		} catch (ServiceException|IOException e) {
 			throw new NetworkRequestException(e.getMessage());
@@ -75,7 +75,7 @@ public final class CreateUserRequest extends UserRequest {
 		}
 
 		public Builder setAccessToken(String accessToken) {
-			Log.d("UserRequest", "Set access token to " + accessToken);
+			Log.v("UserRequest", "Set access token to " + accessToken);
 			request.accessToken = accessToken;
 			return this;
 		}
@@ -96,7 +96,7 @@ public final class CreateUserRequest extends UserRequest {
 			// only require the access token and instance id
 			if( request.accessToken == null
 					|| request.body.getInstanceId() == null) {
-				Log.d("UserRequest", "No access token");
+				Log.v("UserRequest", "No access token");
 				throw new IllegalArgumentException("one of the required fields was empty");
 			}
 			return request;

@@ -29,7 +29,7 @@ RSErasureDecoder::RSErasureDecoder(const RSMatrix &matrix)
       partSymbolPtrs_[p][s] = &partSymbols_[p][s * sizeof(long)];
     }
   }
-  LOG_D("SDDR", "RSErasureDecoder initialized");
+  LOG_P("SDDR", "RSErasureDecoder initialized");
 }
 
 RSErasureDecoder::RSErasureDecoder(const RSErasureDecoder &other)
@@ -50,7 +50,7 @@ RSErasureDecoder::RSErasureDecoder(const RSErasureDecoder &other)
       partSymbolPtrs_[p][s] = &partSymbols_[p][s * sizeof(long)];
     }
   }
-  LOG_D("SDDR", "RSErasureDecoder initialized");
+  LOG_P("SDDR", "RSErasureDecoder initialized");
 }
 
 RSErasureDecoder& RSErasureDecoder::operator = (const RSErasureDecoder &other)

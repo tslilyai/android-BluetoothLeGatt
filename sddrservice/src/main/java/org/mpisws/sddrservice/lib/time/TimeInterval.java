@@ -5,11 +5,21 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static java.lang.Long.parseLong;
+
 public class TimeInterval implements Serializable {
 
     private static final long serialVersionUID = -6870164433943316009L;
     private final Date startTime;
     private final Date endTime;
+
+    public static TimeInterval fromString(String timeint) {
+        String[] strings = timeint.split(" - ");
+        if (strings.length != 2) {
+            return null;
+        }
+        return new TimeInterval(new Date(parseLong(strings[0])), new Date(parseLong(strings[1])));
+    }
 
     public TimeInterval(Date startTime, Date endTime) {
         this.startTime = startTime;
@@ -20,7 +30,8 @@ public class TimeInterval implements Serializable {
         this.startTime = new Date(startTime);
         this.endTime = new Date(endTime);
     }
-    
+
+
     public TimeInterval(final TimeInterval ti) {
         this(ti.getStartL(), ti.getEndL());
     }
@@ -101,7 +112,7 @@ public class TimeInterval implements Serializable {
     public String toString() {
         return startTime + " - " + endTime;
     }
-    
+
     public String toBriefStartEndString() {
         return TimeConversion.convertToMonthDayHourMin(startTime) + " - " + TimeConversion.convertToMonthDayHourMin(endTime);
     }

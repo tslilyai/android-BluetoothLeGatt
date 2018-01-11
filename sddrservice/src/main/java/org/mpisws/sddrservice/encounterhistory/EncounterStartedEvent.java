@@ -25,7 +25,7 @@ public class EncounterStartedEvent extends EncounterEvent {
 
     @Override
     public void broadcast(Context context) {
-        Log.d(TAG, "Broadcasting started encounter");
+        Log.v(TAG, "Broadcasting started encounter");
         final Intent i = new Intent(context, EncounterEventReceiver.class);
         i.putExtra("encounterEvent", this);
         context.sendBroadcast(i);

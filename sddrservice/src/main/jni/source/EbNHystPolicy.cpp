@@ -53,7 +53,7 @@ set<DeviceID> EbNHystPolicy::discovered(const list<DiscoverEvent> &events, list<
           info.state = HystState::Encountered;
           toHandshake.insert(discovery.id);
 
-          LOG_D("EbNHystPolicy", "Changing state for device %d to 'Encountered'", discovery.id);
+          LOG_P("EbNHystPolicy", "Changing state for device %d to 'Encountered'", discovery.id);
           LOG_P("EbNHystPolicy", "[EStart] [%" PRIu64 "] %d", discovery.time, discovery.id);
         }
         break;
@@ -68,7 +68,7 @@ set<DeviceID> EbNHystPolicy::discovered(const list<DiscoverEvent> &events, list<
       newlyDiscovered.push_back(make_pair(discovery.id, time));
       toHandshake.insert(discovery.id);
 
-      LOG_D("EbNHystPolicy", "Changing state for device %d to 'Encountered'", discovery.id);
+      LOG_P("EbNHystPolicy", "Changing state for device %d to 'Encountered'", discovery.id);
       LOG_P("EbNHystPolicy", "[EStart] [%" PRIu64 "] %d", discovery.time, discovery.id);
     }
   }

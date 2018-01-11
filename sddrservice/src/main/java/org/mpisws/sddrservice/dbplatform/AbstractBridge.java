@@ -101,21 +101,21 @@ public abstract class AbstractBridge<T extends AbstractMemoryObject> {
     }
 
     public void updateFromContentValues(final long pkid, final ContentValues values) {
-        Log.d(getTag(), "UpdateFromContentValues: pkid " + pkid + " #columns in values: " + values.keySet().size());
+        Log.v(getTag(), "UpdateFromContentValues: pkid " + pkid + " #columns in values: " + values.keySet().size());
         final int updated = context.getContentResolver().update(
                 ContentUris.withAppendedId(getPersistenceModel().getContentURI(), pkid), values, null, null);
         assert(updated == 1);
     }
 
     public void updateLongColumn(final long pkid, final String column, final Long value) {
-        Log.d(getTag(), "UpdateColumn: pkid " + pkid + ", col " + column + ", val " + value);
+        Log.v(getTag(), "UpdateColumn: pkid " + pkid + ", col " + column + ", val " + value);
         final ContentValues values = new ContentValues();
         values.put(column, value);
         updateFromContentValues(pkid, values);
     }
 
     public void updateDoubleColumn(final long pkid, final String column, final Double value) {
-        Log.d(getTag(), "UpdateColumn: pkid " + pkid + ", col " + column + ", val " + value);
+        Log.v(getTag(), "UpdateColumn: pkid " + pkid + ", col " + column + ", val " + value);
         final ContentValues values = new ContentValues();
         values.put(column, value);
         updateFromContentValues(pkid, values);

@@ -34,7 +34,7 @@ public class UnblockCommentUserHandler extends ActionHandler {
 			final GetCommentRequest request = new GetCommentRequest(commentHandle);
 			GetCommentResponse response = contentService.getComment(request);
 			UserAccount.getInstance().unblockUser(response.getComment().getUser().getHandle());
-			Log.d("UserAccount", "Unblocked User");
+			Log.v("UserAccount", "Unblocked User");
 		} catch (NetworkRequestException e) {
 			DebugLog.logException(e);
 			action.fail(e.getMessage());

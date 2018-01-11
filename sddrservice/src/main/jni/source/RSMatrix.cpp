@@ -23,11 +23,11 @@ RSMatrix::RSMatrix(uint32_t K, uint32_t M, uint32_t W)
       partW_.push_back(w);
 
       int *matrix = reed_sol_vandermonde_coding_matrix(K, M, 8 * w);
-        LOG_D("SDDR", "rs matrix %p", matrix);
+        LOG_P("SDDR", "rs matrix %p", matrix);
     partMatrices_.push_back(shared_ptr<int>(matrix));
     }
   }
-  LOG_D("SDDR", "RSMatrix initialized with %d parts", partMatrices_.size());
-  LOG_D("SDDR", "RSMatrix %p", partMatrices_[partMatrices_.size()-1].get());
+  LOG_P("SDDR", "RSMatrix initialized with %d parts", partMatrices_.size());
+  LOG_P("SDDR", "RSMatrix %p", partMatrices_[partMatrices_.size()-1].get());
 }
 

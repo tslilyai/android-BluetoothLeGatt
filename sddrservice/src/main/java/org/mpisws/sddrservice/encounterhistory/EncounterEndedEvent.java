@@ -19,7 +19,7 @@ public class EncounterEndedEvent extends EncounterEvent {
 
     @Override
     public void broadcast(Context context) {
-        Log.d(TAG, "Broadcasting ended encounter");
+        Log.v(TAG, "Broadcasting ended encounter");
         final Intent i = new Intent(context, EncounterEventReceiver.class);
         i.putExtra("encounterEvent", this);
         context.sendBroadcast(i);

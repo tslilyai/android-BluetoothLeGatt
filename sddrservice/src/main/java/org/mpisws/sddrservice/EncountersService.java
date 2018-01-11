@@ -2,6 +2,7 @@ package org.mpisws.sddrservice;
 
 import android.content.Context;
 import android.content.Intent;
+import android.nfc.Tag;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
@@ -18,11 +19,9 @@ import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
 import org.mpisws.sddrservice.lib.Identifier;
-import org.mpisws.sddrservice.lib.Utils;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
 import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -141,6 +140,9 @@ public class EncountersService implements IEncountersService {
 
     @Override
     public boolean isSignedIn() {
+        if (!isRunning) {
+            return false;
+        }
         return UserAccount.getInstance().isSignedIn();
     }
 
@@ -205,7 +207,6 @@ public class EncountersService implements IEncountersService {
     public void getNotificationsFromNewest(ESNotifs.GetNotificationsCallback getNotificationsCallback, GetNotificationsRequestFlag flag) {
         if (!shouldRunCommand(true)) return;
         esNotifs.get_notifications_from_cursor(getNotificationsCallback, null, flag);
-
     }
 
     @Override
@@ -238,11 +239,7 @@ public class EncountersService implements IEncountersService {
     public void sendBroadcastMsg(String msg, EncountersService.ForwardingFilter filter) {
         if (!shouldRunCommand(true)) return;
         if (filter != null) {
-            String filterstr = "";
-            try {
-                filterstr = Utils.serializeObjectToString(filter);
-            } catch (IOException e) {}
-
+            String filterstr = filter.toString();
             String newMsg = (filterstr + FILTER_END_STR + msg);
             List<String> encounters = getEncounters(filter);
             for (String eid : encounters) {
@@ -258,7 +255,7 @@ public class EncountersService implements IEncountersService {
     @Override
     public void processMessageForBroadcasts(Msg msg) {
         if (!msg.isFromMe() && msg.getFilter() != null) {
-            Log.d(TAG, "Processing msg for broadcasts");
+            Log.v(TAG, "Processing msg for broadcasts");
             boolean shouldSend = storeBroadcastMessage(msg);
             if (shouldSend) {
                 sendBroadcastMsg(msg.getMsg(), msg.getFilter().setNumHopsLimit(msg.getFilter().getNumHops() - 1));
@@ -275,9 +272,7 @@ public class EncountersService implements IEncountersService {
                 // decrease number of hops before encoding filter
                 filter.setNumHopsLimit(filter.getNumHops()-1);
 
-                String filterstr = "";
-                try { filterstr = Utils.serializeObjectToString(filter);}
-                catch (IOException e) {}
+                String filterstr = filter.toString();
                 String newMsg = (filterstr + FILTER_END_STR + msg);
 
                 // only send to new encounters. note that the msg encoding has encoded the original time interval

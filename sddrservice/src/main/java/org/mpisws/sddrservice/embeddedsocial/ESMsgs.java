@@ -166,7 +166,7 @@ public class ESMsgs {
     }
 
     private void process_topics(TopicAction ta, List<TopicView> topiclist) {
-        Log.d(TAG, "Found " + topiclist.size() + " topics, ta.eid " + ta.eid + " going to do topic action " + ta.typ.name());
+        Log.v(TAG, "Found " + topiclist.size() + " topics, ta.eid " + ta.eid + " going to do topic action " + ta.typ.name());
        // No one has created this topic yet! We should try to create it
         if (topiclist.size() == 0) {
             // If we've already tried, this means the post is still not synced. Don't do anything.
@@ -196,7 +196,7 @@ public class ESMsgs {
                 topicToComment = topiclist.get(0).getHandle().compareTo(topiclist.get(1).getHandle()) <= 0
                         ? topiclist.get(0)
                         : topiclist.get(1);
-                Log.d(TAG, "Removing topic " + topicToRemove.getTopicTitle());
+                Log.v(TAG, "Removing topic " + topicToRemove.getTopicTitle());
                 new UserActionProxy(context).removeTopic(topicToRemove);
             } else {
                 topicToComment = topiclist.get(0);
@@ -211,7 +211,7 @@ public class ESMsgs {
 
     private void find_reply_comment_and_do_action(TopicAction ta, TopicView topic) {
         if (topic.getTopicText().compareTo(DUMMY_TOPIC_TEXT) != 0) {
-            Log.d(TAG, "Found replyHandle in topic text!");
+            Log.v(TAG, "Found replyHandle in topic text!");
             do_action(ta, topic, topic.getTopicText());
             return;
         }
@@ -244,7 +244,7 @@ public class ESMsgs {
                                         || (!is_my_topic && UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))) {
                                     if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
                                         // this is the reply comment!
-                                        Log.d(TAG, "Found reply comment " + comment.getCommentText() + " for " + topic.getTopicTitle() + " , updating topic text to be handle");
+                                        Log.v(TAG, "Found reply comment " + comment.getCommentText() + " for " + topic.getTopicTitle() + " , updating topic text to be handle");
                                         topic.setTopicText(comment.getHandle());
                                         new UserActionProxy(context).updateTopic(topic);
                                         do_action(ta, topic, comment.getHandle());
@@ -263,11 +263,11 @@ public class ESMsgs {
                             if (!is_my_topic) {
                                 try {
                                     postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), topic.getTopicTitle(), null));
-                                    Log.d(TAG, "Add reply comment for " + topic.getTopicTitle());
+                                    Log.v(TAG, "Add reply comment for " + topic.getTopicTitle());
                                 } catch (SQLException e) {}
                             }
                             // we're out of comments to fetch, so just do the action
-                            Log.d(TAG, "Didn't find reply comment, just do action for " + topic.getTopicTitle());
+                            Log.v(TAG, "Didn't find reply comment, just do action for " + topic.getTopicTitle());
                             do_action(ta, topic, null);
                         }
                     }
@@ -289,10 +289,10 @@ public class ESMsgs {
                     boolean is_my_topic = UserAccount.getInstance().isCurrentUser(topic.getUser().getHandle()) ? true : false;
                     String encrypted_msg = Utils.encrypt(ta.msg, ssBridge.getSharedSecretByEncounterID(ta.eid));
                     postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), encrypted_msg, null));
-                    Log.d(TAG, "Send comment for " + topic.getTopicTitle());
+                    Log.v(TAG, "Send comment for " + topic.getTopicTitle());
                     if (is_my_topic && replyCommentHandle != null) {
                         postStorage.storeDiscussionItem(DiscussionItem.newReply(replyCommentHandle, "Notify"));
-                        Log.d(TAG, "Send reply to notify for " + topic.getTopicTitle());
+                        Log.v(TAG, "Send reply to notify for " + topic.getTopicTitle());
                     }
                     break;
                 }
@@ -316,7 +316,7 @@ public class ESMsgs {
                     case LOADING:
                         break;
                     case LAST_ATTEMPT_FAILED:
-                        Log.d(TAG, "Last attempt failed");
+                        Log.v(TAG, "Last attempt failed");
                         commentFeedFetcher.requestMoreData();
                         break;
                     default: // ENDED or MORE_DATA
@@ -325,14 +325,14 @@ public class ESMsgs {
                             if (CommentView.class.isInstance(obj)) {
                                 CommentView comment = CommentView.class.cast(obj);
                                 if (ta.thresholdAge > 0 && comment.getCreatedTime() < ta.thresholdAge - THRESHOLD_BUFFER_MS) {
-                                    Log.d(TAG, "Comment created before the threshold time");
+                                    Log.v(TAG, "Comment created before the threshold time");
                                     pastThreshold = true;
                                     break;
                                 } else {
                                     String decrypted_msg = Utils.decrypt(comment.getCommentText(), ssBridge.getSharedSecretByEncounterID(ta.eid));
-                                    Log.d(TAG, "Decrypted " + decrypted_msg);
+                                    Log.v(TAG, "Decrypted " + decrypted_msg);
                                     if (comment.getCommentText().compareTo(topic.getTopicTitle()) == 0) {
-                                        Log.d(TAG, "Found reply comment");
+                                        Log.v(TAG, "Found reply comment");
                                         continue;
                                     }
                                     IEncountersService.ForwardingFilter filter = null;
@@ -352,7 +352,7 @@ public class ESMsgs {
                             }
                         }
                         if (pastThreshold || newState == FetcherState.DATA_ENDED) {
-                            Log.d(TAG, "Found " + commentFeedFetcher.getAllData().size() + " comments for eid " + ta.eid);
+                            Log.v(TAG, "Found " + commentFeedFetcher.getAllData().size() + " comments for eid " + ta.eid);
                             ta.getMessagesCallback.onReceiveMessages(comments);
                         } else {
                             commentFeedFetcher.clearData();
@@ -375,8 +375,11 @@ public class ESMsgs {
 
     public IEncountersService.ForwardingFilter getMsgFilter(String msg) {
         String[] msg_parts = msg.split(IEncountersService.Filter.FILTER_END_STR);
-        Utils.myAssert(msg_parts.length == 2);
+        if (msg_parts.length != 2) {
+            Log.d(TAG, "Length: " + msg_parts.length + " " + msg_parts[0]);
+        }
         IEncountersService.ForwardingFilter filter = null;
+        IEncountersService.ForwardingFilter.fromString(msg_parts[0]);
         try {
             filter = IEncountersService.ForwardingFilter.class.cast(Utils.deserializeObjectFromString(msg_parts[0]));
         } catch (IOException | ClassNotFoundException e) {

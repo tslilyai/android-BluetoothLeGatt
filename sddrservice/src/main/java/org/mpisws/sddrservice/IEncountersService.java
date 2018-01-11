@@ -2,6 +2,10 @@ package org.mpisws.sddrservice;
 
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationManager;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.microsoft.embeddedsocial.autorest.models.Reason;
 
@@ -10,7 +14,12 @@ import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * Created by tslilyai on 12/21/17.
@@ -26,23 +35,27 @@ public interface IEncountersService {
 
     class Filter {
         public static final String FILTER_END_STR = "ENDFLTR";
+        protected static final String DELIMITER = " ## ";
         private TimeInterval timeInterval;
-        private Location location;
+        private double longitude;
+        private double latitude;
         private float radius;
         private List<String> matches;
 
         public Filter() {
             timeInterval = null;
             matches = null;
-            location = null;
+            longitude = -1;
+            latitude = -1;
             radius = 0;
         };
         public Filter setTimeInterval(long startTimeInMillis, long endTimeInMillis) {
             timeInterval = new TimeInterval(startTimeInMillis, endTimeInMillis);
             return this;
         }
-        public Filter setCircularRegion(Location location, float radius) {
-            this.location = location;
+        public Filter setCircularRegion(double longitude, double latitude, float radius) {
+            this.longitude = longitude;
+            this.latitude = latitude;
             this.radius = radius;
             return this;
         }
@@ -53,8 +66,11 @@ public interface IEncountersService {
         public TimeInterval getTimeInterval() {
             return timeInterval;
         }
-        public Location getLocation() {
-            return location;
+        public double getLongitude() {
+            return longitude;
+        }
+        public double getLatitude() {
+            return latitude;
         }
         public float getRadius() {
             return radius;
@@ -65,6 +81,14 @@ public interface IEncountersService {
 
         public void setTimeInterval(TimeInterval timeInterval) {
             this.timeInterval = timeInterval;
+        }
+
+        public String toString() {
+            String[] strings = {
+                    timeInterval == null ? "" : timeInterval.toString(),
+                    matches == null ? "" : TextUtils.join(",", matches),
+                    String.valueOf(getLongitude()), String.valueOf(getLatitude()), String.valueOf(radius)};
+            return TextUtils.join(DELIMITER, strings);
         }
     }
     class ForwardingFilter extends Filter {
@@ -90,17 +114,40 @@ public interface IEncountersService {
             this.lifetimeMs = duration;
             return this;
         }
+        private ForwardingFilter setCreatedTimeMs(long time) {
+            this.createdMs = time;
+            return this;
+        }
         public boolean isRepeating() {
             return isRepeating;
         }
         public int getNumHops() {
             return numHops;
         }
-       public boolean isAlive(long now) {
+        public boolean isAlive(long now) {
             return this.createdMs + this.lifetimeMs >= now;
         }
         public long getEndTime() {
             return this.createdMs + this.lifetimeMs;
+        }
+
+        public String toString() {
+            String str = super.toString();
+            String[] strs = {String.valueOf(isRepeating), String.valueOf(numHops), String.valueOf(createdMs), String.valueOf(lifetimeMs)};
+            return str + DELIMITER + TextUtils.join(DELIMITER, strs);
+        }
+
+        public static ForwardingFilter fromString(String str) {
+            ForwardingFilter f = new ForwardingFilter();
+            String[] strs = str.split(DELIMITER);
+            f.setTimeInterval(TimeInterval.fromString(strs[0]));
+            f.setMatches(Arrays.asList(strs[1].split(", ")));
+            f.setCircularRegion(Double.valueOf(strs[2]), Double.valueOf(strs[3]), Float.valueOf(strs[4]));
+            f.setIsRepeating(Boolean.valueOf(strs[5]))
+                    .setNumHopsLimit(Integer.valueOf(strs[6]))
+                    .setCreatedTimeMs(Long.valueOf(strs[7]))
+                    .setLifetimeTimeMs(Long.valueOf(strs[8]));
+            return f;
         }
     }
 
