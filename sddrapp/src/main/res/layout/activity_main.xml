@@ -19,7 +19,26 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.google.android.gms.common.SignInButton
+             <Button
+                android:id="@+id/testEncountersOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test SDDR Only" />
+
+            <Button
+                android:id="@+id/testESInactive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test ES Inactive" />
+
+             <Button
+                android:id="@+id/testESActive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test ES Active" />
+
+
+<!--            <com.google.android.gms.common.SignInButton
                 android:id="@+id/sign_in_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -96,6 +115,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Get Unread Notifs Old" />
+        -->
         </LinearLayout>
     </ScrollView>
     </LinearLayout>

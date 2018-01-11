@@ -5,10 +5,11 @@ import android.location.Location;
 
 import com.microsoft.embeddedsocial.autorest.models.Reason;
 
+import org.joda.time.DateTime;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
+import org.mpisws.sddrservice.lib.time.TimeInterval;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,25 +22,85 @@ import java.util.List;
  * of class EncountersService. All interface functions can be invoked on the object.
  */
 public interface IEncountersService {
+    static final int MSG_STORAGE_LIMIT = 10000;
 
-    public static class Filter {
-        public Date start_date;
-        public Date end_date;
-        public Location location;
-        public float radius;
-        public List<String> matches;
+    class Filter {
+        public static final String FILTER_END_STR = "ENDFLTR";
+        private TimeInterval timeInterval;
+        private Location location;
+        private float radius;
+        private List<String> matches;
 
-        Filter() {};
-        public void setTimeInterval(Date start_date, Date end_date) {
-            this.start_date = start_date;
-            this.end_date = end_date;
+        public Filter() {
+            timeInterval = null;
+            matches = null;
+            location = null;
+            radius = 0;
+        };
+        public Filter setTimeInterval(long startTimeInMillis, long endTimeInMillis) {
+            timeInterval = new TimeInterval(startTimeInMillis, endTimeInMillis);
+            return this;
         }
-        public void setCircularRegion(Location location, float radius) {
+        public Filter setCircularRegion(Location location, float radius) {
             this.location = location;
             this.radius = radius;
+            return this;
         }
-        public void setMatches(List<String> matches) {
+        public Filter setMatches(List<String> matches) {
             this.matches = matches;
+            return this;
+        }
+        public TimeInterval getTimeInterval() {
+            return timeInterval;
+        }
+        public Location getLocation() {
+            return location;
+        }
+        public float getRadius() {
+            return radius;
+        }
+        public List<String> getMatches() {
+            return matches;
+        }
+
+        public void setTimeInterval(TimeInterval timeInterval) {
+            this.timeInterval = timeInterval;
+        }
+    }
+    class ForwardingFilter extends Filter {
+        private boolean isRepeating;
+        private int numHops;
+        private long createdMs;
+        private long lifetimeMs;
+
+        public ForwardingFilter() {
+            super();
+            createdMs = DateTime.now().getMillis();
+        }
+
+        public ForwardingFilter setIsRepeating(boolean flag) {
+            isRepeating = flag;
+            return this;
+        }
+        public ForwardingFilter setNumHopsLimit(int limit) {
+            numHops = limit;
+            return this;
+        }
+        public ForwardingFilter setLifetimeTimeMs(long duration) {
+            this.lifetimeMs = duration;
+            return this;
+        }
+        public boolean isRepeating() {
+            return isRepeating;
+        }
+        public int getNumHops() {
+            return numHops;
+        }
+       public boolean isAlive(long now) {
+            return this.createdMs + this.lifetimeMs >= now;
+        }
+        public long getEndTime() {
+            return this.createdMs + this.lifetimeMs;
         }
     }
 
@@ -48,6 +109,8 @@ public interface IEncountersService {
         ALL
     }
 
+    public void startTestEncountersOnly(Context context);
+    public void startTestESEnabled(Context context);
     /**
      * Starts up the encounter-formation service that begins encounter formation
      * and turns on all encounter-based functionality
@@ -207,22 +270,10 @@ public interface IEncountersService {
      *
      * @param msg a string representing the message to be sent
      * @param filter a filter to specify the time interval, location range, and/or link matches
-     *               of encounters to which the message should be forwarded
+     *               of encounters to which the message should be forwarded, as well as whether the
+     *               message should be repeatedly send
      */
-    public void sendBroadcastMsg(String msg, EncountersService.Filter filter);
-
-    /**
-     * Sends a message to all encounters that meet the requirement specified by filter,
-     * and additionally indicates that those encounters should forward the message to any
-     * of their encounters that fit the filter. This forwarding continues for the specified
-     * number of encounter hops.
-     *
-     * @param msg a string representing the message to be sent
-     * @param filter a filter to specify the time interval, location range, and/or link matches
-     *               of encounters to which the message should be forwarded
-     * @param numHopsThreshold the limit of the number of hops this message should be sent
-     */
-    public void sendBroadcastMsg(String msg, EncountersService.Filter filter, int numHopsThreshold);
+    public void sendBroadcastMsg(String msg, EncountersService.ForwardingFilter filter);
 
     /**
      * Processes a message to see if it should be broadcasted
@@ -231,4 +282,5 @@ public interface IEncountersService {
      */
     public void processMessageForBroadcasts(ESMsgs.Msg msg);
 
+    public void sendRepeatingBroadcastMessages();
 }

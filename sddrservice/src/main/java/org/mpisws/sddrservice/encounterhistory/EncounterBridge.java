@@ -111,19 +111,26 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
         if (filter == null) {
             return getAllItems();
         }
-        final JavaItemFilter<MEncounter> dbfilter = new JavaItemFilter<MEncounter>() {
-            @Override
-            public boolean isNeeded(MEncounter encounter) {
+        final JavaItemFilter<MEncounter> dbfilter = encounter -> {
+            boolean isNeeded = true;
+
+            if (filter.getTimeInterval() != null) {
+                isNeeded &= encounter.getTimeInterval().overlapsWith(filter.getTimeInterval());
+            }
+
+            if (filter.getLocation() != null) {
                 float[] results = new float[1];
                 Location.distanceBetween(
                         encounter.getLatitude(), encounter.getLongitude(),
-                        filter.location.getLatitude(), filter.location.getLongitude(),
+                        filter.getLocation().getLatitude(), filter.getLocation().getLongitude(),
                         results);
-                float distance = results[0];
-                return encounter.getTimeInterval().overlapsWith(new TimeInterval(filter.start_date, filter.end_date))
-                        && encounter.getCommonIDs().containsAll(filter.matches)
-                        &&  distance < filter.radius;
+                isNeeded &= results[0] <= filter.getRadius();
             }
+
+            if (filter.getMatches() != null) {
+                isNeeded &= encounter.getCommonIDs().containsAll(filter.getMatches());
+            }
+            return isNeeded;
         };
         return getFilteredItems(dbfilter);
     }

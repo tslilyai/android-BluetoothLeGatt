@@ -19,9 +19,11 @@ import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
+import org.mpisws.sddrservice.IEncountersService;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.lib.Utils;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,14 +93,16 @@ public class ESMsgs {
         private long createdTime;
         private String handle;
         private String msg;
+        private IEncountersService.ForwardingFilter filter;
         private String eid;
         private boolean fromMe;
 
-        Msg(ContentType typ, long createdTime, String handle, String msg, String eid, boolean fromMe) {
+        public Msg(ContentType typ, long createdTime, String handle, String msg, IEncountersService.ForwardingFilter filter, String eid, boolean fromMe) {
             this.handle = handle;
             this.typ = typ;
             this.createdTime = createdTime;
             this.msg = msg;
+            this.filter = filter;
             this.eid = eid;
             this.fromMe = fromMe;
         }
@@ -116,6 +120,7 @@ public class ESMsgs {
         public String getCursor() {
             return handle;
         }
+        public IEncountersService.ForwardingFilter getFilter() { return filter; }
     }
 
     public interface GetMessagesCallback {
@@ -330,11 +335,16 @@ public class ESMsgs {
                                         Log.d(TAG, "Found reply comment");
                                         continue;
                                     }
+                                    IEncountersService.ForwardingFilter filter = null;
+                                    if (decrypted_msg.contains(IEncountersService.Filter.FILTER_END_STR)) {
+                                        filter = getMsgFilter(decrypted_msg);
+                                    }
                                     comments.add(new Msg(
                                             ContentType.COMMENT,
                                             comment.getCreatedTime(),
                                             comment.getHandle(),
-                                            decrypted_msg,
+                                            getMsg(decrypted_msg),
+                                            filter,
                                             topic.getTopicTitle(),
                                             UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
                                     );
@@ -361,5 +371,22 @@ public class ESMsgs {
             commentFeedFetcher.setCursor(ta.cursor);
             commentFeedFetcher.requestMoreData();
         }
+    }
+
+    public IEncountersService.ForwardingFilter getMsgFilter(String msg) {
+        String[] msg_parts = msg.split(IEncountersService.Filter.FILTER_END_STR);
+        Utils.myAssert(msg_parts.length == 2);
+        IEncountersService.ForwardingFilter filter = null;
+        try {
+            filter = IEncountersService.ForwardingFilter.class.cast(Utils.deserializeObjectFromString(msg_parts[0]));
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return filter;
+    }
+    private String getMsg(String msg) {
+        String[] msg_parts = msg.split(IEncountersService.Filter.FILTER_END_STR);
+        Utils.myAssert(msg_parts.length == 2);
+        return msg_parts[1];
     }
 }
