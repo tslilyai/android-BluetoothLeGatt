@@ -17,6 +17,7 @@ import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.time.TimeConversion;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -96,12 +97,10 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
         final long confirmationTime = PEncounters.extractConfirmationTime(cursor);
         final FacebookEventStatus facebookEventStatus = PEncounters.extractFacebookEventStatus(cursor);
         final long conduitID = PEncounters.extractConduitID(cursor);
-        final double latitude = PEncounters.extractLatitude(cursor);
-        final double longitude = PEncounters.extractLongitude(cursor);
 
         return new MEncounter(pkID, commonIDsList, encounterTimeInterval,
                 lastSeen, confirmationTime, facebookEventStatus,
-                latitude, longitude, conduitID);
+                conduitID);
     }
     /**
      * Gets all encounters that overlap with the requested filtered results. Not efficient since it's filtering the results after
@@ -119,12 +118,25 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
             }
 
             if (filter.getLatitude() != -1 && filter.getLongitude() != -1) {
+                List<LocationBridge.LocationStamp> locationStamps = new ArrayList<>();
+                List<Identifier> eids = encounter.getEncounterIDs(context);
+                SSBridge bridge = new SSBridge(context);
+                LocationBridge locbridge = new LocationBridge(context);
                 float[] results = new float[1];
-                Location.distanceBetween(
-                        encounter.getLatitude(), encounter.getLongitude(),
-                        filter.getLatitude(), filter.getLongitude(),
-                        results);
-                isNeeded &= results[0] <= filter.getRadius();
+                for (Identifier eid : eids) {
+                    long pkid = bridge.getEncounterPKIDByEncounterID(eid);
+                    LocationBridge.LocationStamp locationStamp = locbridge.getLocationByEncounterPKID(pkid);
+                    Location.distanceBetween(
+                            locationStamp.latitude, locationStamp.longitude,
+                            filter.getLatitude(), filter.getLongitude(),
+                            results);
+                    if (results[0] <= filter.getRadius()) {
+                        locationStamps.add(locationStamp);
+                    }
+                }
+                long lengthOverlap = locationStamps.isEmpty() ? 0 :
+                        locationStamps.get(locationStamps.size() - 1).timestamp - locationStamps.get(0).timestamp;
+                isNeeded &= lengthOverlap >= filter.getOverlapTime();
             }
 
             if (filter.getMatches() != null) {
@@ -173,11 +185,6 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
 
     public void updateConduitID(long encPkid, long apkid) {
         updateLongColumn(encPkid, PEncounters.Columns.conduitID, apkid);
-    }
-
-    public void updateLocation(long encPkid, double latitude, double longitude) {
-        updateDoubleColumn(encPkid, PEncounters.Columns.latitude, latitude);
-        updateDoubleColumn(encPkid, PEncounters.Columns.longitude, longitude);
     }
 
     @Override

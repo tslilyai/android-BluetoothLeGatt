@@ -37,6 +37,6 @@ public class EncounterUpdatedEvent extends EncounterEvent {
         if (updatedRows != 1) {
             throw new RuntimeException("Update returned non-1 value: " + updatedRows);
         }
-        insertSharedSecretsAndRSSIEntriesAndBlooms(context);
+        insertSharedSecretsAndRSSIEntriesAndBloomsAndLocation(context);
     }
 }

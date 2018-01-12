@@ -29,8 +29,8 @@ public class PEncounters extends PersistenceModel {
         public static final String lastTimeSeen = "lastseen";
         public static final String confirmationTime = "conftime";
         public static final String currentWirelessAddress = "mac";
-        public static final String latitude = "latitude";
-        public static final String longitude = "longitude";
+        public static final String latitudes = "latitude";
+        public static final String longitudes = "longitude";
         public static final String facebookEventStatus = "facebookEventStatus";
         public static final String conduitID = "conduitID";
     }
@@ -46,8 +46,8 @@ public class PEncounters extends PersistenceModel {
         columns.add(new DBColumn(Columns.currentWirelessAddress, "TEXT"));
         columns.add(new DBColumn(Columns.facebookEventStatus, "INTEGER"));
         columns.add(new DBColumn(Columns.conduitID, "INTEGER"));
-        columns.add(new DBColumn(Columns.latitude, "REAL"));
-        columns.add(new DBColumn(Columns.longitude, "REAL"));
+        columns.add(new DBColumn(Columns.latitudes, "BLOB"));
+        columns.add(new DBColumn(Columns.longitudes, "BLOB"));
         return columns;
     }
 
@@ -75,12 +75,12 @@ public class PEncounters extends PersistenceModel {
         return cursor.getString(cursor.getColumnIndexOrThrow(Columns.currentWirelessAddress));
     }
 
-    public static double extractLatitude(final Cursor cursor) {
-        return cursor.getDouble(cursor.getColumnIndexOrThrow(Columns.latitude));
+    public static byte[] extractLatitudes(final Cursor cursor) {
+        return cursor.getBlob(cursor.getColumnIndexOrThrow(Columns.latitudes));
     }
 
-    public static double extractLongitude(final Cursor cursor) {
-        return cursor.getDouble(cursor.getColumnIndexOrThrow(Columns.longitude));
+    public static byte[] extractLongitudes(final Cursor cursor) {
+        return cursor.getBlob(cursor.getColumnIndexOrThrow(Columns.longitudes));
     }
 
     public static FacebookEventStatus extractFacebookEventStatus(final Cursor cursor) {

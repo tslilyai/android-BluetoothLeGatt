@@ -40,6 +40,7 @@ public interface IEncountersService {
         private double longitude;
         private double latitude;
         private float radius;
+        private long overlapTime;
         private List<String> matches;
 
         public Filter() {
@@ -48,9 +49,14 @@ public interface IEncountersService {
             longitude = -1;
             latitude = -1;
             radius = 0;
+            overlapTime = 0;
         };
         public Filter setTimeInterval(long startTimeInMillis, long endTimeInMillis) {
             timeInterval = new TimeInterval(startTimeInMillis, endTimeInMillis);
+            return this;
+        }
+        public Filter setOverlapTime(long timeMs) {
+            overlapTime = timeMs;
             return this;
         }
         public Filter setCircularRegion(double longitude, double latitude, float radius) {
@@ -61,6 +67,10 @@ public interface IEncountersService {
         }
         public Filter setMatches(List<String> matches) {
             this.matches = matches;
+            return this;
+        }
+        public Filter setTimeInterval(TimeInterval timeInterval) {
+            this.timeInterval = timeInterval;
             return this;
         }
         public TimeInterval getTimeInterval() {
@@ -78,18 +88,19 @@ public interface IEncountersService {
         public List<String> getMatches() {
             return matches;
         }
-
-        public void setTimeInterval(TimeInterval timeInterval) {
-            this.timeInterval = timeInterval;
+        public long getOverlapTime() {
+            return overlapTime;
         }
 
         public String toString() {
             String[] strings = {
                     timeInterval == null ? "" : timeInterval.toString(),
                     matches == null ? "" : TextUtils.join(",", matches),
-                    String.valueOf(getLongitude()), String.valueOf(getLatitude()), String.valueOf(radius)};
+                    String.valueOf(getLongitude()), String.valueOf(getLatitude()), String.valueOf(radius),
+                    String.valueOf(overlapTime)};
             return TextUtils.join(DELIMITER, strings);
         }
+
     }
     class ForwardingFilter extends Filter {
         static private final int EXPLOSION_LIMIT = 10000;
@@ -158,14 +169,15 @@ public interface IEncountersService {
         public static ForwardingFilter fromString(String str) {
             ForwardingFilter f = new ForwardingFilter();
             String[] strs = str.split(DELIMITER);
-            f.setTimeInterval(TimeInterval.fromString(strs[0]));
-            f.setMatches(Arrays.asList(strs[1].split(", ")));
-            f.setCircularRegion(Double.valueOf(strs[2]), Double.valueOf(strs[3]), Float.valueOf(strs[4]));
-            f.setIsRepeating(Boolean.valueOf(strs[5]))
-                    .setNumHopsLimit(Integer.valueOf(strs[6]))
-                    .setFanoutLimit(Integer.valueOf(strs[7]))
-                    .setCreatedTimeMs(Long.valueOf(strs[8]))
-                    .setLifetimeTimeMs(Long.valueOf(strs[9]));
+            f.setTimeInterval(TimeInterval.fromString(strs[0]))
+                .setMatches(Arrays.asList(strs[1].split(", ")))
+                .setCircularRegion(Double.valueOf(strs[2]), Double.valueOf(strs[3]), Float.valueOf(strs[4]))
+                .setOverlapTime(Long.valueOf(strs[5]));
+            f.setIsRepeating(Boolean.valueOf(strs[6]))
+                .setNumHopsLimit(Integer.valueOf(strs[7]))
+                .setFanoutLimit(Integer.valueOf(strs[8]))
+                .setCreatedTimeMs(Long.valueOf(strs[9]))
+                .setLifetimeTimeMs(Long.valueOf(strs[10]));
             return f;
         }
     }

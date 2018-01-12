@@ -87,7 +87,7 @@ public abstract class EncounterEvent implements Serializable {
         return values;
     }
 
-    protected void insertSharedSecretsAndRSSIEntriesAndBlooms(final Context context) {
+    protected void insertSharedSecretsAndRSSIEntriesAndBloomsAndLocation(final Context context) {
         if (newRSSIEntries != null) {
             insertRSSIEntries(context, newRSSIEntries);
         }
@@ -97,31 +97,9 @@ public abstract class EncounterEvent implements Serializable {
         if (blooms != null) {
             insertBloomFilters(context, blooms);
         }
+        insertLocation(context);
     }
 
-    protected void insertLocation(final Context context) {
-        Log.v(TAG, "Inserting location");
-        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            double lat = location.getLatitude();
-                            double longi = location.getLongitude();
-                            new EncounterBridge(context).updateLocation(pkid, lat, longi);
-                            Log.v(TAG, "Updated location with lat " + lat + " and long " + longi);
-                        } else {
-                            Log.v(TAG, "Location null");
-                        }
-                    }
-                });
-    }
 
     // TODO this means that all common identifiers must be of size Constants.HANDSHAKE_DH_SIZE
     protected byte[] identifierListToByteArray(final Collection<Identifier> list) {
@@ -172,12 +150,12 @@ public abstract class EncounterEvent implements Serializable {
             values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
 
+
             // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
             Log.v(TAG, "Create topic for " + eid.toString());
             EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
         }
     }
-
 
     private void insertBloomFilters(final Context context, final List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms) {
         Log.v(TAG, "BLOOMS: Inserting " + blooms.size() + " blooms for encounterPKID " + pkid);
@@ -189,5 +167,34 @@ public abstract class EncounterEvent implements Serializable {
             values.put(PBlooms.Columns.timestamp, System.currentTimeMillis());
             context.getContentResolver().insert(EncounterHistoryAPM.blooms.getContentURI(), values);
         }
+    }
+
+    private void insertLocation(final Context context) {
+        Log.v(TAG, "Inserting location");
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            double lat = location.getLatitude();
+                            double longi = location.getLongitude();
+                            Log.v(TAG, "Updated location with lat " + lat + " and long " + longi);
+                            final ContentValues values = new ContentValues();
+                            values.put(PLocation.Columns.encounterPKID, pkid);
+                            values.put(PLocation.Columns.latitude, lat);
+                            values.put(PLocation.Columns.longitude, longi);
+                            values.put(PLocation.Columns.timestamp, System.currentTimeMillis());
+                            context.getContentResolver().insert(EncounterHistoryAPM.locations.getContentURI(), values);
+                        } else {
+                            Log.v(TAG, "Location null");
+                        }
+                    }
+                });
     }
 }

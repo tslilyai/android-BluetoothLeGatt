@@ -5,6 +5,9 @@ import android.database.Cursor;
 
 import org.mpisws.sddrservice.lib.Identifier;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SSBridge {
 
     private final Context context;

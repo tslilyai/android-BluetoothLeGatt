@@ -34,6 +34,6 @@ public class EncounterEndedEvent extends EncounterEvent {
         context.getContentResolver().update(uri, values, PEncounters.Columns.confirmationTime + " != -1", null);
         // Delete IF unconfirmed, will not touch confirmed ones
         context.getContentResolver().delete(uri, PEncounters.Columns.confirmationTime + " == -1", null);
-        insertSharedSecretsAndRSSIEntriesAndBlooms(context);
+        insertSharedSecretsAndRSSIEntriesAndBloomsAndLocation(context);
     }
 }
