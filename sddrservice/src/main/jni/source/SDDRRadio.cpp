@@ -136,7 +136,7 @@ void SDDRRadio::changeEpoch()
                     if(dhExchange_.computeSharedSecret(sharedSecret, 
                         curEpoch.dhDecoder.decode(), curEpoch.dhExchangeYCoord))
                     {
-                        LOG_P(TAG, "-- Adding shared secret %s for id %ld", 
+                        LOG_D("ENCOUNTERS_TEST", "-- Adding shared secret %s for id %ld", 
                                 sharedSecret.toString().c_str(),
                                 device->getID());
                         device->addSharedSecret(sharedSecret);
@@ -611,7 +611,7 @@ void SDDRRadio::processEpochs(EbNDevice *device)
           SharedSecret sharedSecret(confirmScheme_.type == ConfirmScheme::None);
           if(dhExchange.computeSharedSecret(sharedSecret, dhRemotePublic, epoch.dhExchangeYCoord))
           {
-            LOG_P(TAG, "-- Adding shared secret %s for device id %d", 
+            LOG_D("ENCOUNTERS_TEST", "-- Adding shared secret %s for device id %d", 
                     sharedSecret.toString().c_str(), device->getID());
             device->addSharedSecret(sharedSecret);
           }

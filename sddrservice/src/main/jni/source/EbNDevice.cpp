@@ -135,7 +135,7 @@ void EbNDevice::confirmPassive(const BloomFilter *bloom, const uint8_t *prefix, 
           secret.confirm(SharedSecret::ConfirmScheme::Passive);
           secretsToReport_.push_back(secret);
 
-          LOG_P("EbNDevice", "Confirmed shared secret \'%s\' for id %d", secret.value.toString().c_str(), id_);
+          LOG_D("ENCOUNTERS_TEST", "Confirmed shared secret \'%s\' for id %d", secret.value.toString().c_str(), id_);
         }
       }
       else

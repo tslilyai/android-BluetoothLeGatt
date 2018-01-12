@@ -92,13 +92,17 @@ public interface IEncountersService {
         }
     }
     class ForwardingFilter extends Filter {
+        static private final int EXPLOSION_LIMIT = 10000;
         private boolean isRepeating;
         private int numHops;
+        private int fanoutLimit;
         private long createdMs;
         private long lifetimeMs;
 
         public ForwardingFilter() {
             super();
+            numHops = 1;
+            fanoutLimit = -1;
             createdMs = DateTime.now().getMillis();
         }
 
@@ -108,6 +112,13 @@ public interface IEncountersService {
         }
         public ForwardingFilter setNumHopsLimit(int limit) {
             numHops = limit;
+            fanoutLimit = limit >= 0 && Math.pow(Math.exp(limit), numHops) < EXPLOSION_LIMIT
+                    ? limit : fanoutLimit;
+             return this;
+        }
+        public ForwardingFilter setFanoutLimit(int limit) {
+            fanoutLimit = limit >= 0 && Math.pow(Math.exp(limit), numHops) < EXPLOSION_LIMIT
+                    ? limit : fanoutLimit;
             return this;
         }
         public ForwardingFilter setLifetimeTimeMs(long duration) {
@@ -124,6 +135,9 @@ public interface IEncountersService {
         public int getNumHops() {
             return numHops;
         }
+        public int getFanoutLimit() {
+            return fanoutLimit < 0 ? 0 : fanoutLimit;
+        }
         public boolean isAlive(long now) {
             return this.createdMs + this.lifetimeMs >= now;
         }
@@ -133,7 +147,11 @@ public interface IEncountersService {
 
         public String toString() {
             String str = super.toString();
-            String[] strs = {String.valueOf(isRepeating), String.valueOf(numHops), String.valueOf(createdMs), String.valueOf(lifetimeMs)};
+            String[] strs = {String.valueOf(isRepeating),
+                    String.valueOf(numHops),
+                    String.valueOf(fanoutLimit),
+                    String.valueOf(createdMs),
+                    String.valueOf(lifetimeMs)};
             return str + DELIMITER + TextUtils.join(DELIMITER, strs);
         }
 
@@ -145,8 +163,9 @@ public interface IEncountersService {
             f.setCircularRegion(Double.valueOf(strs[2]), Double.valueOf(strs[3]), Float.valueOf(strs[4]));
             f.setIsRepeating(Boolean.valueOf(strs[5]))
                     .setNumHopsLimit(Integer.valueOf(strs[6]))
-                    .setCreatedTimeMs(Long.valueOf(strs[7]))
-                    .setLifetimeTimeMs(Long.valueOf(strs[8]));
+                    .setFanoutLimit(Integer.valueOf(strs[7]))
+                    .setCreatedTimeMs(Long.valueOf(strs[8]))
+                    .setLifetimeTimeMs(Long.valueOf(strs[9]));
             return f;
         }
     }

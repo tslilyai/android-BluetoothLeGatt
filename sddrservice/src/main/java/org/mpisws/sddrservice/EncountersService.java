@@ -238,14 +238,20 @@ public class EncountersService implements IEncountersService {
     @Override
     public void sendBroadcastMsg(String msg, EncountersService.ForwardingFilter filter) {
         if (!shouldRunCommand(true)) return;
-        if (filter != null) {
+        if (filter != null && filter.getNumHops() > 0) {
             String filterstr = filter.toString();
             String newMsg = (filterstr + FILTER_END_STR + msg);
             List<String> encounters = getEncounters(filter);
-            for (String eid : encounters) {
-                sendMsg(eid, newMsg);
+
+            // send to a limited number of encounters
+            int sendingLimit = filter.getFanoutLimit();
+            for (int i = 0; i < sendingLimit; ++i) {
+                if (i >= encounters.size()) {
+                    break;
+                }
+                sendMsg(encounters.get(i), newMsg);
             }
-            // store our own broadcast messages to repeatedly send
+            // store our own broadcast messages if they need to be repeatedly sent
             if (filter.isRepeating()) {
                 storeBroadcastMessage(new Msg(null, 0, "", msg, filter, "", true));
             }
@@ -256,7 +262,7 @@ public class EncountersService implements IEncountersService {
     public void processMessageForBroadcasts(Msg msg) {
         if (!msg.isFromMe() && msg.getFilter() != null) {
             Log.v(TAG, "Processing msg for broadcasts");
-            boolean shouldSend = storeBroadcastMessage(msg);
+            boolean shouldSend = msg.getFilter().getNumHops() > 0 && storeBroadcastMessage(msg);
             if (shouldSend) {
                 sendBroadcastMsg(msg.getMsg(), msg.getFilter().setNumHopsLimit(msg.getFilter().getNumHops() - 1));
             }
@@ -277,9 +283,15 @@ public class EncountersService implements IEncountersService {
 
                 // only send to new encounters. note that the msg encoding has encoded the original time interval
                 filter.setTimeInterval(new TimeInterval(DateTime.now().getMillis(), filter.getTimeInterval().getEndL()));
+
                 List<String> encounters = getEncounters(filter);
-                for (String eid : encounters) {
-                    sendMsg(eid, newMsg);
+                // again, limit number of encounters that receive this message
+                int sendingLimit = filter.getFanoutLimit();
+                for (int j = 0; j < sendingLimit; ++j) {
+                    if (j >= encounters.size()) {
+                        break;
+                    }
+                    sendMsg(encounters.get(j), newMsg);
                 }
             } else {
                 i.remove();
@@ -288,6 +300,10 @@ public class EncountersService implements IEncountersService {
     }
 
     private boolean storeBroadcastMessage(Msg msg) {
+        if (msg.getFilter().getNumHops() <= 0) {
+            return false;
+        }
+
         // TODO for right now, just don't send if we are out of space
         if (fwdedMsgs.size() > MSG_STORAGE_LIMIT) {
             cleanupOldMessages();
