@@ -2,6 +2,7 @@ package org.mpisws.sddrservice.encounterhistory;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 import org.mpisws.sddrservice.lib.Identifier;
 
@@ -22,6 +23,8 @@ public class SSBridge {
                 "HEX(" + PSharedSecrets.Columns.encounterID + ") = ?", new String[] { encounterID }, null);
         if (cursor.moveToNext()) {
             result = EncounterHistoryAPM.sharedSecrets.extractSharedSecret(cursor);
+            Log.v("SSBridge", "Found secret " + result == null ? "" : new String(result));
+            Log.v("SSBridge", "Found timestamp " + EncounterHistoryAPM.sharedSecrets.extractTimestamp(cursor));
         }
         cursor.close();
         if (result == null) {

@@ -34,5 +34,4 @@ public class Constants {
      */
     public static final android.icu.text.SimpleDateFormat fullTimeFormat = new android.icu.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static final int HANDSHAKE_DH_SIZE = 24;
-    public static final String TESTTAG = "EbNTest";
 }

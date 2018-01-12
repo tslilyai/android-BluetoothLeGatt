@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import org.joda.time.DateTime;
 import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
@@ -27,6 +28,7 @@ import org.mpisws.sddrservice.IEncountersService;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
+import org.mpisws.sddrservice.lib.Profiler;
 
 import java.util.List;
 import java.util.Timer;
@@ -53,37 +55,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.testESInactive).setOnClickListener(this);
         findViewById(R.id.testESActive).setOnClickListener(this);
         findViewById(R.id.signIn).setOnClickListener(this);
-
-
-        /*encountersService.startEncounterService(this);
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
-        findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.get_all_notifs_old).setOnClickListener(this);
-        findViewById(R.id.get_all_notifs_new).setOnClickListener(this);
-        findViewById(R.id.get_unread_notifs_old).setOnClickListener(this);
-        findViewById(R.id.get_unread_notifs_new).setOnClickListener(this);
-        findViewById(R.id.set_notifs).setOnClickListener(this);
-        findViewById(R.id.GetMsgs).setOnClickListener(this);
-        findViewById(R.id.SendMsg).setOnClickListener(this);
-        findViewById(R.id.SendBroadcastMsg).setOnClickListener(this);
-        findViewById(R.id.deleteMe).setOnClickListener(this);*/
+        findViewById(R.id.deleteAccount).setOnClickListener(this);
    }
-
-    class GetNotifs extends TimerTask {
-        ESNotifs.GetNotificationsCallback notifCallback;
-        public GetNotifs (ESNotifs.GetNotificationsCallback nc) {
-            notifCallback = nc;
-        }
-        public void run() {
-            encountersService.getNotificationsFromNewest(notifCallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY);
-        }
-    }
 
     @Override
     public void onClick(View v) {
         final ESNotifs.Notif[] notifHolder = {null};
 
         switch (v.getId()) {
+            case R.id.deleteAccount:
+                encountersService.deleteAccount();
+                break;
             case R.id.signIn:
                 if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
                     Log.v(TAG, "Not registered with Google yet");
@@ -107,14 +89,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final ESMsgs.GetMessagesCallback msgsCallback = new ESMsgs.GetMessagesCallback() {
                     @Override
                     public void onReceiveMessages(final List<ESMsgs.Msg> msgs) {
+                        Log.d("ESACTIVE_TEST", "End Recv Msgs : " + DateTime.now().getMillis());
+                        Log.d("ESACTIVE_TEST", "Start Send Msgs : " + DateTime.now().getMillis());
                         for (ESMsgs.Msg msg : msgs) {
                             encountersService.processMessageForBroadcasts(msg);
                         }
+                        Log.d("ESACTIVE_TEST", "End Send Msgs : " + DateTime.now().getMillis());
                     }
                 };
                 final ESNotifs.GetNotificationsCallback notifcallback = new ESNotifs.GetNotificationsCallback() {
                     @Override
                     public void onReceiveNotifications(List<ESNotifs.Notif> notifs) {
+                        Log.d("ESACTIVE_TEST", "End Get Notifs: " + DateTime.now().getMillis());
                         Log.v(TAG, "Notif: Calling getNotifsCallback of " + notifs.size() + " notifs");
                         long newestNotifCursorTime = -1;
                         for (ESNotifs.Notif notif : notifs) {
@@ -124,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                         if (notifHolder[0] != null) encountersService.markAllPreviousNotificationsAsRead(notifHolder[0]);
+                        Log.d("ESACTIVE_TEST", "Start Recv Msgs : " + DateTime.now().getMillis());
                         encountersService.getMessagesFromNotifications(notifs, msgsCallback);
                     }
                 };
@@ -134,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
+                        Log.d("ESACTIVE_TEST", "Start Get Notifs: " + DateTime.now().getMillis());
                         encountersService.getNotificationsFromNewest(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY);
                         encountersService.sendRepeatingBroadcastMessages();
                     }

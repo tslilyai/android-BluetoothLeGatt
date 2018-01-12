@@ -244,8 +244,7 @@ public class EncountersService implements IEncountersService {
             List<String> encounters = getEncounters(filter);
 
             // send to a limited number of encounters
-            int sendingLimit = filter.getFanoutLimit();
-            for (int i = 0; i < sendingLimit; ++i) {
+            for (int i = 0; i < filter.getFanoutLimit(); ++i) {
                 if (i >= encounters.size()) {
                     break;
                 }
@@ -282,12 +281,12 @@ public class EncountersService implements IEncountersService {
                 String newMsg = (filterstr + FILTER_END_STR + msg);
 
                 // only send to new encounters. note that the msg encoding has encoded the original time interval
+                // TODO this sends to continuing encounters that overlap with the beginning of the time interval
                 filter.setTimeInterval(new TimeInterval(DateTime.now().getMillis(), filter.getTimeInterval().getEndL()));
 
                 List<String> encounters = getEncounters(filter);
                 // again, limit number of encounters that receive this message
-                int sendingLimit = filter.getFanoutLimit();
-                for (int j = 0; j < sendingLimit; ++j) {
+                for (int j = 0; j < filter.getFanoutLimit(); ++j) {
                     if (j >= encounters.size()) {
                         break;
                     }
@@ -316,6 +315,7 @@ public class EncountersService implements IEncountersService {
         }
         fwdedMsgs.put(msg.getCursor(), msg.getFilter().getEndTime());
         if (msg.getFilter().isRepeating()) {
+            Log.v(TAG, "Stored repeating message");
             repeatingMsgs.add(msg);
         }
         return true;

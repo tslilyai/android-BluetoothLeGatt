@@ -343,7 +343,7 @@ public class ESMsgs {
                                             ContentType.COMMENT,
                                             comment.getCreatedTime(),
                                             comment.getHandle(),
-                                            getMsg(decrypted_msg),
+                                            getMsgOfFilterMsg(decrypted_msg),
                                             filter,
                                             topic.getTopicTitle(),
                                             UserAccount.getInstance().isCurrentUser(comment.getUser().getHandle()))
@@ -378,18 +378,10 @@ public class ESMsgs {
         if (msg_parts.length != 2) {
             Log.d(TAG, "Length: " + msg_parts.length + " " + msg_parts[0]);
         }
-        IEncountersService.ForwardingFilter filter = null;
-        IEncountersService.ForwardingFilter.fromString(msg_parts[0]);
-        try {
-            filter = IEncountersService.ForwardingFilter.class.cast(Utils.deserializeObjectFromString(msg_parts[0]));
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return filter;
+        return IEncountersService.ForwardingFilter.fromString(msg_parts[0]);
     }
-    private String getMsg(String msg) {
+    private String getMsgOfFilterMsg(String msg) {
         String[] msg_parts = msg.split(IEncountersService.Filter.FILTER_END_STR);
-        Utils.myAssert(msg_parts.length == 2);
-        return msg_parts[1];
+        return (msg_parts.length != 2) ? "" :  msg_parts[1];
     }
 }
