@@ -136,7 +136,7 @@ public interface IEncountersService {
             return numHops;
         }
         public int getFanoutLimit() {
-            return fanoutLimit < 0 ? 0 : fanoutLimit;
+            return fanoutLimit < 0 ? 1 : fanoutLimit;
         }
         public boolean isAlive(long now) {
             return this.createdMs + this.lifetimeMs >= now;
