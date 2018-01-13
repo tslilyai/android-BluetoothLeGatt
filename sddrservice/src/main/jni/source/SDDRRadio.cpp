@@ -187,7 +187,7 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
       device = new EbNDevice(generateDeviceID(), addr, listenSet_);
       deviceMap_.add(addr, device);
 
-      LOG_P(TAG, "-- Discovered new SDDR device (ID %ld, Address %s)", 
+      LOG_D("ENCOUNTERS_TEST", "-- Discovered new SDDR device (ID %ld, Address %s)", 
               device->getID(), device->getAddress().toString().c_str());
     }
 

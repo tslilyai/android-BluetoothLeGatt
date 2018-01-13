@@ -90,11 +90,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onReceiveMessages(final List<ESMsgs.Msg> msgs) {
                         Log.d("ESACTIVE_TEST", "End Recv Msgs : " + DateTime.now().getMillis());
-                        Log.d("ESACTIVE_TEST", "Start Send Msgs : " + DateTime.now().getMillis());
+                        Log.d("ESACTIVE_TEST", "Start Process Msgs : " + DateTime.now().getMillis());
                         for (ESMsgs.Msg msg : msgs) {
                             encountersService.processMessageForBroadcasts(msg);
                         }
-                        Log.d("ESACTIVE_TEST", "End Send Msgs : " + DateTime.now().getMillis());
+                        Log.d("ESACTIVE_TEST", "End Process Msgs : " + DateTime.now().getMillis());
                     }
                 };
                 final ESNotifs.GetNotificationsCallback notifcallback = new ESNotifs.GetNotificationsCallback() {
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 };
 
                 IEncountersService.ForwardingFilter filter = new IEncountersService.ForwardingFilter().setNumHopsLimit(1).setLifetimeTimeMs(Long.MAX_VALUE);
-                encountersService.sendBroadcastMsg("", filter.setIsRepeating(true).setNumHopsLimit(1).setLifetimeTimeMs(Long.MAX_VALUE));
+                encountersService.sendBroadcastMsg("", filter.setIsRepeating(true).setNumHopsLimit(1).setLifetimeTimeMs(Long.MAX_VALUE).setFanoutLimit(1000));
                 final Handler handler = new Handler();
                 final Runnable runnable = new Runnable() {
                     @Override

@@ -92,8 +92,7 @@ private:
 
   static const uint16_t ADVERT_MIN_INTERVAL = 650; // ms
   static const uint16_t ADVERT_MAX_INTERVAL = 700; // ms
-  static const uint16_t SCAN_INTERVAL = 3000;//7000, 11000, 15000, 19000, 21000, 25000; // ms
-
+  static const uint16_t SCAN_INTERVAL = 15000;//ms 
   static const size_t ADV_N = 2 * ((EPOCH_INTERVAL + (SCAN_INTERVAL - 1)) / SCAN_INTERVAL);
   static const size_t ADV_N_LOG2 = CLog<ADV_N>::value;
 

@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_BALANCED;
+import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
 
 /**
  * Manages BLE Advertising.

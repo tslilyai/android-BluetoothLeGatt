@@ -3,6 +3,7 @@ package org.mpisws.sddrservice;
 import android.content.Context;
 import android.content.Intent;
 import android.nfc.Tag;
+import android.os.Handler;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
@@ -17,6 +18,7 @@ import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.embeddedsocial.ESUser;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
+import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
@@ -29,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
 
 import static org.mpisws.sddrservice.IEncountersService.Filter.FILTER_END_STR;
 
@@ -260,10 +263,15 @@ public class EncountersService implements IEncountersService {
     @Override
     public void processMessageForBroadcasts(Msg msg) {
         if (!msg.isFromMe() && msg.getFilter() != null) {
-            Log.v(TAG, "Processing msg for broadcasts");
-            boolean shouldSend = msg.getFilter().getNumHops() > 0 && storeBroadcastMessage(msg);
-            if (shouldSend) {
-                sendBroadcastMsg(msg.getMsg(), msg.getFilter().setNumHopsLimit(msg.getFilter().getNumHops() - 1));
+            long pkid = new SSBridge(context).getEncounterPKIDByEncounterID(msg.getEid());
+            EncounterBridge bridge = new EncounterBridge(context);
+            MEncounter encounter = bridge.getItemByPKID(pkid);
+            if (bridge.isEncounterValid(msg.getFilter(), encounter)) {
+                Log.v(TAG, "Processing msg for broadcasts");
+                boolean shouldSend = msg.getFilter().getNumHops() > 0 && storeBroadcastMessage(msg);
+                if (shouldSend) {
+                    sendBroadcastMsg(msg.getMsg(), msg.getFilter().setNumHopsLimit(msg.getFilter().getNumHops() - 1));
+                }
             }
         }
     }
@@ -290,6 +298,7 @@ public class EncountersService implements IEncountersService {
                     if (j >= encounters.size()) {
                         break;
                     }
+                    Log.v(TAG, "Sending repeating messages");
                     sendMsg(encounters.get(j), newMsg);
                 }
             } else {

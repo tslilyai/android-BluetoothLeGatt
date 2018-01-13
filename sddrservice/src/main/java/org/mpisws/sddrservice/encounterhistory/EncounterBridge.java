@@ -102,6 +102,43 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
                 lastSeen, confirmationTime, facebookEventStatus,
                 conduitID);
     }
+
+    public boolean isEncounterValid(EncountersService.Filter filter, MEncounter encounter) {
+        boolean isNeeded = true;
+
+        isNeeded &= encounter.isConfirmed();
+
+        if (filter.getTimeInterval() != null) {
+            isNeeded &= encounter.getTimeInterval().overlapsWith(filter.getTimeInterval());
+        }
+
+        if (filter.getLatitude() != -1 && filter.getLongitude() != -1) {
+            List<LocationBridge.LocationStamp> locationStamps = new ArrayList<>();
+            List<Identifier> eids = encounter.getEncounterIDs(context);
+            SSBridge bridge = new SSBridge(context);
+            LocationBridge locbridge = new LocationBridge(context);
+            float[] results = new float[1];
+            for (Identifier eid : eids) {
+                long pkid = bridge.getEncounterPKIDByEncounterID(eid);
+                LocationBridge.LocationStamp locationStamp = locbridge.getLocationByEncounterPKID(pkid);
+                Location.distanceBetween(
+                        locationStamp.latitude, locationStamp.longitude,
+                        filter.getLatitude(), filter.getLongitude(),
+                        results);
+                if (results[0] <= filter.getRadius()) {
+                    locationStamps.add(locationStamp);
+                }
+            }
+            long lengthOverlap = locationStamps.isEmpty() ? 0 :
+                    locationStamps.get(locationStamps.size() - 1).timestamp - locationStamps.get(0).timestamp;
+            isNeeded &= lengthOverlap >= filter.getOverlapTime();
+        }
+        if (filter.getMatches() != null) {
+            isNeeded &= encounter.getCommonIDs().containsAll(filter.getMatches());
+        }
+        return isNeeded;
+    }
+
     /**
      * Gets all encounters that overlap with the requested filtered results. Not efficient since it's filtering the results after
      * retrieving them.
@@ -111,38 +148,7 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
             return getAllItems();
         }
         final JavaItemFilter<MEncounter> dbfilter = encounter -> {
-            boolean isNeeded = true;
-
-            if (filter.getTimeInterval() != null) {
-                isNeeded &= encounter.getTimeInterval().overlapsWith(filter.getTimeInterval());
-            }
-
-            if (filter.getLatitude() != -1 && filter.getLongitude() != -1) {
-                List<LocationBridge.LocationStamp> locationStamps = new ArrayList<>();
-                List<Identifier> eids = encounter.getEncounterIDs(context);
-                SSBridge bridge = new SSBridge(context);
-                LocationBridge locbridge = new LocationBridge(context);
-                float[] results = new float[1];
-                for (Identifier eid : eids) {
-                    long pkid = bridge.getEncounterPKIDByEncounterID(eid);
-                    LocationBridge.LocationStamp locationStamp = locbridge.getLocationByEncounterPKID(pkid);
-                    Location.distanceBetween(
-                            locationStamp.latitude, locationStamp.longitude,
-                            filter.getLatitude(), filter.getLongitude(),
-                            results);
-                    if (results[0] <= filter.getRadius()) {
-                        locationStamps.add(locationStamp);
-                    }
-                }
-                long lengthOverlap = locationStamps.isEmpty() ? 0 :
-                        locationStamps.get(locationStamps.size() - 1).timestamp - locationStamps.get(0).timestamp;
-                isNeeded &= lengthOverlap >= filter.getOverlapTime();
-            }
-
-            if (filter.getMatches() != null) {
-                isNeeded &= encounter.getCommonIDs().containsAll(filter.getMatches());
-            }
-            return isNeeded;
+            return isEncounterValid(filter, encounter);
         };
         return getFilteredItems(dbfilter);
     }

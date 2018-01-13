@@ -89,6 +89,13 @@ public class SDDR_Core_Service extends Service {
             core.addNewLink(new Identifier(ID.getBytes()), LinkabilityEntryMode.AdvertiseAndListen);
             return START_STICKY;
         }
+
+        if (intent.getExtras().containsKey("stop_sddr_service"))
+        {
+            core.should_run = false;
+            core = null;
+            return START_STICKY;
+        }
         else {
             Log.v(TAG, "Unknown intent");
             return START_STICKY;
