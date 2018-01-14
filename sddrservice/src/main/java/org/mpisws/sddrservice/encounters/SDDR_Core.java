@@ -21,6 +21,7 @@ import org.mpisws.sddrservice.encounterhistory.EncounterStartedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterUpdatedEvent;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounterhistory.RSSIEntry;
+import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.NotFoundException;
 import org.mpisws.sddrservice.lib.Sleeper;
@@ -120,6 +121,10 @@ public class SDDR_Core implements Runnable {
 
         should_run = true;
         while (should_run) {
+            /* FOR TESTING COMPUTATION POWER USAGE */
+            mSleeper.sleep(15000);
+            mScanner.runScanNoProcessing();
+            /*
             mRA = SDDR_Native.c_getNextRadioAction();
             if (mRA.duration > 0) {
                 Log.v(TAG, "sleeping for " + mRA.duration);
@@ -142,10 +147,10 @@ public class SDDR_Core implements Runnable {
                         TODO Deal with active/hybrid schemes
                         TODO Deal with different levels of connectivity due to hybrid/active
                     */
-                    break;
+             /*       break;
                 default:
                     throw new RuntimeException("Unknown Action Type");
-            }
+            }*/
         }
 
         // cleanup

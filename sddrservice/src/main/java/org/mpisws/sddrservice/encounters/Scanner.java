@@ -84,6 +84,8 @@ public class Scanner {
         }
     }
     private final RunPostDiscovery RunPD = new RunPostDiscovery();
+
+
     public void discoverEncounters() {
         Log.v(TAG, "Prediscovery");
         SDDR_Native.c_preDiscovery();
@@ -118,10 +120,11 @@ public class Scanner {
     /**
      * Stop scanning for BLE Advertisements.
      */
-    public void stopScanning() {
+   public void stopScanning() {
         Log.v(TAG, "Stopping Scanning");
         mBluetoothLeScanner.stopScan(mScanCallback);
-    }
+   }
+
 
     /**
      * Filter our scans so we only discover SDDR_API devices
@@ -245,5 +248,52 @@ public class Scanner {
                 mGatt.close();
             }
         }
+    }
+
+    private class RunPostDiscoveryNoProcessing implements Runnable {
+        public boolean done = false;
+
+        public void run() {
+            stopScanningNoProcessing();
+
+            /* sets the c_EncounterMsgs list in SDDR_Core */
+            done = true;
+            synchronized (this) {
+                notifyAll();
+            }
+            done = false;
+        }
+    }
+    private final RunPostDiscoveryNoProcessing RunPDNoProcessing = new RunPostDiscoveryNoProcessing();
+
+    public void runScanNoProcessing() {
+        startScanningNoProcessing();
+        mHandler.postDelayed(RunPDNoProcessing, Constants.SCAN_PERIOD);
+        synchronized (RunPDNoProcessing) {
+            if (!RunPDNoProcessing.done) {
+                try {
+                    RunPDNoProcessing.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    public void startScanningNoProcessing() {
+        if (mScanCallback == null) {
+            mScanCallback = new SDDRScanNoProcessingCallback();
+            mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
+        } else {
+            mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
+        }
+        Log.v(TAG, "Starting Scanning");
+    }
+     public void stopScanningNoProcessing() {
+        Log.v(TAG, "Stopping Scanning");
+        mBluetoothLeScanner.stopScan(mScanCallback);
+    }
+
+    private class SDDRScanNoProcessingCallback extends ScanCallback {
+        private void processResult(ScanResult result) {}
     }
 }
