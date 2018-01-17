@@ -47,7 +47,6 @@ public class SDDR_Core implements Runnable {
     private BluetoothAdapter mBluetoothAdapter;
     private Advertiser mAdvertiser;
     private Scanner mScanner;
-    private GattServerClient mGattServerClient;
     private Sleeper mSleeper;
     private LinkabilityBridge mLinkBridge;
     private EncounterBridge mEncounterBridge;
@@ -105,7 +104,6 @@ public class SDDR_Core implements Runnable {
         SDDR_Native.c_mallocRadio();
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter);
-        mGattServerClient.initialize(bluetoothManager, mService);
 
         // initialize the databases for encounters and links
         mEncounterBridge.finalizeAbandonedEncounters();
