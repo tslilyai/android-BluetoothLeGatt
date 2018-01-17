@@ -6,7 +6,6 @@ static struct jThingsCache {
     jfieldID fidChangeEpoch;
     jfieldID fidDiscover;
     jfieldID fidc_EncounterMsgs;
-    jfieldID fidc_DevAddrs;
     jclass clsNative;
     jclass clsArray;
     jclass clsAT;
@@ -63,7 +62,6 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1ma
     jni_cache.fidChangeEpoch = env->GetStaticFieldID(jni_cache.clsAT, "ChangeEpoch", "Lorg/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType;");
     jni_cache.fidDiscover = env->GetStaticFieldID(jni_cache.clsAT, "Discover", "Lorg/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType;");
     jni_cache.fidc_EncounterMsgs = env->GetStaticFieldID(jni_cache.clsNative, "c_EncounterMsgs", "Ljava/util/ArrayList;");
-    jni_cache.fidc_DevAddrs = env->GetStaticFieldID(jni_cache.clsNative, "c_DevAddrs", "Ljava/util/ArrayList;");
 
     jni_cache.constructorRA = env->GetMethodID(jni_cache.clsRA, "<init>", 
                 "(Lorg/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType;J)V");
@@ -139,8 +137,8 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
     
     char const* bytes = radioPtr->changeAndGetAdvert();
-    jbyteArray arr = env->NewByteArray(ADVERT_LEN);
-    env->SetByteArrayRegion(arr, 0, ADVERT_LEN, (jbyte*)bytes);
+    jbyteArray arr = env->NewByteArray(SDDRRadio::ADVERT_LEN);
+    env->SetByteArrayRegion(arr, 0, SDDRRadio::ADVERT_LEN, (jbyte*)bytes);
     return arr;
 }
 
@@ -179,8 +177,8 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
  * Method:    c_processScanResult
  * Signature: ([BI[B)V
  */
-JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1processScanResult
-  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert, jbyteArray jdevAddress){
+JNIEXPORT jboolean JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1processScanResult
+  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert){
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
 
     int addr_len = env->GetArrayLength(jaddr);
@@ -192,12 +190,7 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1pr
     int advert_len = env->GetArrayLength(jadvert);
     char* advert = new char[advert_len];
     env->GetByteArrayRegion(jadvert, 0, advert_len, reinterpret_cast<jbyte*>(advert));
-
-    int devAddrLen = env->GetArrayLength(jdevAddress);
-    char* devaddrBytes = new char[devAddrLen];
-    env->GetByteArrayRegion(jdevAddress, 0, devAddrLen, reinterpret_cast<jbyte*>(devaddrBytes));
-    std::string devaddrStr(devaddrBytes, devAddrLen);
-    radioPtr->processScanResponse(myAddr, (int)jrssi, (uint8_t*)advert, devaddrStr);
+    return radioPtr->processScanResponse(myAddr, (int)jrssi, (uint8_t*)advert);
 }
 
 /*
@@ -220,27 +213,16 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1pr
   (JNIEnv *env, jobject obj) {
     LOG_P(TAG, "Starting post discovery jni code");
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
-    std::pair<
-            std::vector<std::string>,
-            std::vector<std::string>
-        > msgs_addrs = radioPtr->postDiscoveryGetEncounters();
+    std::vector<std::string> msgs = radioPtr->postDiscoveryGetEncounters();
 
     jobject arraylistObjMsgs = env->GetStaticObjectField(jni_cache.clsNative, 
             jni_cache.fidc_EncounterMsgs); 
-    jobject arraylistObjAddrs = env->GetStaticObjectField(jni_cache.clsNative, 
-            jni_cache.fidc_DevAddrs); 
     jbyteArray bytes;
-    for (std::string m : msgs_addrs.first) {
+    for (std::string m : msgs) {
         LOG_P(TAG, "-- Adding msg %s to encounter msgs", m.c_str());
         bytes = env->NewByteArray(m.length());
         env->SetByteArrayRegion(bytes, 0, m.length(), (jbyte*)m.c_str());
         env->CallBooleanMethod(arraylistObjMsgs, jni_cache.addArray, bytes);
-    }
-    for (std::string m : msgs_addrs.second) {
-        LOG_P(TAG, "-- Adding addr %s to dev addrs", m.c_str());
-        bytes = env->NewByteArray(m.length());
-        env->SetByteArrayRegion(bytes, 0, m.length(), (jbyte*)m.c_str());
-        env->CallBooleanMethod(arraylistObjAddrs, jni_cache.addArray, bytes);
     }
 }
 
@@ -348,6 +330,6 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     return jbytes;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHKey(JNIEnv *env, jobject obj, jbyteArray arr) {
-    return null;
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHKey(JNIEnv *env, jobject obj) {
+    return NULL;
 }

@@ -5,6 +5,7 @@ package org.mpisws.sddrservice.encounters;
  */
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.util.Log;
@@ -207,6 +208,14 @@ public class SDDR_Core implements Runnable {
         }
     }
 
+    private void sendActiveConfirmations() {
+        BluetoothDevice dev = mScanner.newDevices.poll();
+        while (dev != null) {
+            mGattServerClient.connectToDevice(dev);
+            dev= mScanner.newDevices.poll();
+        }
+    }
+
     public void processEncounters(Context context) {
         Log.v(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
 
@@ -268,9 +277,6 @@ public class SDDR_Core implements Runnable {
                     numNewEncounters++;
                     encEvent = new EncounterStartedEvent(pkid, time);
                     Log.v(TAG, "[EncounterEvent] Tentative encounter started at " + time);
-                    /*if (event.activeConfirmation) {
-                        mGattServerClient.connect()
-                    }*/
                     break;
                 case Start:
                     numNewEncounters++;
@@ -320,6 +326,9 @@ public class SDDR_Core implements Runnable {
             encEvent.broadcast(context);
             iterator.remove();
         }
+
+        sendActiveConfirmations();
+
         if (numNewEncounters >= EncountersService.BUFFERED_MESSAGES_THRESHOLD) {
             EncountersService.getInstance().sendRepeatingBroadcastMessages();
             numNewEncounters = 0;

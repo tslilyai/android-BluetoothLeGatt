@@ -20,11 +20,6 @@ package org.mpisws.sddrservice.encounters;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -43,9 +38,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
-import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
 
 /**
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
@@ -56,6 +51,7 @@ public class Scanner {
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
+    public ConcurrentLinkedQueue<BluetoothDevice> newDevices;
 
     public Scanner() {}
 
@@ -63,6 +59,7 @@ public class Scanner {
         this.mBluetoothAdapter = btAdapter;
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mHandler = new Handler();
+        newDevices = new ConcurrentLinkedQueue<>();
         Log.v(TAG, "Initialized Scanner");
     }
 
@@ -181,7 +178,9 @@ public class Scanner {
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi);
-                    SDDR_Native.c_processScanResult(ID, rssi, advert, result.getDevice().getAddress().getBytes());
+                    if (SDDR_Native.c_processScanResult(ID, rssi, advert)) {
+                        newDevices.add(result.getDevice());
+                    }
                 }
             }
         }

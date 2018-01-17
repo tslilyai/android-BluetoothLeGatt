@@ -23,8 +23,6 @@
 #include "sddr.pb.h"
 #include <jni.h>
 
-#define ADVERT_LEN 22
-
 class SDDRRadio 
 {
 public:
@@ -77,6 +75,8 @@ public:
   };
 
   static ConfirmScheme getDefaultConfirmScheme();
+public: 
+  static const uint64_t ADVERT_LEN = 22;
 
 private:
   const size_t RS_W;
@@ -89,10 +89,7 @@ private:
   static const uint32_t BF_N = 256;
   static const uint32_t BF_N_PASSIVE = 128;
   static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);//15);
-
-  static const uint16_t ADVERT_MIN_INTERVAL = 650; // ms
-  static const uint16_t ADVERT_MAX_INTERVAL = 700; // ms
-  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 15000; // ms
+  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 30000; // ms
   static const uint64_t SCAN_INTERVAL_IDLE = 120000; // ms
   static const uint64_t TIME_IDLE_MODE = 300000; // ms
 
@@ -110,7 +107,6 @@ protected:
       SharedSecretQueue;
 
 protected:
-  std::list<std::string> newDevicesAddrs_;
   DeviceID nextDeviceID_;
   size_t keySize_;
   ConfirmScheme confirmScheme_;
@@ -170,10 +166,10 @@ public: // to be called via JNI
           uint64_t rssiReportInterval);
   char const* changeAndGetAdvert();
   void preDiscovery();
-  std::pair<std::vector<std::string>,std::vector<std::string>> postDiscoveryGetEncounters();
+  std::vector<std::string> postDiscoveryGetEncounters();
   const Address getRandomAddr();
   void changeEpoch();
-  void processScanResponse(Address addr, int8_t rssi, uint8_t* data, std::string dev_addr);
+  bool processScanResponse(Address addr, int8_t rssi, uint8_t* data);
   ActionInfo getNextAction();
   void setAdvertisedSet(const LinkValueList &advertisedSet);
   void setListenSet(const LinkValueList &listenSet);

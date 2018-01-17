@@ -10,8 +10,7 @@ SDDRRadio::ConfirmScheme SDDRRadio::getDefaultConfirmScheme()
 }
 
 SDDRRadio::SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, MemoryScheme memoryScheme, bool retroactive, int adapterID, EbNHystPolicy hystPolicy, uint64_t rssiReportInterval)
-   : newDevicesAddrs_(),
-     nextDeviceID_(0),
+: nextDeviceID_(0),
      keySize_(keySize),
      confirmScheme_(confirmScheme),
      memoryScheme_(memoryScheme),
@@ -23,6 +22,8 @@ SDDRRadio::SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, MemoryScheme m
      idToRecentDevices_(),
      nextDiscover_(getTimeMS() + 10000),
      nextChangeEpoch_(getTimeMS() + EPOCH_INTERVAL),
+     timeDetectedNewDevice_(),
+     timeDetectedUnconfirmedDevice_(),
      RS_W(computeRSSymbolSize(keySize, (ADVERT_LEN*8) - 1 - ADV_N_LOG2)),
      RS_K((keySize / 8) / RS_W),
      RS_M(ADV_N - RS_K),
@@ -167,17 +168,17 @@ void SDDRRadio::preDiscovery()
     if(memoryScheme_ == MemoryScheme::NoMemory)
         deviceMap_.clear();
     discovered_.clear();
-    newDevicesAddrs_.clear();
 }
 
-void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data, std::string dev_addr)
+bool SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
 {
     BitMap advert(ADVERT_LEN * 8, data);
+    bool newlyFound = false;
     LOG_P(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", addr.toString().c_str() , rssi, advert.toHexString().c_str());
     
     if (!addr.verifyChecksum()) {
         LOG_P(TAG, "Not an SDDR device, address checksum failed");
-        return;
+        return false;
     }
 
     uint64_t scanTime = getTimeMS();
@@ -188,7 +189,7 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data, st
 
       device = new EbNDevice(generateDeviceID(), addr, listenSet_);
       deviceMap_.add(addr, device);
-      newDevicesAddrs_.push_back(dev_addr);
+      newlyFound = true;
 
       LOG_D("ENCOUNTERS_TEST", "-- Discovered new SDDR device (ID %ld, Address %s)", 
               device->getID(), device->getAddress().toString().c_str());
@@ -201,9 +202,10 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data, st
 
     processAdvert(device, scanTime, data);
     processEpochs(device);
+    return newlyFound;
 }
 
-pair<std::vector<std::string>,std::vector<std::string>> postDiscoveryGetEncounters()
+std::vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
 {
     // discovered_ is set from processScanResult
     // get the encounters from this discovery and store them away
@@ -262,7 +264,7 @@ pair<std::vector<std::string>,std::vector<std::string>> postDiscoveryGetEncounte
     LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
  
     LOG_P(TAG, "-- Sending %d encounters", messages.size());
-    return std::make_pair(messages, newDevicesAddrs_);
+    return messages;
 }
 
 /* 
