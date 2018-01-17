@@ -6,7 +6,7 @@ import android.text.TextUtils;
 import com.microsoft.embeddedsocial.autorest.models.Reason;
 
 import org.joda.time.DateTime;
-import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
+import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
 
@@ -192,18 +192,6 @@ public interface IEncountersService {
     public void startEncounterService(Context context);
 
     /**
-     * Adds a linkable identifier linkID to the Bluetooth broadcast used to form encounters. This allows
-     * a recipient with whom you form an encounter, and who also has access to linkID,
-     * to either later or at the present recognize that you were broadcasting linkID.
-     *<p>
-     * Example usages include recognition of group membership (e.g., a linkID that corresponds to
-     * "interested in birdwatching") or revealing identity (linking two otherwise anonymous encounters)
-     *
-     * @param linkID the linkable identifier to be added to the Bluetooth broadcast
-     */
-    public void addLinkableID(String linkID);
-
-    /**
      * Retrieves all encounters that satisfy the constraints of the filter.
      *
      * @param filter a filter consisting of a time frame, required linkable identifier matches, and location; if this is null, all encounters are retrieved
@@ -245,14 +233,14 @@ public interface IEncountersService {
      *
      * @param msg The message sent by the to-be-blocked party
      */
-    public void blockSender(ESMsgs.Msg msg);
+    public void blockSender(ESTopics.Msg msg);
 
     /**
      * Unblocks all notifications and messages from whomever sent this message
      *
      * @param msg The message sent by the to-be-unblocked party
      */
-    public void unblockSender(ESMsgs.Msg msg);
+    public void unblockSender(ESTopics.Msg msg);
 
     /**
      * Sends a message to the specified encounter.
@@ -270,7 +258,7 @@ public interface IEncountersService {
      * @param thresholdMessageAge a timestamp (ms) representing the oldest message to be retrieved. If this is negative, all messages are retrieved.
      * @param getMessagesCallback a callback to be called with the list of retrieved messages
      */
-    public void getMsgsFromNewest(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback);
+    public void getMsgsFromNewest(String encounterID, long thresholdMessageAge, ESTopics.GetMessagesCallback getMessagesCallback);
 
     /**
      * Gets the messages of this encounter from a given point in the encounter thread, and invokes
@@ -281,14 +269,14 @@ public interface IEncountersService {
      * @param getMessagesCallback a callback to be called with the list of retrieved messages
      * @param cursor the point in the thread at which to start retrieving messages; each message is associated with a cursor (see the getCursor() method for a Msg)
      */
-    public void getMsgsFromCursor(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback, String cursor);
+    public void getMsgsFromCursor(String encounterID, long thresholdMessageAge, ESTopics.GetMessagesCallback getMessagesCallback, String cursor);
 
     /**
      * Report a particular message for its content.
      * @param msg the message being reported
      * @param reason the reason for reporting
      */
-    public void reportMsg(ESMsgs.Msg msg, Reason reason);
+    public void reportMsg(ESTopics.Msg msg, Reason reason);
 
     /**
      * Gets a page of notifications in the notifications feed from the newest notification, and invokes
@@ -317,7 +305,7 @@ public interface IEncountersService {
      * @param notifs the notifications for which their corresponding encounters will be retrieved
      * @param getMessagesCallback a callback to be called with the messages for the notification
      */
-    public void getMessagesFromNotifications(List<ESNotifs.Notif> notifs, ESMsgs.GetMessagesCallback getMessagesCallback);
+    public void getMessagesFromNotifications(List<ESNotifs.Notif> notifs, ESTopics.GetMessagesCallback getMessagesCallback);
 
     /**
      * Marks all notifications prior to and including the specified notification as read.
@@ -350,5 +338,5 @@ public interface IEncountersService {
      *
      * @param msg the message to be processed
      */
-    public void processMessageForBroadcasts(ESMsgs.Msg msg);
+    public void processMessageForBroadcasts(ESTopics.Msg msg);
 }

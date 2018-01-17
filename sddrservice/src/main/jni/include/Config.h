@@ -11,9 +11,6 @@ struct Config
   struct Radio
   {
     size_t keySize;
-    SDDRRadio::ConfirmScheme confirm;
-    SDDRRadio::MemoryScheme memory;
-    bool retroactive;
   } radio;
 
   struct HystPolicy
@@ -36,12 +33,9 @@ struct Config
 
 constexpr Config configDefaults =
 {
-  {224, {SDDRRadio::ConfirmScheme::Passive, 0.05}, SDDRRadio::MemoryScheme::Standard, 
-  true /*retroactive linking*/},
+  {224}, 
   {EbNHystPolicy::Scheme::Standard, TIME_MIN_TO_MS(2), TIME_MIN_TO_MS(5), 2, TIME_MIN_TO_MS(10), -85},
   {TIME_MIN_TO_MS(1)}
 };
   
-//{192, {SDDRRadio::ConfirmScheme::Passive, 0.05}, SDDRRadio::MemoryScheme::Standard},
-
 #endif // CONFIG_H

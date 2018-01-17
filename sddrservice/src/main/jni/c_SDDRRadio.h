@@ -94,14 +94,6 @@ JNIEXPORT jobject JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_
 
 /*
  * Class:     org_mpisws_sddrservice_encounters_SDDR_Native
- * Method:    c_changeAndGetAdvert
- * Signature: ()[B
- */
-JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1changeAndGetAdvert
-  (JNIEnv *, jobject);
-
-/*
- * Class:     org_mpisws_sddrservice_encounters_SDDR_Native
  * Method:    c_changeEpoch
  * Signature: ()V
  */
@@ -144,12 +136,9 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1pr
 JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1postDiscovery
   (JNIEnv *, jobject);
 
-JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1updateLinkability
-        (JNIEnv *env, jobject obj, jbyteArray arr);
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHKey(JNIEnv *env, jobject obj);
 
-JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getRetroactiveMatches (JNIEnv *env, jobject obj, jbyteArray arr);
-
-JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHKey(JNIEnv *env, jobject obj, jbyteArray arr);
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyAdvert(JNIEnv *env, jobject obj);
 
 #ifdef __cplusplus
 }

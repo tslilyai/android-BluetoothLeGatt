@@ -10,8 +10,8 @@ import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 
 import org.joda.time.DateTime;
-import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
-import org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg;
+import org.mpisws.sddrservice.embeddedsocial.ESTopics;
+import org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.embeddedsocial.ESUser;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
@@ -20,7 +20,6 @@ import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
-import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +46,7 @@ public class EncountersService implements IEncountersService {
     private boolean isRunning = false;
     private Context context;
     private ESUser esUser;
-    private ESMsgs esMsg;
+    private ESTopics esMsg;
     private ESNotifs esNotifs;
     private HashMap<String, Long> fwdedMsgs;
     private Set<Msg> repeatingMsgs;
@@ -68,7 +67,7 @@ public class EncountersService implements IEncountersService {
         context.startService(serviceIntent);
 
         esUser = new ESUser(context);
-        esMsg = new ESMsgs(context);
+        esMsg = new ESTopics(context);
         esNotifs = new ESNotifs();
 
         this.context = context;
@@ -82,7 +81,7 @@ public class EncountersService implements IEncountersService {
         context.startService(serviceIntent);
 
         esUser = new ESUser(context);
-        esMsg = new ESMsgs(context);
+        esMsg = new ESTopics(context);
         esNotifs = new ESNotifs();
 
         this.context = context;
@@ -97,23 +96,11 @@ public class EncountersService implements IEncountersService {
         context.startService(serviceIntent);
 
         esUser = new ESUser(context);
-        esMsg = new ESMsgs(context);
+        esMsg = new ESTopics(context);
         esNotifs = new ESNotifs();
 
         this.context = context;
         this.isRunning = true;
-    }
-
-    @Override
-    public void addLinkableID(String linkID) {
-        if (!shouldRunCommand(true)) return;
-        Log.v(TAG, "Adding linkID " + linkID);
-
-        Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
-        serviceIntent.putExtra("@string.add_linkid", linkID);
-        // note that if we change the mode to listen-only, this is the same as retroactive linking
-        serviceIntent.putExtra("Mode", LinkabilityEntryMode.AdvertiseAndListen);
-        context.startService(serviceIntent);
     }
 
     @Override
@@ -179,22 +166,22 @@ public class EncountersService implements IEncountersService {
     @Override
     public void sendMsg(String encounterID, String msg) {
         if (!shouldRunCommand(true)) return;
-        esMsg.find_and_act_on_topic(new ESMsgs.TopicAction(
-                ESMsgs.TopicAction.TATyp.SendMsg, encounterID, msg));
+        esMsg.find_and_act_on_topic(new ESTopics.TopicAction(
+                ESTopics.TopicAction.TATyp.SendMsg, encounterID, msg));
     }
 
     @Override
-    public void getMsgsFromNewest(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback) {
+    public void getMsgsFromNewest(String encounterID, long thresholdMessageAge, ESTopics.GetMessagesCallback getMessagesCallback) {
         if (!shouldRunCommand(true)) return;
-        esMsg.find_and_act_on_topic(new ESMsgs.TopicAction(
-                ESMsgs.TopicAction.TATyp.GetMsgs, thresholdMessageAge, encounterID, null, getMessagesCallback));
+        esMsg.find_and_act_on_topic(new ESTopics.TopicAction(
+                ESTopics.TopicAction.TATyp.GetMsgs, thresholdMessageAge, encounterID, null, getMessagesCallback));
     }
 
     @Override
-    public void getMsgsFromCursor(String encounterID, long thresholdMessageAge, ESMsgs.GetMessagesCallback getMessagesCallback, String cursor) {
+    public void getMsgsFromCursor(String encounterID, long thresholdMessageAge, ESTopics.GetMessagesCallback getMessagesCallback, String cursor) {
         if (!shouldRunCommand(true)) return;
-        esMsg.find_and_act_on_topic(new ESMsgs.TopicAction(
-                ESMsgs.TopicAction.TATyp.GetMsgs, thresholdMessageAge, encounterID, cursor, getMessagesCallback));
+        esMsg.find_and_act_on_topic(new ESTopics.TopicAction(
+                ESTopics.TopicAction.TATyp.GetMsgs, thresholdMessageAge, encounterID, cursor, getMessagesCallback));
     }
 
     @Override
@@ -216,7 +203,7 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void getMessagesFromNotifications(List<ESNotifs.Notif> notifs, ESMsgs.GetMessagesCallback getMessagesCallback) {
+    public void getMessagesFromNotifications(List<ESNotifs.Notif> notifs, ESTopics.GetMessagesCallback getMessagesCallback) {
         if (!shouldRunCommand(true)) return;
         esNotifs.get_messages_of_notifications(notifs, getMessagesCallback, esMsg);
     }
@@ -231,8 +218,8 @@ public class EncountersService implements IEncountersService {
     @Override
     public void createEncounterMsgingChannel(String encounterId) {
         if (!shouldRunCommand(true)) return;
-        esMsg.find_and_act_on_topic(new ESMsgs.TopicAction(
-                ESMsgs.TopicAction.TATyp.CreateOnly, encounterId));
+        esMsg.find_and_act_on_topic(new ESTopics.TopicAction(
+                ESTopics.TopicAction.TATyp.CreateEIDTopic, encounterId));
     }
 
     @Override

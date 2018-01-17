@@ -14,7 +14,7 @@ public class EncounterEndedEvent extends EncounterEvent {
     private static final long serialVersionUID = -6822428069212190684L;
 
     public EncounterEndedEvent(final long pkid, final long endTime, final List<RSSIEntry> rssiEntries, final String currentAddress) {
-        super(pkid, null, endTime, endTime, rssiEntries, null, null, null, currentAddress, null);
+        super(pkid, null, endTime, endTime, null, rssiEntries, currentAddress, null);
     }
 
     @Override
@@ -30,10 +30,11 @@ public class EncounterEndedEvent extends EncounterEvent {
         final Uri uri = ContentUris.withAppendedId(EncounterHistoryAPM.encounters.getContentURI(), pkid);
         final ContentValues values = toContentValues(context, false);
         // TODO slight hack...
-        // Update IF confirmed, will not touch unconfirmed ones
-        context.getContentResolver().update(uri, values, PEncounters.Columns.confirmationTime + " != -1", null);
+        // Update (regardless IF confirmed, *will* touch unconfirmed ones)
+        context.getContentResolver().update(uri, values, null, null);
         // Delete IF unconfirmed, will not touch confirmed ones
-        context.getContentResolver().delete(uri, PEncounters.Columns.confirmationTime + " == -1", null);
-        insertSharedSecretsAndRSSIEntriesAndBloomsAndLocation(context);
+        // We don't want to do this because we might confirm this retroactively
+        //context.getContentResolver().delete(uri, PEncounters.Columns.confirmationTime + " == -1", null);
+        insertLocationRSSIandAdverts(context);
     }
 }

@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,6 +97,17 @@ public abstract class AbstractBridge<T extends AbstractMemoryObject> {
             result = null;
         }
         assert(cursor.getCount() <= 1);
+        cursor.close();
+        return result;
+    }
+
+    public List<T> getItemsByColumn(final String column, final String value) {
+        List<T> result = new ArrayList<T>();
+        final Cursor cursor = context.getContentResolver().query(getPersistenceModel().getContentURI(), null, column + " = ?",
+                new String[] { value }, null);
+        while (cursor.moveToNext()) {
+            result.add(cursorToItem(cursor));
+        }
         cursor.close();
         return result;
     }

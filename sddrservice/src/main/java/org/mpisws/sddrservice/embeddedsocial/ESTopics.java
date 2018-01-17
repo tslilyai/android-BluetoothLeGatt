@@ -20,23 +20,24 @@ import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
 import org.mpisws.sddrservice.IEncountersService;
+import org.mpisws.sddrservice.encounterhistory.ConfirmEncounter;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.lib.Utils;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static com.microsoft.embeddedsocial.fetcher.base.FetcherState.DATA_ENDED;
+import static org.mpisws.sddrservice.embeddedsocial.ESTopics.TopicAction.TATyp.CreateEIDTopic;
 
 /**
  * Created by tslilyai on 12/8/17.
  */
 
-public class ESMsgs {
-    private static final String TAG = ESMsgs.class.getSimpleName();
+public class ESTopics {
+    private static final String TAG = ESTopics.class.getSimpleName();
     private static final String DUMMY_TOPIC_TEXT = "DummyTopicText";
     private static final long THRESHOLD_BUFFER_MS = 1000;
     private final PostStorage postStorage;
@@ -44,7 +45,7 @@ public class ESMsgs {
     private final SSBridge ssBridge;
     private final Object lock = new Object();
 
-    public ESMsgs(Context context) {
+    public ESTopics(Context context) {
         this.context = context;
         postStorage = new PostStorage(context);
         ssBridge = new SSBridge(context);
@@ -54,13 +55,16 @@ public class ESMsgs {
         public enum TATyp {
             GetMsgs,
             SendMsg,
-            CreateOnly
+            CreateEIDTopic,
+            CreateAdvertTopic
         }
 
         TATyp typ;
         String msg;
         GetMessagesCallback getMessagesCallback;
         String eid;
+        String title;
+        byte[] dhkey;
         String cursor;
         long thresholdAge;
 
@@ -81,9 +85,16 @@ public class ESMsgs {
             this.getMessagesCallback = getMessagesCallback;
         }
 
-        public TopicAction(TATyp typ, String eid) {
-            Utils.myAssert(typ == TATyp.CreateOnly);
-            this.eid = eid;
+        public TopicAction(TATyp typ, String title) {
+            Utils.myAssert(typ == CreateEIDTopic);
+            this.title = title;
+            this.typ = typ;
+        }
+
+        public TopicAction(TATyp typ, String title, byte[] DHKey) {
+            Utils.myAssert(typ == TATyp.CreateAdvertTopic);
+            this.title = title;
+            this.dhkey= dhkey;
             this.typ = typ;
         }
     }
@@ -136,7 +147,7 @@ public class ESMsgs {
         synchronized(lock) {
             for (String eid : unsentMsgs.keySet()) {
                 for (String msg : unsentMsgs.get(eid)) {
-                    find_and_act_on_topic(new ESMsgs.TopicAction(ESMsgs.TopicAction.TATyp.SendMsg, eid, msg));
+                    find_and_act_on_topic(new ESTopics.TopicAction(ESTopics.TopicAction.TATyp.SendMsg, eid, msg));
                 }
                 unsentMsgs.remove(eid);
             }
@@ -179,8 +190,8 @@ public class ESMsgs {
             }
             // Remember that we're trying to create this topic so we don't create it twice. Then
             // actually try and create the topic
-            if (!UserAccount.getInstance().getAccountDetails().pendingTopic(ta.eid)) {
-                UserAccount.getInstance().getAccountDetails().addPendingTopic(ta.eid);
+            if (!UserAccount.getInstance().getAccountDetails().pendingTopic(ta.title)) {
+                UserAccount.getInstance().getAccountDetails().addPendingTopic(ta.title);
                 postStorage.storePost(ta.eid, DUMMY_TOPIC_TEXT, null, PublisherType.USER);
                 WorkerService.getLauncher(context).launchService((ServiceAction.SYNC_DATA));
             }
@@ -201,12 +212,28 @@ public class ESMsgs {
             } else {
                 topicToComment = topiclist.get(0);
             }
-            if (ta.typ == TopicAction.TATyp.GetMsgs) {
-                get_msgs_helper(ta, topicToComment);
-            } else {
-                find_reply_comment_and_do_action(ta, topicToComment);
+            switch (ta.typ) {
+                case GetMsgs:
+                    get_msgs_helper(ta, topicToComment);
+                    break;
+                case CreateAdvertTopic:
+                    tryPostDHKey(ta.dhkey, topicToComment);
+                    tryGetDHKey(topicToComment);
+                    break;
+                case CreateEIDTopic:
+                case SendMsg:
+                    find_reply_comment_and_do_action(ta, topicToComment);
+                default:
+                    break;
             }
         }
+    }
+
+    private void tryPostDHKey(byte[] dhKey, TopicView topic) {
+    }
+
+    private void tryGetDHKey(TopicView topic) {
+        //ConfirmEncounter()
     }
 
     private void find_reply_comment_and_do_action(TopicAction ta, TopicView topic) {
@@ -296,7 +323,7 @@ public class ESMsgs {
                     }
                     break;
                 }
-                case CreateOnly: {
+                case CreateEIDTopic: {
                     break;
                 }
             }

@@ -25,7 +25,7 @@ import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.IEncountersService;
-import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
+import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
 
@@ -84,12 +84,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 encountersService.signIn();
                 encountersService.startTestESEnabled(this);
 
-                final ESMsgs.GetMessagesCallback msgsCallback = new ESMsgs.GetMessagesCallback() {
+                final ESTopics.GetMessagesCallback msgsCallback = new ESTopics.GetMessagesCallback() {
                     @Override
-                    public void onReceiveMessages(final List<ESMsgs.Msg> msgs) {
+                    public void onReceiveMessages(final List<ESTopics.Msg> msgs) {
                         Log.d("ESACTIVE_TEST", "End Recv Msgs : " + DateTime.now().getMillis());
                         Log.d("ESACTIVE_TEST", "Start Process Msgs : " + DateTime.now().getMillis());
-                        for (ESMsgs.Msg msg : msgs) {
+                        for (ESTopics.Msg msg : msgs) {
                             encountersService.processMessageForBroadcasts(msg);
                         }
                         Log.d("ESACTIVE_TEST", "End Process Msgs : " + DateTime.now().getMillis());

@@ -109,7 +109,7 @@ public class ESNotifs {
         }
     }
 
-    public void get_messages_of_notifications(List<Notif> notifs, ESMsgs.GetMessagesCallback getMessagesCallback, ESMsgs esMsgs) {
+    public void get_messages_of_notifications(List<Notif> notifs, ESTopics.GetMessagesCallback getMessagesCallback, ESTopics esTopics) {
         IContentService contentService = GlobalObjectRegistry.getObject(EmbeddedSocialServiceProvider.class).getContentService();
         Runnable r = () -> {
             for (Notif notif : notifs) {
@@ -141,8 +141,8 @@ public class ESNotifs {
                         continue;
                     }
                     Log.v(TAG, "Got eid for notif " + eid);
-                    esMsgs.find_and_act_on_topic(new ESMsgs.TopicAction(
-                            ESMsgs.TopicAction.TATyp.GetMsgs, notif.getCreatedTime(), eid, null, getMessagesCallback));
+                    esTopics.find_and_act_on_topic(new ESTopics.TopicAction(
+                            ESTopics.TopicAction.TATyp.GetMsgs, notif.getCreatedTime(), eid, null, getMessagesCallback));
                 } catch (NetworkRequestException e) {}
             }
         };

@@ -16,14 +16,12 @@ public class SDDR_Native {
     static public native void c_mallocRadio();
     static public native void c_freeRadio();
     static public native SDDR_Core.RadioAction c_getNextRadioAction();
-    static public native byte[] c_changeAndGetAdvert();
+    static public native byte[] c_getMyAdvert();
     static public native void c_changeEpoch();
     static public native byte[] c_getRandomAddr();
     static public native boolean c_processScanResult(byte[] addr, int rssi, byte[] advert);
     static public native void c_preDiscovery();
     static public native void c_postDiscovery();
-    static public native void c_updateLinkability(byte[] arr);
-    static public native byte[] c_getRetroactiveMatches(byte[] arr);
     static public native byte[] c_getMyDHKey();
 
     static public long c_RadioPtr;

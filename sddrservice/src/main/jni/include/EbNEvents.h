@@ -5,22 +5,9 @@
 #include <list>
 #include <string>
 
-#include "LinkValue.h"
-#include "BloomFilter.h"
-
 typedef int32_t DeviceID;
 
 extern uint64_t sddrStartTimestamp;
-
-struct BloomInfo
-{
-  BloomFilter bloom;
-  BitMap prefix;
-  float pFalseDelta;
-
-  BloomInfo(BloomFilter bloom, BitMap prefix, float pfalse) :
-    bloom(bloom), prefix(prefix), pFalseDelta(pfalse) {};
-};
 
 struct DiscoverEvent
 {
@@ -69,20 +56,13 @@ struct EncounterEvent
   uint64_t time;
   DeviceID id;
   std::string address;
-  std::string dev_addr;
   std::list<RSSIEvent> rssiEvents;
-  std::list<LinkValue> matching;
-  std::list<SharedSecret> sharedSecrets;
-  std::list<BloomInfo> blooms;
-  bool matchingSetUpdated;
-  bool sharedSecretsUpdated;
-  bool bloomsUpdated;
+  std::list<std::string> adverts;
+  bool advertsUpdated;
 
   EncounterEvent(uint64_t time)
      : time(time),
-       matchingSetUpdated(false),
-       sharedSecretsUpdated(false),
-       bloomsUpdated(false)
+       advertsUpdated(false)
   {
   }
 
@@ -90,9 +70,7 @@ struct EncounterEvent
      : type(type),
        time(time),
        id(id),
-       matchingSetUpdated(false),
-       sharedSecretsUpdated(false),
-       bloomsUpdated(false)
+       advertsUpdated(false)
   {
   }
 

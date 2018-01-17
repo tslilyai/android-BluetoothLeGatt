@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import org.mpisws.sddrservice.encounters.SDDR_Proto;
-import org.mpisws.sddrservice.lib.Identifier;
-
 import java.util.List;
 
 public class EncounterStartedEvent extends EncounterEvent {
@@ -15,12 +12,11 @@ public class EncounterStartedEvent extends EncounterEvent {
     private static final long serialVersionUID = 3977070185056288814L;
 
     public EncounterStartedEvent(long pkid, long startTime) {
-        super(pkid, startTime, startTime, -1L, null, null, null, null, null, -1L);
+        super(pkid, startTime, startTime, -1L, null, null, null, -1L);
     }
 
-    public EncounterStartedEvent(long pkid, long startTime, List<RSSIEntry> newRSSIEntries, List<Identifier> sharedSecrets,
-                                 List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms, List<Identifier> commonIDs, String currentWirelessAddress, long confirmationTime) {
-        super(pkid, startTime, startTime, -1L, newRSSIEntries, sharedSecrets, blooms, commonIDs, currentWirelessAddress, confirmationTime);
+    public EncounterStartedEvent(long pkid, long startTime, List<RSSIEntry> newRSSIEntries, String currentWirelessAddress) {
+        super(pkid, startTime, startTime, -1L, null, newRSSIEntries, currentWirelessAddress, -1L);
     }
 
     @Override
@@ -35,6 +31,6 @@ public class EncounterStartedEvent extends EncounterEvent {
     public void persistIntoDatabase(Context context) {
         final ContentValues values = toContentValues(context, true);
         context.getContentResolver().insert(EncounterHistoryAPM.encounters.getContentURI(), values);
-        insertSharedSecretsAndRSSIEntriesAndBloomsAndLocation(context);
+        insertLocationRSSIandAdverts(context);
     }
 }

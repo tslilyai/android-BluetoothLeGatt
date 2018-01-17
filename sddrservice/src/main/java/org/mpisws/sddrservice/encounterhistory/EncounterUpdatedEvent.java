@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
-import org.mpisws.sddrservice.encounters.SDDR_Proto;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Utils;
 
@@ -17,9 +16,9 @@ public class EncounterUpdatedEvent extends EncounterEvent {
     private static final String TAG = Utils.getTAG(EncounterUpdatedEvent.class);
     private static final long serialVersionUID = 8765808577556790959L;
 
-    public EncounterUpdatedEvent(long pkid, long lastTimeSeen, List<RSSIEntry> newRSSIEntries, List<Identifier> sharedSecrets,
-                                 List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms, List<Identifier> commonIDs, String currentWirelessAddress, Long confirmationTime) {
-        super(pkid, null, lastTimeSeen, null, newRSSIEntries, sharedSecrets, blooms, commonIDs, currentWirelessAddress, confirmationTime);
+    public EncounterUpdatedEvent(long pkid, long lastTimeSeen, List<Identifier> adverts, List<RSSIEntry> newRSSIEntries,
+                                 String currentWirelessAddress) {
+        super(pkid, null, lastTimeSeen, null, adverts, newRSSIEntries, currentWirelessAddress, null);
     }
 
     @Override
@@ -37,6 +36,6 @@ public class EncounterUpdatedEvent extends EncounterEvent {
         if (updatedRows != 1) {
             throw new RuntimeException("Update returned non-1 value: " + updatedRows);
         }
-        insertSharedSecretsAndRSSIEntriesAndBloomsAndLocation(context);
+        insertLocationRSSIandAdverts(context);
     }
 }

@@ -19,7 +19,7 @@ import com.microsoft.embeddedsocial.gcm.GcmTokenHolder;
 import com.microsoft.embeddedsocial.server.sync.DataSynchronizer;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 
-import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
+import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 
 /**
  * Uploads all available data to the server.
@@ -63,7 +63,7 @@ public class SynchronizationHandler implements IServiceIntentHandler<ServiceActi
 		}
 		// send any unsent messages
 		if (UserAccount.getInstance().isSignedIn())
-			new ESMsgs(UserAccount.getInstance().context).sendUnsentMsgs();
+			new ESTopics(UserAccount.getInstance().context).sendUnsentMsgs();
 	}
 
 	@Override

@@ -32,10 +32,8 @@ public class Advertiser {
     private AdvertiseCallback mAdvertiseCallback;
     private AdvertiseSettings mAdvertiseSettings;
     private UUID mUUID;
-    private UUID mUUIDScan;
     private byte[] mAddr = new byte[Constants.PUUID_LENGTH];
     private byte[] mAdData = new byte[Constants.ADVERT_LENGTH];
-    private byte[] mScanData = new byte[Constants.ADVERT_LENGTH];
 
     public void initialize(BluetoothAdapter btAdapter) {
         mBluetoothLeAdvertiser = btAdapter.getBluetoothLeAdvertiser();
@@ -63,19 +61,6 @@ public class Advertiser {
         Log.v(TAG, "Setting Advert " +  Utils.getHexString(mAddr) + Utils.getHexString(mAdData));
     }
 
-    public void setScanData(byte[] newData) {
-        Utils.myAssert(newData.length==Constants.ADVERT_LENGTH + Constants.PUUID_LENGTH - Constants.ADDR_LENGTH);
-        // copy what data can fit into the puuid slot
-        System.arraycopy(newData, 0, mAddr, Constants.ADDR_LENGTH, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH);
-        // copy the rest of the data into the advert
-        System.arraycopy(newData, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH, mScanData, 0, Constants.ADVERT_LENGTH);
-
-        ByteBuffer bb = ByteBuffer.wrap(mAddr);
-        long high = bb.getLong();
-        long low = bb.getLong();
-        mUUIDScan = new UUID(high, low);
-    }
-
     public void resetAdvertiser() {
         if (mAdvertiseCallback != null)
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
@@ -93,7 +78,6 @@ public class Advertiser {
             mBluetoothLeAdvertiser.startAdvertising(
                     mAdvertiseSettings,
                     buildAdvertiseData(),
-                    buildScanData(),
                     mAdvertiseCallback
             );
         }
@@ -108,18 +92,6 @@ public class Advertiser {
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
             mAdvertiseCallback = null;
         }
-    }
-
-    /**
-     * Returns an AdvertiseData object which includes the Service UUID and Device Name.
-     */
-    private AdvertiseData buildScanData() {
-        AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
-        dataBuilder.setIncludeDeviceName(false);
-        dataBuilder.setIncludeTxPowerLevel(false);
-
-        dataBuilder.addServiceData(new ParcelUuid(mUUIDScan), mScanData);
-        return dataBuilder.build();
     }
 
     /**

@@ -89,6 +89,18 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         return encounterIDs;
     }
 
+    public List<Identifier> getAdverts(final Context context) { // Ordered by PKID ASC
+        final List<Identifier> adverts = new LinkedList<Identifier>();
+        final Cursor cursor = context.getContentResolver().query(EncounterHistoryAPM.sharedSecrets.getContentURI(), null,
+                PSharedSecrets.Columns.encounterPKID + " = ?", new String[] { String.valueOf(pkid) },
+                PSharedSecrets.Columns.pkid + " ASC");
+        while (cursor.moveToNext()) {
+            adverts.add(new Identifier(EncounterHistoryAPM.sharedSecrets.extractAdvert(cursor)));
+        }
+        cursor.close();
+        return adverts;
+    }
+
     public TimeInterval getTimeInterval() {
         return timeInterval;
     }
@@ -132,48 +144,9 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         }
         return new LinkabilityResult(names, stickerIDs, isLinkable);
     }
-    
+
     public LinkabilityResult checkLinkabilityForSingleEncounter(final Context context, List<MLinkabilityEntry> links) {
         return checkLinkability(links);
-    }
-
-    public void updateEncounterMatchings(final Context context) {
-        List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms = getBlooms(context);
-        if (blooms.size() == 0) {
-            return;
-        }
-        final SDDR_Proto.Event eventsend = SDDR_Proto.Event.newBuilder()
-                .setRetroactiveInfo(SDDR_Proto.Event.RetroactiveInfo.newBuilder()
-                        .addAllBlooms(blooms).build()).build();
-        Log.v(TAG, "BLOOMS: Retroactive for pkid " + pkid);
-        byte[] eventBytes = SDDR_Native.c_getRetroactiveMatches(eventsend.toByteArray());
-        if (eventBytes == null) {
-            Log.v(TAG, "BLOOMS: No retroactive matches of signficance");
-            return;
-        }
-
-        final SDDR_Proto.Event eventrecv;
-        try {
-            eventrecv = SDDR_Proto.Event.parseFrom(eventBytes);
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-            return;
-        }
-        Utils.myAssert(eventrecv.hasRetroactiveInfo());
-        final SDDR_Proto.Event.RetroactiveInfo info = eventrecv.getRetroactiveInfo();
-        List<ByteString> matchingSetPB = info.getMatchingSetList();
-        if (matchingSetPB.size() > 0) {
-            List<Identifier> matchingSet;
-            matchingSet = new LinkedList<>();
-            for (com.google.protobuf.ByteString matching : matchingSetPB) {
-                matchingSet.add(new Identifier(matching.toByteArray()));
-            }
-            Log.v(TAG, "BLOOMS: Found " + matchingSet.size() + " retroactive matches with Encounter pkid " + pkid);
-            Log.v(TAG, "BLOOMS: Previous " + getCommonIDs().size() + " non-retroactive matches with Encounter pkid " + pkid);
-
-            EncounterRetroactiveEvent revent = new EncounterRetroactiveEvent(pkid, matchingSet);
-            revent.broadcast(context);
-        }
     }
 
     @Override

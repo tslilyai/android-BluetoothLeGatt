@@ -78,11 +78,11 @@ public class ESUser {
         UserAccount.getInstance().deleteAccount();
     }
 
-    public void block_sender(ESMsgs.Msg msg) {
+    public void block_sender(ESTopics.Msg msg) {
         ActionsLauncher.blockCommentUser(context, msg.getCursor());
     }
 
-    public void unblock_sender(ESMsgs.Msg msg) {
+    public void unblock_sender(ESTopics.Msg msg) {
         ActionsLauncher.unblockCommentUser(context, msg.getCursor());
     }
 

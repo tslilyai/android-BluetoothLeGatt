@@ -31,24 +31,20 @@ public abstract class EncounterEvent implements Serializable {
     protected final Long startTime;
     protected final Long lastTimeSeen;
     protected final Long endTime;
+    protected final List<Identifier> adverts;
     protected final List<RSSIEntry> newRSSIEntries;
-    protected final List<Identifier> sharedSecrets;
-    protected final List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms;
-    protected final List<Identifier> commonIDs;
     protected final String currentWirelessAddress;
     protected final Long confirmationTime;
+    private Identifier myAdvert;
 
-    public EncounterEvent(long pkid, Long startTime, Long lastTimeSeen, Long endTime, List<RSSIEntry> newRSSIEntries,
-                          List<Identifier> sharedSecrets, List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms,
-                          List<Identifier> commonIDs, String currentWirelessAddress, Long confirmationTime) {
+    public EncounterEvent(long pkid, Long startTime, Long lastTimeSeen, Long endTime, List<Identifier> adverts, List<RSSIEntry> newRSSIEntries,
+                          String currentWirelessAddress, Long confirmationTime) {
         this.pkid = pkid;
         this.startTime = startTime;
         this.lastTimeSeen = lastTimeSeen;
         this.endTime = endTime;
+        this.adverts = adverts;
         this.newRSSIEntries = newRSSIEntries;
-        this.sharedSecrets = sharedSecrets;
-        this.blooms = blooms;
-        this.commonIDs = commonIDs;
         this.currentWirelessAddress = currentWirelessAddress;
         this.confirmationTime = confirmationTime;
     }
@@ -56,6 +52,10 @@ public abstract class EncounterEvent implements Serializable {
     public abstract void broadcast(final Context context);
 
     public abstract void persistIntoDatabase(Context context);
+
+    public void setMyAdvert(byte[] advert) {
+       myAdvert = new Identifier(advert);
+    }
 
     protected ContentValues toContentValues(final Context context, final boolean putPKID) {
         Log.v(TAG, "\tPKID: " + pkid + "\n\tstartTime: " + startTime + "\n\tlastTimeSeen: " + lastTimeSeen
@@ -76,9 +76,6 @@ public abstract class EncounterEvent implements Serializable {
         if (currentWirelessAddress != null) {
             values.put(PEncounters.Columns.currentWirelessAddress, currentWirelessAddress);
         }
-        if (commonIDs != null) { // null means not updated (empty means updated to empty)
-            values.put(PEncounters.Columns.commonIDs, identifierListToByteArray(commonIDs));
-        }
         if (confirmationTime != null) {
             values.put(PEncounters.Columns.confirmationTime, confirmationTime);
         }
@@ -87,17 +84,12 @@ public abstract class EncounterEvent implements Serializable {
         return values;
     }
 
-    protected void insertSharedSecretsAndRSSIEntriesAndBloomsAndLocation(final Context context) {
+    protected void insertLocationRSSIandAdverts(final Context context) {
         if (newRSSIEntries != null) {
             insertRSSIEntries(context, newRSSIEntries);
         }
-        if (sharedSecrets != null) {
-            insertSharedSecrets(context, sharedSecrets);
-        }
-        if (blooms != null) {
-            insertBloomFilters(context, blooms);
-        }
         insertLocation(context);
+        insertAdverts(context);
     }
 
 
@@ -139,36 +131,6 @@ public abstract class EncounterEvent implements Serializable {
                 sumRSSI / (float) rssiEntries.size()));
     }
 
-    private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
-        Log.v(TAG, "Inserting shared secrets " + sharedSecrets.size());
-        for (Identifier sharedSecret : sharedSecrets) {
-            Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret);
-            final ContentValues values = new ContentValues();
-            values.put(PSharedSecrets.Columns.encounterPKID, pkid);
-            values.put(PSharedSecrets.Columns.sharedSecret, sharedSecret.getBytes());
-            values.put(PSharedSecrets.Columns.encounterID, eid.getBytes());
-            values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
-            context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
-
-
-            // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
-            Log.v(TAG, "Create topic for " + eid.toString());
-            EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
-        }
-    }
-
-    private void insertBloomFilters(final Context context, final List<SDDR_Proto.Event.RetroactiveInfo.BloomInfo> blooms) {
-        Log.v(TAG, "BLOOMS: Inserting " + blooms.size() + " blooms for encounterPKID " + pkid);
-        for (SDDR_Proto.Event.RetroactiveInfo.BloomInfo bloom : blooms) {
-            Log.v(TAG, "BLOOMS: Insert Bloom Prefix Size " + bloom.getPrefixSize() + " Prefix: " + bloom.getPrefixBytes().toString());
-            final ContentValues values = new ContentValues();
-            values.put(PBlooms.Columns.encounterPKID, pkid);
-            values.put(PBlooms.Columns.bloom, bloom.toByteArray());
-            values.put(PBlooms.Columns.timestamp, System.currentTimeMillis());
-            context.getContentResolver().insert(EncounterHistoryAPM.blooms.getContentURI(), values);
-        }
-    }
-
     private void insertLocation(final Context context) {
         Log.v(TAG, "Inserting location");
         FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
@@ -196,5 +158,28 @@ public abstract class EncounterEvent implements Serializable {
                         }
                     }
                 });
+    }
+
+    private void insertAdverts(final Context context) {
+        if (adverts != null) {
+            insertAdverts(context, adverts);
+        }
+    }
+
+    private void insertAdverts(final Context context, final List<Identifier> adverts) {
+        Log.v(TAG, "Inserting adverts" + adverts.size());
+        String concat_advert;
+        for (Identifier advert: adverts) {
+            if (myAdvert.toString().compareTo(advert.toString()) <= 0) {
+                concat_advert = myAdvert.toString().concat(advert.toString());
+            } else {
+                concat_advert = advert.toString().concat(myAdvert.toString());
+            }
+            final ContentValues values = new ContentValues();
+            values.put(PSharedSecrets.Columns.encounterPKID, pkid);
+            values.put(PSharedSecrets.Columns.advert, concat_advert.getBytes());
+            values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
+            context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
+        }
     }
 }

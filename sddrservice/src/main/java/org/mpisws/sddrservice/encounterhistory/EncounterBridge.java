@@ -139,6 +139,9 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
         return isNeeded;
     }
 
+    public List<MEncounter> getEncountersUnconfirmed() {
+        return getItemsByColumn(PEncounters.Columns.confirmationTime, String.valueOf(-1L));
+    }
     /**
      * Gets all encounters that overlap with the requested filtered results. Not efficient since it's filtering the results after
      * retrieving them.

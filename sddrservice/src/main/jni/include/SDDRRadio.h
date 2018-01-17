@@ -48,6 +48,8 @@ public:
   };
 public: 
   static const uint64_t ADVERT_LEN = 22;
+  std::string dhkey_;
+  std::string advert_;
 
 private:
   static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);//15);
@@ -64,15 +66,12 @@ protected:
 protected:
   DeviceID nextDeviceID_;
   size_t keySize_;
-  LinkValueList advertisedSet_;
-  LinkValueList listenSet_;
   std::mutex setMutex_;
   RecentDeviceList recentDevices_;
   IDToRecentDeviceMap idToRecentDevices_;
   uint64_t nextDiscover_;
   uint64_t nextChangeEpoch_;
   uint64_t timeDetectedNewDevice_;
-  uint64_t timeDetectedUnconfirmedDevice_;
   // note that this doesn't prevent other devices from retroactively linking
   // against this one---this just allows this device to retroactively link
   // against any encountered device
@@ -84,20 +83,17 @@ protected:
   std::mutex dhExchangeMutex_;
   size_t advertNum_;
   BitMap lastAdvert_;
-  SegmentedBloomFilter advertBloom_;
-  size_t advertBloomNum_;
   std::list<DiscoverEvent> discovered_;
   EbNHystPolicy hystPolicy_;
   uint64_t rssiReportInterval_;
-  char* advert_;
 
 private:
+  void setAdvert();
   bool processAdvert(EbNDevice *device, uint64_t time, const uint8_t *data);
   void processEpochs(EbNDevice *device);
   std::set<DeviceID> handshake(const std::set<DeviceID> &deviceIDs);
   std::string encounterToMsg(const EncounterEvent &event);
 
-  ConfirmScheme::Type getHandshakeScheme();
   bool getDeviceEvent(EncounterEvent &event, DeviceID id, uint64_t rssiReportInterval);
   DeviceID generateDeviceID();
   EncounterEvent doneWithDevice(DeviceID id);
@@ -110,20 +106,14 @@ private:
           const uint8_t *prefix, uint32_t prefixSize, bool includePassive = true);
 
 public: // to be called via JNI
-  SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, 
-          MemoryScheme memoryScheme, bool retroActive,
-          int adapterID, EbNHystPolicy hystPolicy,
+  SDDRRadio(size_t keySize, int adapterID, EbNHystPolicy hystPolicy,
           uint64_t rssiReportInterval);
-  char const* generateAdvert();
   void preDiscovery();
   std::vector<std::string> postDiscoveryGetEncounters();
   const Address getRandomAddr();
   void changeEpoch();
-  bool processScanResponse(Address addr, int8_t rssi, uint8_t* data);
+  bool processScanResponse(Address addr, int8_t rssi, std::string advert);
   ActionInfo getNextAction();
-  void setAdvertisedSet(const LinkValueList &advertisedSet);
-  void setListenSet(const LinkValueList &listenSet);
-  bool getRetroactiveMatches(LinkValueList& matching, std::list<BloomInfo>& blooms);
 };
 
 inline DeviceID SDDRRadio::generateDeviceID()

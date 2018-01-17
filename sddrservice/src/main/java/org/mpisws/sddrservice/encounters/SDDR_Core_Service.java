@@ -83,13 +83,6 @@ public class SDDR_Core_Service extends Service {
             return START_STICKY;
         }
 
-        if (intent.getExtras().containsKey("@string.add_linkid"))
-        {
-            String ID = intent.getExtras().getString("@string.add_linkid");
-            core.addNewLink(new Identifier(ID.getBytes()), LinkabilityEntryMode.AdvertiseAndListen);
-            return START_STICKY;
-        }
-
         if (intent.getExtras().containsKey("stop_sddr_service"))
         {
             core.should_run = false;

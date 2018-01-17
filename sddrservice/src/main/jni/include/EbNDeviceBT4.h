@@ -20,15 +20,11 @@ private:
 
   struct Epoch
   {
-    uint32_t lastAdvertNum;
-    uint64_t lastAdvertTime;
-    RSErasureDecoder dhDecoder;
+    uint8_t *advert;
     std::list<ECDH> dhExchanges;
     bool dhExchangeYCoord;
-    BloomList blooms;
-    uint32_t decodeBloomNum;
 
-    Epoch(uint32_t advertNum, uint64_t advertTime, const RSMatrix &dhCodeMatrix, const ECDH &dhExchange, bool dhExchangeYCoord);
+    Epoch(uint8_t *advert, const ECDH &dhExchange, bool dhExchangeYCoord);
   };
 
 private:

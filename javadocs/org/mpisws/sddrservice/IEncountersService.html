@@ -175,25 +175,25 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#getMessagesFromNotifications-java.util.List-org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback-">getMessagesFromNotifications</a></span>(java.util.List&lt;org.mpisws.sddrservice.embeddedsocial.ESNotifs.Notif&gt;&nbsp;notifs,
-                            org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback&nbsp;getMessagesCallback)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#getMessagesFromNotifications-java.util.List-org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback-">getMessagesFromNotifications</a></span>(java.util.List&lt;org.mpisws.sddrservice.embeddedsocial.ESNotifs.Notif&gt;&nbsp;notifs,
+                            org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback&nbsp;getMessagesCallback)</code>
 <div class="block">Gets the messages associated with each notification in the provided list.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#getMsgsFromBeginning-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback-">getMsgsFromBeginning</a></span>(java.lang.String&nbsp;encounterID,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#getMsgsFromBeginning-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback-">getMsgsFromBeginning</a></span>(java.lang.String&nbsp;encounterID,
                     long&nbsp;thresholdMessageAge,
-                    org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback&nbsp;getMessagesCallback)</code>
+                    org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback&nbsp;getMessagesCallback)</code>
 <div class="block">Gets the newest messages of this encounter thread, and invokes
  the GetMessagesCallback parameter on the retrieved list.</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#getMsgsFromCursor-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback-java.lang.String-">getMsgsFromCursor</a></span>(java.lang.String&nbsp;encounterID,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#getMsgsFromCursor-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback-java.lang.String-">getMsgsFromCursor</a></span>(java.lang.String&nbsp;encounterID,
                  long&nbsp;thresholdMessageAge,
-                 org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback&nbsp;getMessagesCallback,
+                 org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback&nbsp;getMessagesCallback,
                  java.lang.String&nbsp;cursor)</code>
 <div class="block">Gets the messages of this encounter from a given point in the encounter thread, and invokes
  the GetMessagesCallback parameter on the retrieved list.</div>
@@ -230,7 +230,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i11" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#processMessageForBroadcasts-org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg-">processMessageForBroadcasts</a></span>(org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg&nbsp;msg)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#processMessageForBroadcasts-org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg-">processMessageForBroadcasts</a></span>(org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg&nbsp;msg)</code>
 <div class="block">Processes a message to see if it should be broadcasted</div>
 </td>
 </tr>
@@ -242,7 +242,7 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#reportMsg-org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg-com.microsoft.embeddedsocial.autorest.models.Reason-">reportMsg</a></span>(org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg&nbsp;msg,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../org/mpisws/sddrservice/IEncountersService.html#reportMsg-org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg-com.microsoft.embeddedsocial.autorest.models.Reason-">reportMsg</a></span>(org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg&nbsp;msg,
          com.microsoft.embeddedsocial.autorest.models.Reason&nbsp;reason)</code>
 <div class="block">Report a particular message for its content.</div>
 </td>
@@ -434,7 +434,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 </li>
 </ul>
-<a name="getMsgsFromBeginning-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback-">
+<a name="getMsgsFromBeginning-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -442,7 +442,7 @@ var activeTableTab = "activeTableTab";
 <h4>getMsgsFromBeginning</h4>
 <pre>void&nbsp;getMsgsFromBeginning(java.lang.String&nbsp;encounterID,
                           long&nbsp;thresholdMessageAge,
-                          org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback&nbsp;getMessagesCallback)</pre>
+                          org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback&nbsp;getMessagesCallback)</pre>
 <div class="block">Gets the newest messages of this encounter thread, and invokes
  the GetMessagesCallback parameter on the retrieved list.</div>
 <dl>
@@ -453,7 +453,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 </li>
 </ul>
-<a name="getMsgsFromCursor-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback-java.lang.String-">
+<a name="getMsgsFromCursor-java.lang.String-long-org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockList">
@@ -461,7 +461,7 @@ var activeTableTab = "activeTableTab";
 <h4>getMsgsFromCursor</h4>
 <pre>void&nbsp;getMsgsFromCursor(java.lang.String&nbsp;encounterID,
                        long&nbsp;thresholdMessageAge,
-                       org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback&nbsp;getMessagesCallback,
+                       org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback&nbsp;getMessagesCallback,
                        java.lang.String&nbsp;cursor)</pre>
 <div class="block">Gets the messages of this encounter from a given point in the encounter thread, and invokes
  the GetMessagesCallback parameter on the retrieved list.</div>
@@ -474,13 +474,13 @@ var activeTableTab = "activeTableTab";
 </dl>
 </li>
 </ul>
-<a name="reportMsg-org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg-com.microsoft.embeddedsocial.autorest.models.Reason-">
+<a name="reportMsg-org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg-com.microsoft.embeddedsocial.autorest.models.Reason-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>reportMsg</h4>
-<pre>void&nbsp;reportMsg(org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg&nbsp;msg,
+<pre>void&nbsp;reportMsg(org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg&nbsp;msg,
                com.microsoft.embeddedsocial.autorest.models.Reason&nbsp;reason)</pre>
 <div class="block">Report a particular message for its content.</div>
 <dl>
@@ -526,14 +526,14 @@ var activeTableTab = "activeTableTab";
 </dl>
 </li>
 </ul>
-<a name="getMessagesFromNotifications-java.util.List-org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback-">
+<a name="getMessagesFromNotifications-java.util.List-org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>getMessagesFromNotifications</h4>
 <pre>void&nbsp;getMessagesFromNotifications(java.util.List&lt;org.mpisws.sddrservice.embeddedsocial.ESNotifs.Notif&gt;&nbsp;notifs,
-                                  org.mpisws.sddrservice.embeddedsocial.ESMsgs.GetMessagesCallback&nbsp;getMessagesCallback)</pre>
+                                  org.mpisws.sddrservice.embeddedsocial.ESTopics.GetMessagesCallback&nbsp;getMessagesCallback)</pre>
 <div class="block">Gets the messages associated with each notification in the provided list. All messages that exist in the encounter topic
  associated with the notification, and occurred at or after the time of the notification, are retrieved. The
  callback is invoked on the retrieved list of messages for each notification.</div>
@@ -613,13 +613,13 @@ var activeTableTab = "activeTableTab";
 </dl>
 </li>
 </ul>
-<a name="processMessageForBroadcasts-org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg-">
+<a name="processMessageForBroadcasts-org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>processMessageForBroadcasts</h4>
-<pre>void&nbsp;processMessageForBroadcasts(org.mpisws.sddrservice.embeddedsocial.ESMsgs.Msg&nbsp;msg)</pre>
+<pre>void&nbsp;processMessageForBroadcasts(org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg&nbsp;msg)</pre>
 <div class="block">Processes a message to see if it should be broadcasted</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>

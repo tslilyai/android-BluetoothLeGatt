@@ -87,8 +87,6 @@ void EbNHystPolicy::encountered(const std::set<DeviceID> &devices)
   {
     const DeviceID &devID = *devIt;
 
-    LOG_P("EbNHystPolicy", "[EConfirmed] [%" PRIu64 "] %d", time, devID);
-
     DeviceInfoMap::iterator infoIt = deviceInfo_.find(devID);
     if(infoIt == deviceInfo_.end())
     {
@@ -143,4 +141,3 @@ list<pair<DeviceID, uint64_t> > EbNHystPolicy::checkExpired()
 
   return toRemove;
 }
-

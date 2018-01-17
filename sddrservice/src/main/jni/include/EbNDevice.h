@@ -23,40 +23,19 @@ class EbNDevice
   friend class SDDRRadio;
 
 private:
-  typedef std::list<std::pair<size_t, SegmentedBloomFilter> > BloomList;
-
-  struct Epoch
-  {
-    uint32_t lastAdvertNum;
-    uint64_t lastAdvertTime;
-    RSErasureDecoder dhDecoder;
-    std::list<ECDH> dhExchanges;
-    bool dhExchangeYCoord;
-    BloomList blooms;
-    uint32_t decodeBloomNum;
-
-    Epoch(uint32_t advertNum, uint64_t advertTime, const RSMatrix &dhCodeMatrix, const ECDH &dhExchange, bool dhExchangeYCoord);
-  };
-
   DeviceID id_;
   Address address_;
-  LinkValueList matching_;
-  bool updatedMatching_;
-  float matchingPFalse_;
-  SharedSecretList sharedSecrets_;
-  SharedSecretList secretsToReport_;
-  std::mutex sharedSecretsMutex_;
+  std::list<std::string> adverts_;
+  std::list<std::string> adverts_to_report_;
+  std::mutex advertsMutex_;
   std::list<RSSIEvent> rssiToReport_;
   uint64_t lastReportTime_;
   bool confirmed_;
   bool shakenHands_;
   bool reported_;
-  std::list<Epoch> epochs_;
-  
-  std::list<BloomInfo> bloomsToReport_;
 
 public:
-  EbNDevice(DeviceID id, const Address &address, const LinkValueList &listenSet);
+  EbNDevice(DeviceID id, const Address &address);
   ~EbNDevice();
 
   DeviceID getID() const;
@@ -64,18 +43,8 @@ public:
   const Address& getAddress() const;
   virtual void setAddress(const Address &address);
 
-  void updateBlooms(const BloomFilter *bloom, const BitMap *prefix, float pFalseDelta);
-
-  const LinkValueList& getMatching() const;
-  void updateMatching(const BloomFilter *bloom, const uint8_t *prefix, uint32_t prefixSize);
-  void updateMatching(const BloomFilter *bloom, const uint8_t *prefix, uint32_t prefixSize, float pFalseDelta);
-  float getMatchingPFalse() const;
-
-  SharedSecretList getSharedSecrets();
-  void addSharedSecret(const SharedSecret &secret);
-  void confirmPassive(const BloomFilter *bloom, const uint8_t *prefix, uint32_t prefixSize, float threshold);
-  void confirmPassive(const BloomFilter *bloom, const uint8_t *prefix, uint32_t prefixSize, float threshold, float pFalseDelta);
-  bool isConfirmed() const;
+  std::list<std::string> getAdverts();
+  void addAdvert(const std::string advert);
 
   void setShakenHands(bool value);
   bool hasShakenHands() const;
@@ -101,25 +70,10 @@ inline void EbNDevice::setAddress(const Address &address)
   address_ = address;
 }
 
-inline const LinkValueList& EbNDevice::getMatching() const
+inline std::list<std::string> EbNDevice::getAdverts()
 {
-  return matching_;
-}
-
-inline float EbNDevice::getMatchingPFalse() const
-{
-  return matchingPFalse_;
-}
-
-inline SharedSecretList EbNDevice::getSharedSecrets()
-{
-  std::lock_guard<std::mutex> sharedSecretsLock(sharedSecretsMutex_);
-  return sharedSecrets_;
-}
-
-inline bool EbNDevice::isConfirmed() const
-{
-  return confirmed_;
+  std::lock_guard<std::mutex> advertsLock(advertsMutex_);
+  return adverts_;
 }
 
 inline void EbNDevice::setShakenHands(bool value)

@@ -24,9 +24,6 @@ SDDRRadio* setupRadio(Config config) {
             config.hyst.rssiThreshold);
     return new SDDRRadio(
            config.radio.keySize,
-           config.radio.confirm,
-           config.radio.memory,
-           config.radio.retroactive,
            0,
            hystPolicy,
            config.reporting.rssiInterval);
@@ -129,21 +126,6 @@ JNIEXPORT jobject JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_
 
 /*
  * Class:     org_mpisws_sddrservice_encounters_SDDR_Native
- * Method:    c_changeAndGetAdvert
- * Signature: ()[B
- */
-JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1changeAndGetAdvert
-  (JNIEnv *env, jobject obj) {
-    SDDRRadio* radioPtr = getRadioPtr(env, obj);
-    
-    char const* bytes = radioPtr->changeAndGetAdvert();
-    jbyteArray arr = env->NewByteArray(SDDRRadio::ADVERT_LEN);
-    env->SetByteArrayRegion(arr, 0, SDDRRadio::ADVERT_LEN, (jbyte*)bytes);
-    return arr;
-}
-
-/*
- * Class:     org_mpisws_sddrservice_encounters_SDDR_Native
  * Method:    c_changeEpoch
  * Signature: ()V
  */
@@ -190,7 +172,7 @@ JNIEXPORT jboolean JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c
     int advert_len = env->GetArrayLength(jadvert);
     char* advert = new char[advert_len];
     env->GetByteArrayRegion(jadvert, 0, advert_len, reinterpret_cast<jbyte*>(advert));
-    return radioPtr->processScanResponse(myAddr, (int)jrssi, (uint8_t*)advert);
+    return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(advert));
 }
 
 /*
@@ -226,110 +208,17 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1pr
     }
 }
 
-JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1updateLinkability
-        (JNIEnv *env, jobject obj, jbyteArray arr)
-{
-    jsize len = env->GetArrayLength(arr);
-    jbyte* msg = env->GetByteArrayElements(arr,0);
-    
-    SDDR::Event event;
-    event.ParseFromArray(reinterpret_cast<uint8_t*>(msg), len);
-    if(event.has_linkabilityevent())
-    {
-      LOG_P(TAG, "Updating advertised and listen sets");
-
-      LinkValueList advertisedSet;
-      LinkValueList listenSet;
-
-      const SDDR::Event::LinkabilityEvent &subEvent = event.linkabilityevent();
-      for(size_t e = 0; e < subEvent.entries_size(); e++)
-      {
-        const SDDR::Event_LinkabilityEvent_Entry &entry = subEvent.entries(e);
-
-        const std::string &linkValueStr = entry.linkvalue();
-        LinkValue linkValue(new uint8_t[linkValueStr.length()], linkValueStr.length());
-        memcpy(linkValue.get(), linkValueStr.c_str(), linkValueStr.length());
-
-        const SDDR::Event_LinkabilityEvent_Entry_ModeType &mode = entry.mode();
-        switch(mode)
-        {
-        case SDDR::Event_LinkabilityEvent_Entry_ModeType_AdvertAndListen:
-          advertisedSet.push_back(linkValue);
-          LOG_P(TAG, "Adding %s to the advertised set", linkValue.toString().c_str()); 
-        case SDDR::Event_LinkabilityEvent_Entry_ModeType_Listen:
-          listenSet.push_back(linkValue);
-          LOG_P(TAG, "Adding %s to the listen set", linkValue.toString().c_str()); 
-          break; 
-        default:
-          LOG_E(TAG, "Received invalid mode (%d) in a linkability event entry", mode);
-          break;
-        }
-      }
-
-      SDDRRadio* radioPtr = getRadioPtr(env, obj);
-      radioPtr->setAdvertisedSet(advertisedSet);
-      radioPtr->setListenSet(listenSet);
-    } else {
-      LOG_P(TAG, "Not a linkable event");
-    }
-}
-
-JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getRetroactiveMatches
-        (JNIEnv *env, jobject obj, jbyteArray arr)
-{
-    jsize len = env->GetArrayLength(arr);
-    jbyte* msg = env->GetByteArrayElements(arr,0);
-    
-    // deserialize bloom filter information
-    SDDR::Event event;
-    event.ParseFromArray(reinterpret_cast<uint8_t*>(msg), len);
-    assert(event.has_retroactiveinfo());
-    std::list<BloomInfo> bis;
-    const SDDR::Event::RetroactiveInfo &subEvent = event.retroactiveinfo();
-    for(size_t b = 0; b < subEvent.blooms_size(); b++)
-    {
-        const SDDR::Event_RetroactiveInfo_BloomInfo &pbbloom = subEvent.blooms(b);
-
-        /* Set up new bloom filter */
-        assert(pbbloom.bloom().m_() == pbbloom.bloom().bits_().size());
-        const size_t bloomsize = pbbloom.bloom().bits_().size(); 
-        const uint8_t* bloombuffer = (const uint8_t*) pbbloom.bloom().bits_().c_str();
-        BloomFilter bloom(pbbloom.bloom().n_(), pbbloom.bloom().k_(), BitMap(pbbloom.bloom().m_(), bloombuffer));
-
-        /* Add new bloominfo to process */
-        assert(pbbloom.prefix_size() == pbbloom.prefix_bytes().size());
-        const uint8_t* prefixbuffer = (const uint8_t*) pbbloom.prefix_bytes().c_str();
-        bis.push_back(BloomInfo(bloom, BitMap(pbbloom.prefix_size()*8, prefixbuffer), pbbloom.pfalse()));
-    }
-
-    // perform queries on bloom filters
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyAdvert(JNIEnv *env, jobject obj) {
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
-    LinkValueList matching;
-    bool matches = radioPtr->getRetroactiveMatches(matching, bis);
-    if (!matches) {
-        return NULL;
-    }
-    LOG_P(TAG, "Retroactive: Found %d matches", matching.size());
-
-    // serialize matching back to java array
-    SDDR::Event_RetroactiveInfo *retroactiveinfo = new SDDR::Event_RetroactiveInfo();
-
-    for(auto it = matching.begin(); it != matching.end(); it++)
-    {
-        retroactiveinfo->add_matchingset(it->get(), it->size());
-    }
-    std::string str;
-    SDDR::Event fullEvent;
-    fullEvent.set_allocated_retroactiveinfo(retroactiveinfo);
-    fullEvent.SerializeToString(&str);
-
-    uint8_t* bytes = (uint8_t*)str.c_str();
-    const jbyte* nativemsg = reinterpret_cast<const jbyte*>(bytes);
-    jbyteArray jbytes = env->NewByteArray(str.length());
-    env->SetByteArrayRegion(jbytes, 0, str.length(), nativemsg);
+    std::string advert = radioPtr->advert_;
+    jbyteArray jbytes = env->NewByteArray(advert.length());
+    env->SetByteArrayRegion(jbytes, 0, advert.length(), (jbyte*)advert.c_str());
     return jbytes;
 }
-
 JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHKey(JNIEnv *env, jobject obj) {
-    return NULL;
+    SDDRRadio* radioPtr = getRadioPtr(env, obj);
+    std::string dhkey = radioPtr->dhkey_;
+    jbyteArray jbytes = env->NewByteArray(dhkey.length());
+    env->SetByteArrayRegion(jbytes, 0, dhkey.length(), (jbyte*)dhkey.c_str());
+    return jbytes;
 }
