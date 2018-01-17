@@ -40,8 +40,7 @@ struct DiscoverEvent
      : time(time),
        id(id),
        rssi(rssi)
-  {
-  }
+  {}
 };
 
 struct RSSIEvent
@@ -70,6 +69,7 @@ struct EncounterEvent
   uint64_t time;
   DeviceID id;
   std::string address;
+  std::string dev_addr;
   std::list<RSSIEvent> rssiEvents;
   std::list<LinkValue> matching;
   std::list<SharedSecret> sharedSecrets;

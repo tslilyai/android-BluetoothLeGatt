@@ -178,7 +178,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
  * Signature: ([BI[B)V
  */
 JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1processScanResult
-  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert){
+  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert, jbyteArray jdevAddress){
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
 
     int addr_len = env->GetArrayLength(jaddr);
@@ -191,7 +191,11 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1pr
     char* advert = new char[advert_len];
     env->GetByteArrayRegion(jadvert, 0, advert_len, reinterpret_cast<jbyte*>(advert));
 
-    radioPtr->processScanResponse(myAddr, (int)jrssi, (uint8_t*)advert);
+    int devAddrLen = env->GetArrayLength(jdevAddress);
+    char* devaddrBytes = new char[devAddrLen];
+    env->GetByteArrayRegion(jdevAddress, 0, devAddrLen, reinterpret_cast<jbyte*>(devaddrBytes));
+    std::string devaddrStr(devaddrBytes, devAddrLen);
+    radioPtr->processScanResponse(myAddr, (int)jrssi, (uint8_t*)advert, devaddrStr);
 }
 
 /*

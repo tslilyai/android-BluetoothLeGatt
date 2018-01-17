@@ -126,7 +126,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
  * Signature: ([BI[B)V
  */
 JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1processScanResult
-  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray);
+  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray, jbyteArray);
 
 /*
  * Class:     org_mpisws_sddrservice_encounters_SDDR_1Native

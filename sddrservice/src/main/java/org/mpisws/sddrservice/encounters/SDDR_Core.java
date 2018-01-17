@@ -7,13 +7,12 @@ package org.mpisws.sddrservice.encounters;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
@@ -21,7 +20,6 @@ import org.mpisws.sddrservice.encounterhistory.EncounterStartedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterUpdatedEvent;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounterhistory.RSSIEntry;
-import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.NotFoundException;
 import org.mpisws.sddrservice.lib.Sleeper;
@@ -48,12 +46,14 @@ public class SDDR_Core implements Runnable {
     private BluetoothAdapter mBluetoothAdapter;
     private Advertiser mAdvertiser;
     private Scanner mScanner;
+    private GattServerClient mGattServerClient;
     private Sleeper mSleeper;
     private LinkabilityBridge mLinkBridge;
     private EncounterBridge mEncounterBridge;
     private List<MLinkabilityEntry> mLinks;
 
     public boolean should_run;
+    public int numNewEncounters;
 
     /* fields set by C functions and pointers */
     static public class RadioAction {
@@ -85,6 +85,7 @@ public class SDDR_Core implements Runnable {
     private void updateAdvert() {
         Log.v(TAG, "Updating Advert");
         mAdvertiser.setAdData(SDDR_Native.c_changeAndGetAdvert());
+        mAdvertiser.setScanData(SDDR_Native.c_changeAndGetAdvert());
         mAdvertiser.resetAdvertiser();
     }
 
@@ -93,7 +94,8 @@ public class SDDR_Core implements Runnable {
         final BluetoothManager bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
-        mScanner = new Scanner(mService);
+        mScanner = new Scanner();
+        mGattServerClient = new GattServerClient();
         mSleeper = new Sleeper(mService);
         mLinkBridge = new LinkabilityBridge(mService);
         mEncounterBridge = new EncounterBridge(mService);
@@ -103,11 +105,13 @@ public class SDDR_Core implements Runnable {
         SDDR_Native.c_mallocRadio();
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter);
+        mGattServerClient.initialize(bluetoothManager, mService);
 
         // initialize the databases for encounters and links
         mEncounterBridge.finalizeAbandonedEncounters();
         mLinks = mLinkBridge.getAllItems();
         updateBTListenAdvertiseSets(mLinks);
+        numNewEncounters = 0;
     }
 
     public void run() {
@@ -117,14 +121,11 @@ public class SDDR_Core implements Runnable {
         updateAdvert();
 
         // enable advertising
+        mAdvertiser.stopAdvertising();
         mAdvertiser.startAdvertising();
 
         should_run = true;
         while (should_run) {
-            /* FOR TESTING COMPUTATION POWER USAGE */
-            mSleeper.sleep(15000);
-            mScanner.runScanNoProcessing();
-            /*
             mRA = SDDR_Native.c_getNextRadioAction();
             if (mRA.duration > 0) {
                 Log.v(TAG, "sleeping for " + mRA.duration);
@@ -143,14 +144,10 @@ public class SDDR_Core implements Runnable {
                     updateAdvert();
                     mScanner.discoverEncounters();
                     processEncounters(mService);
-                    /*
-                        TODO Deal with active/hybrid schemes
-                        TODO Deal with different levels of connectivity due to hybrid/active
-                    */
-             /*       break;
+                    break;
                 default:
                     throw new RuntimeException("Unknown Action Type");
-            }*/
+            }
         }
 
         // cleanup
@@ -210,7 +207,7 @@ public class SDDR_Core implements Runnable {
         }
     }
 
-    public static void processEncounters(Context context) {
+    public void processEncounters(Context context) {
         Log.v(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
 
         for (Iterator<byte[]> iterator = SDDR_Native.c_EncounterMsgs.iterator(); iterator.hasNext();) {
@@ -268,10 +265,15 @@ public class SDDR_Core implements Runnable {
             EncounterEvent encEvent = null;
             switch (type) {
                 case UnconfirmedStart: // brand new unconfirmed
+                    numNewEncounters++;
                     encEvent = new EncounterStartedEvent(pkid, time);
                     Log.v(TAG, "[EncounterEvent] Tentative encounter started at " + time);
+                    /*if (event.activeConfirmation) {
+                        mGattServerClient.connect()
+                    }*/
                     break;
                 case Start:
+                    numNewEncounters++;
                     if (new EncounterBridge(context).getItemByPKID(pkid) == null) {
                         // brand new confirmed from incoming connection, TODO get from native instead of DB
                         Log.v(TAG, "[EncounterEvent] Already confirmed encounter started at " + time);
@@ -317,6 +319,10 @@ public class SDDR_Core implements Runnable {
 
             encEvent.broadcast(context);
             iterator.remove();
+        }
+        if (numNewEncounters >= EncountersService.BUFFERED_MESSAGES_THRESHOLD) {
+            EncountersService.getInstance().sendRepeatingBroadcastMessages();
+            numNewEncounters = 0;
         }
     }
 }

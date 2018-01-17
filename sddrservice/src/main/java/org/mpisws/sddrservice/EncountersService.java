@@ -2,8 +2,6 @@ package org.mpisws.sddrservice;
 
 import android.content.Context;
 import android.content.Intent;
-import android.nfc.Tag;
-import android.os.Handler;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
@@ -31,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
 
 import static org.mpisws.sddrservice.IEncountersService.Filter.FILTER_END_STR;
 
@@ -42,7 +39,7 @@ import static org.mpisws.sddrservice.IEncountersService.Filter.FILTER_END_STR;
 public class EncountersService implements IEncountersService {
     private static final String TAG = EncountersService.class.getSimpleName();
     private static final EncountersService instance = new EncountersService();
-
+    public static final int BUFFERED_MESSAGES_THRESHOLD = 20;
     /*
         Set when the SDDR service is started. No API call other than start_service can be
         made when this boolean is false.
@@ -263,6 +260,7 @@ public class EncountersService implements IEncountersService {
     @Override
     public void processMessageForBroadcasts(Msg msg) {
         if (!msg.isFromMe() && msg.getFilter() != null) {
+            Log.d("ESACTIVE_TEST", "Msg: " + msg.getEid() + " " + msg.getMsg() + " " + DateTime.now().getMillis());
             long pkid = new SSBridge(context).getEncounterPKIDByEncounterID(msg.getEid());
             EncounterBridge bridge = new EncounterBridge(context);
             MEncounter encounter = bridge.getItemByPKID(pkid);
@@ -276,7 +274,6 @@ public class EncountersService implements IEncountersService {
         }
     }
 
-    @Override
     public void sendRepeatingBroadcastMessages() {
         for (Iterator<Msg> i = repeatingMsgs.iterator(); i.hasNext();) {
             Msg msg = i.next();

@@ -1,10 +1,6 @@
 package org.mpisws.sddrservice;
 
 import android.content.Context;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.microsoft.embeddedsocial.autorest.models.Reason;
@@ -14,12 +10,8 @@ import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
 
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
 
 /**
  * Created by tslilyai on 12/21/17.
@@ -359,6 +351,4 @@ public interface IEncountersService {
      * @param msg the message to be processed
      */
     public void processMessageForBroadcasts(ESMsgs.Msg msg);
-
-    public void sendRepeatingBroadcastMessages();
 }

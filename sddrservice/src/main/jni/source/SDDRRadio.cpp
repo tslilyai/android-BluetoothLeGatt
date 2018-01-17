@@ -168,7 +168,7 @@ void SDDRRadio::preDiscovery()
     discovered_.clear();
 }
 
-void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
+void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data, std::string dev_addr)
 {
     BitMap advert(ADVERT_LEN * 8, data);
     LOG_P(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", addr.toString().c_str() , rssi, advert.toHexString().c_str());
@@ -184,7 +184,7 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
     {
       lock_guard<mutex> setLock(setMutex_);
 
-      device = new EbNDevice(generateDeviceID(), addr, listenSet_);
+      device = new EbNDevice(generateDeviceID(), addr, listenSet_, dev_addr);
       deviceMap_.add(addr, device);
 
       LOG_D("ENCOUNTERS_TEST", "-- Discovered new SDDR device (ID %ld, Address %s)", 
@@ -202,9 +202,6 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data)
 
 vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
 {
-    nextDiscover_ += SCAN_INTERVAL + (-1000 + (rand() % 2001));
-    LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
-  
     // discovered_ is set from processScanResult
     // get the encounters from this discovery and store them away
     LOG_P(TAG, "-- discovered_ %d devices", discovered_.size());
@@ -218,6 +215,7 @@ vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
     {
       EncounterEvent event(EncounterEvent::UnconfirmedStarted, ndIt->second, ndIt->first);
       encounters.push_back(event);
+      timeDetectedNewDevice_ = event.time;
     }
 
     for(auto discIt = discovered_.begin(); discIt != discovered_.end(); discIt++)
@@ -226,6 +224,11 @@ vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
       if(getDeviceEvent(event, discIt->id, rssiReportInterval_))
       {
         encounters.push_back(event);
+      } 
+      else 
+      {
+          // the event wasn't updated! this means it wasn't confirmed yet
+          timeDetectedUnconfirmedDevice_ = event.time;
       }
     }
 
@@ -242,6 +245,19 @@ vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
     {
         messages.push_back(encounterToMsg(*encIt)); 
     }
+
+    // stay in encounter-forming mode if the last time we saw a 
+    // new device or unconfirmed device was less 5 minutes ago
+    const uint64_t curTime = getTimeMS();
+    bool SCAN_ENCOUNTERS_DETECTED = 
+        (curTime - timeDetectedNewDevice_ < TIME_IDLE_MODE) 
+        || (curTime - timeDetectedUnconfirmedDevice_ < TIME_IDLE_MODE);
+    LOG_P(TAG, "Detected scan encounters? %d", SCAN_ENCOUNTERS_DETECTED);
+    nextDiscover_ += SCAN_ENCOUNTERS_DETECTED 
+        ? SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001))
+        : SCAN_INTERVAL_IDLE + (-1000 + (rand() % 2001));
+    LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
+ 
     LOG_P(TAG, "-- Sending %d encounters", messages.size());
     return messages;
 }
@@ -507,14 +523,14 @@ bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *d
       // against either the advertisement or scan response as last received
       if((curEpoch->lastAdvertNum == advertNum) || (curEpoch->lastAdvertNum == (advertNum + 1)))
       {
-        if(diffAdvertTime < ((ADV_N / 2) * SCAN_INTERVAL))
+        if(diffAdvertTime < ((ADV_N / 2) * SCAN_INTERVAL_ENCOUNTERS))
         {
           isDuplicate = true;
           isNew = false;
         }
       }
       // This advertisement belongs to the current epoch
-      else if((curEpoch->lastAdvertNum < advertNum) && (diffAdvertTime < (((diffAdvertNum + 63) * SCAN_INTERVAL) / 2)))
+      else if((curEpoch->lastAdvertNum < advertNum) && (diffAdvertTime < (((diffAdvertNum + 63) * SCAN_INTERVAL_ENCOUNTERS) / 2)))
       {
         isNew = false;
       }

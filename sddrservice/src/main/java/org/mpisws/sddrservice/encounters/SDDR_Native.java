@@ -19,7 +19,7 @@ public class SDDR_Native {
     static public native byte[] c_changeAndGetAdvert();
     static public native void c_changeEpoch();
     static public native byte[] c_getRandomAddr();
-    static public native void c_processScanResult(byte[] addr, int rssi, byte[] advert);
+    static public native void c_processScanResult(byte[] addr, int rssi, byte[] advert, byte[] devaddr);
     static public native void c_preDiscovery();
     static public native void c_postDiscovery();
     static public native void c_updateLinkability(byte[] arr);

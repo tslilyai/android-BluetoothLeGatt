@@ -92,8 +92,10 @@ private:
 
   static const uint16_t ADVERT_MIN_INTERVAL = 650; // ms
   static const uint16_t ADVERT_MAX_INTERVAL = 700; // ms
-  static const uint16_t SCAN_INTERVAL = 15000;//ms 
-  static const size_t ADV_N = 2 * ((EPOCH_INTERVAL + (SCAN_INTERVAL - 1)) / SCAN_INTERVAL);
+  static const uint64_t SCAN_INTERVAL_IDLE = 120000;//ms 
+  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 15000;//ms 
+  static const uint64_t TIME_IDLE_MODE = 300000;//ms 
+  static const size_t ADV_N = 2 * ((EPOCH_INTERVAL + (SCAN_INTERVAL_ENCOUNTERS - 1)) / SCAN_INTERVAL_ENCOUNTERS);
   static const size_t ADV_N_LOG2 = CLog<ADV_N>::value;
 
   static const size_t ACTIVE_BF_M = 1108;
@@ -118,6 +120,8 @@ protected:
   IDToRecentDeviceMap idToRecentDevices_;
   uint64_t nextDiscover_;
   uint64_t nextChangeEpoch_;
+  uint64_t timeDetectedNewDevice_;
+  uint64_t timeDetectedUnconfirmedDevice_;
   // note that this doesn't prevent other devices from retroactively linking
   // against this one---this just allows this device to retroactively link
   // against any encountered device
@@ -167,7 +171,7 @@ public: // to be called via JNI
   std::vector<std::string> postDiscoveryGetEncounters();
   const Address getRandomAddr();
   void changeEpoch();
-  void processScanResponse(Address addr, int8_t rssi, uint8_t* data);
+  void processScanResponse(Address addr, int8_t rssi, uint8_t* data, std::string dev_addr);
   ActionInfo getNextAction();
   void setAdvertisedSet(const LinkValueList &advertisedSet);
   void setListenSet(const LinkValueList &listenSet);

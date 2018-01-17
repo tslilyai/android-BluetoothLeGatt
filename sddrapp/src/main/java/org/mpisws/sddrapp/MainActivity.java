@@ -28,11 +28,8 @@ import org.mpisws.sddrservice.IEncountersService;
 import org.mpisws.sddrservice.embeddedsocial.ESMsgs;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
-import org.mpisws.sddrservice.lib.Profiler;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -56,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.testESActive).setOnClickListener(this);
         findViewById(R.id.signIn).setOnClickListener(this);
         findViewById(R.id.deleteAccount).setOnClickListener(this);
+        encountersService.startTestEncountersOnly(this);
    }
 
     @Override

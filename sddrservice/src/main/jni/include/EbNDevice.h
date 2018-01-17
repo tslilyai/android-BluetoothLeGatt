@@ -40,6 +40,7 @@ private:
 
   DeviceID id_;
   Address address_;
+  const std::string dev_addr_;
   LinkValueList matching_;
   bool updatedMatching_;
   float matchingPFalse_;
@@ -56,7 +57,7 @@ private:
   std::list<BloomInfo> bloomsToReport_;
 
 public:
-  EbNDevice(DeviceID id, const Address &address, const LinkValueList &listenSet);
+  EbNDevice(DeviceID id, const Address &address, const LinkValueList &listenSet, const std::string devaddr);
   ~EbNDevice();
 
   DeviceID getID() const;

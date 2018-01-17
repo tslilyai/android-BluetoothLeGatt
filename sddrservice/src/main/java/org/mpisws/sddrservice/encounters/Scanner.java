@@ -22,6 +22,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
 
 /**
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
@@ -53,12 +56,8 @@ public class Scanner {
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
-    private SDDR_Core_Service mService;
-    private BluetoothGatt mGatt;
 
-    public Scanner(SDDR_Core_Service service) {
-        mService = service;
-    }
+    public Scanner() {}
 
     public void initialize(BluetoothAdapter btAdapter) {
         this.mBluetoothAdapter = btAdapter;
@@ -74,7 +73,7 @@ public class Scanner {
             stopScanning();
             Log.v(TAG, "Post discovery");
 
-            /* sets the c_EncounterMsgs list in SDDR_Core */
+            // sets the c_EncounterMsgs list in SDDR_Core
             SDDR_Native.c_postDiscovery();
             done = true;
             synchronized (this) {
@@ -123,7 +122,7 @@ public class Scanner {
    public void stopScanning() {
         Log.v(TAG, "Stopping Scanning");
         mBluetoothLeScanner.stopScan(mScanCallback);
-   }
+    }
 
 
     /**
@@ -149,15 +148,7 @@ public class Scanner {
      * Custom ScanCallback object. Calls the native function to process discoveries for encounters.
      */
     private class SDDRScanCallback extends ScanCallback {
-        /* For active connections */
-        private void connectResult(ScanResult result) {
-            BluetoothDevice device = result.getDevice();
-            String deviceAddress = device.getAddress();
-            Log.v(TAG, "Got BT address to connect: " + deviceAddress);
-            mGatt = device.connectGatt(mService, false, new GattClientCallback());
-        }
-
-        private void processResult(ScanResult result) {
+       private void processResult(ScanResult result) {
             Log.v(TAG, "Scan result processing");
             ScanRecord record = result.getScanRecord();
             if (record == null) {
@@ -165,11 +156,6 @@ public class Scanner {
                 return;
             } else {
                 Map<ParcelUuid, byte[]> datamap = record.getServiceData();
-                if (datamap.size() != 1) {
-                    Log.v(TAG, "Scan Result (not SDDR: not one service!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
-                    return;
-                }
-
                 for (ParcelUuid pu : datamap.keySet()) {
                     ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
                     bb.putLong(pu.getUuid().getMostSignificantBits());
@@ -195,7 +181,7 @@ public class Scanner {
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi);
-                    SDDR_Native.c_processScanResult(ID, rssi, advert);
+                    SDDR_Native.c_processScanResult(ID, rssi, advert, result.getDevice().getAddress().getBytes());
                 }
             }
         }
@@ -220,80 +206,4 @@ public class Scanner {
         }
     }
 
-    /* For active connections */
-    private class GattClientCallback extends BluetoothGattCallback {
-
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            super.onConnectionStateChange(gatt, status, newState);
-            if (status == BluetoothGatt.GATT_FAILURE) {
-                Log.v(TAG, "ResponseTyp to connect to device");
-                disconnectGattServer();
-                return;
-            } else if (status != BluetoothGatt.GATT_SUCCESS) {
-                disconnectGattServer();
-                Log.v(TAG, "Unsuccessful connect to device");
-                return;
-            }
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.v(TAG, "Connected to device");
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                disconnectGattServer();
-            }
-        }
-        public void disconnectGattServer() {
-            Log.v(TAG, "Disconnecting device");
-            if (mGatt != null) {
-                mGatt.disconnect();
-                mGatt.close();
-            }
-        }
-    }
-
-    private class RunPostDiscoveryNoProcessing implements Runnable {
-        public boolean done = false;
-
-        public void run() {
-            stopScanningNoProcessing();
-
-            /* sets the c_EncounterMsgs list in SDDR_Core */
-            done = true;
-            synchronized (this) {
-                notifyAll();
-            }
-            done = false;
-        }
-    }
-    private final RunPostDiscoveryNoProcessing RunPDNoProcessing = new RunPostDiscoveryNoProcessing();
-
-    public void runScanNoProcessing() {
-        startScanningNoProcessing();
-        mHandler.postDelayed(RunPDNoProcessing, Constants.SCAN_PERIOD);
-        synchronized (RunPDNoProcessing) {
-            if (!RunPDNoProcessing.done) {
-                try {
-                    RunPDNoProcessing.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-    public void startScanningNoProcessing() {
-        if (mScanCallback == null) {
-            mScanCallback = new SDDRScanNoProcessingCallback();
-            mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
-        } else {
-            mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
-        }
-        Log.v(TAG, "Starting Scanning");
-    }
-     public void stopScanningNoProcessing() {
-        Log.v(TAG, "Stopping Scanning");
-        mBluetoothLeScanner.stopScan(mScanCallback);
-    }
-
-    private class SDDRScanNoProcessingCallback extends ScanCallback {
-        private void processResult(ScanResult result) {}
-    }
 }
