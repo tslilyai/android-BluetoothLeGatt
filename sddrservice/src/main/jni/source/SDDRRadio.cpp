@@ -10,7 +10,8 @@ SDDRRadio::ConfirmScheme SDDRRadio::getDefaultConfirmScheme()
 }
 
 SDDRRadio::SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, MemoryScheme memoryScheme, bool retroactive, int adapterID, EbNHystPolicy hystPolicy, uint64_t rssiReportInterval)
-   : nextDeviceID_(0),
+   : newDevicesAddrs_(),
+     nextDeviceID_(0),
      keySize_(keySize),
      confirmScheme_(confirmScheme),
      memoryScheme_(memoryScheme),

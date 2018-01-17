@@ -92,9 +92,10 @@ private:
 
   static const uint16_t ADVERT_MIN_INTERVAL = 650; // ms
   static const uint16_t ADVERT_MAX_INTERVAL = 700; // ms
-  static const uint64_t SCAN_INTERVAL_IDLE = 120000;//ms 
-  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 15000;//ms 
-  static const uint64_t TIME_IDLE_MODE = 300000;//ms 
+  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 15000; // ms
+  static const uint64_t SCAN_INTERVAL_IDLE = 120000; // ms
+  static const uint64_t TIME_IDLE_MODE = 300000; // ms
+
   static const size_t ADV_N = 2 * ((EPOCH_INTERVAL + (SCAN_INTERVAL_ENCOUNTERS - 1)) / SCAN_INTERVAL_ENCOUNTERS);
   static const size_t ADV_N_LOG2 = CLog<ADV_N>::value;
 
@@ -109,6 +110,7 @@ protected:
       SharedSecretQueue;
 
 protected:
+  std::list<std::string> newDevicesAddrs_;
   DeviceID nextDeviceID_;
   size_t keySize_;
   ConfirmScheme confirmScheme_;
@@ -140,7 +142,6 @@ protected:
   std::list<DiscoverEvent> discovered_;
   EbNHystPolicy hystPolicy_;
   uint64_t rssiReportInterval_;
-  std::list<std::string> newDevicesAddrs_;
 
 private:
   BitMap generateAdvert(size_t advertNum);
