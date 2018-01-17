@@ -185,4 +185,3 @@ inline DeviceID SDDRRadio::generateDeviceID()
 }
 
 #endif // SDDRRADIO_H
-
