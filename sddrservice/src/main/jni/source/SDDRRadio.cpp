@@ -24,16 +24,7 @@ SDDRRadio::SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, MemoryScheme m
      nextChangeEpoch_(getTimeMS() + EPOCH_INTERVAL),
      timeDetectedNewDevice_(),
      timeDetectedUnconfirmedDevice_(),
-     RS_W(computeRSSymbolSize(keySize, (ADVERT_LEN*8) - 1 - ADV_N_LOG2)),
-     RS_K((keySize / 8) / RS_W),
-     RS_M(ADV_N - RS_K),
-     BF_SM((ADVERT_LEN*8) - 1 - ADV_N_LOG2 - (RS_W*8)),
-     BF_K(1),
-     BF_B(2),
      deviceMap_(),
-     dhCodeMatrix_(RS_K, RS_M + (2 * (RS_K - 1)), RS_W),
-     dhEncoder_(dhCodeMatrix_),
-     dhPrevSymbols_((2 * (RS_K - 1)) * RS_W),
      dhExchange_(keySize),
      dhExchangeMutex_(),
      advertNum_(0),
@@ -42,10 +33,6 @@ SDDRRadio::SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, MemoryScheme m
      hystPolicy_(hystPolicy),
      rssiReportInterval_(rssiReportInterval)
 {
-    LOG_P(TAG, "General Parameters: ADV_N = %zu, ADV_N_LOG2 = %zu", ADV_N, ADV_N_LOG2);
-    LOG_P(TAG, "RS Parameters: W = %zu, K = %zu, M = %zu", RS_W, RS_K, RS_M);
-    LOG_P(TAG, "BF Parameters: SM = %zu", BF_SM);
-
     // initialize the random number generator
     FILE *urand = fopen("/dev/urandom", "r");
     unsigned int seed = 0;
@@ -55,7 +42,7 @@ SDDRRadio::SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, MemoryScheme m
         seed |= (uint8_t)getc(urand);
     }
     srand(seed);
-    dhEncoder_.encode(dhExchange_.getPublicX());
+	advert_ = generateAdvert(dhExchange);
 }
 
 const Address SDDRRadio::getRandomAddr() {
@@ -64,21 +51,6 @@ const Address SDDRRadio::getRandomAddr() {
     uint8_t partial = (uint8_t)dhExchange_.getPublicY() << 5;
     Address addr = Address::newIDWithPartial(partial, 0x20);
     return addr;
-}
-
-char const* SDDRRadio::changeAndGetAdvert() {
-    BitMap newAdvert;
-    if(advertNum_ >= ADV_N)
-    {
-        LOG_P(TAG, "Reached last unique advert, waiting for epoch change\n");
-        newAdvert = lastAdvert_;
-    } else {
-        newAdvert = generateAdvert(advertNum_);
-        lastAdvert_ = newAdvert;
-        LOG_P(TAG, "New Advert #%ld -- %s", advertNum_, newAdvert.toHexString().c_str());
-        advertNum_++;
-    }
-    return (char*)newAdvert.toByteArray();
 }
 
 SDDRRadio::ActionInfo SDDRRadio::getNextAction()
@@ -112,50 +84,15 @@ void SDDRRadio::changeEpoch()
 
     // Generate a new secret for this epoch's DH exchanges
     dhExchange_.generateSecret();
-    // Copying the leftover symbols from the prior epoch, which we will later
-    // include in the first K-1 adverts of this epoch
-    for(int k = 0; k < (RS_K - 1); k++)
-    {
-        memcpy(dhPrevSymbols_.data() + (k * RS_W), dhEncoder_.getSymbol(RS_K + RS_M + k), RS_W);
-    }
-
-    // Generating new symbols based on an updated DH local public value
-    dhEncoder_.encode(dhExchange_.getPublicX());
-
+    
     // Computing new shared secrets in the case of passive or hybrid confirmation
-    if((confirmScheme_.type & ConfirmScheme::Passive) != 0)
-    {
-        for(auto it = deviceMap_.begin(); it != deviceMap_.end(); it++)
-        {
-            EbNDevice *device = it->second;
-            if(!device->epochs_.empty())
-            {
-                LOG_P(TAG, "-- Computing shared secret for id %ld", device->getID());
-                EbNDevice::Epoch &curEpoch = device->epochs_.back();
-                if(curEpoch.dhDecoder.isDecoded())
-                {
-                    SharedSecret sharedSecret(confirmScheme_.type == ConfirmScheme::None);
-                    if(dhExchange_.computeSharedSecret(sharedSecret, 
-                        curEpoch.dhDecoder.decode(), curEpoch.dhExchangeYCoord))
-                    {
-                        LOG_D("ENCOUNTERS_TEST", "-- Adding shared secret %s for id %ld", 
-                                sharedSecret.toString().c_str(),
-                                device->getID());
-                        device->addSharedSecret(sharedSecret);
-                    }
-                    else
-                    {
-                        LOG_P(TAG, "-- Could not compute shared secret for id %ld", device->getID());
-                    }
-                }
-                else
-                {
-                    curEpoch.dhExchanges.push_back(dhExchange_);
-                }
-            }
-        }
-    }
+    // TODO ES?
+    /*LOG_D("ENCOUNTERS_TEST", "-- Adding shared secret %s for id %ld", 
+            sharedSecret.toString().c_str(),
+            device->getID());
+    device->addSharedSecret(sharedSecret);*/
     nextChangeEpoch_ += EPOCH_INTERVAL;
+    advert_ = generateAdvert(dhExchange_);
 }
 
 
@@ -165,8 +102,6 @@ void SDDRRadio::changeEpoch()
 
 void SDDRRadio::preDiscovery()
 {
-    if(memoryScheme_ == MemoryScheme::NoMemory)
-        deviceMap_.clear();
     discovered_.clear();
 }
 
@@ -424,88 +359,25 @@ bool SDDRRadio::getRetroactiveMatches(LinkValueList& matching, std::list<BloomIn
 /* 
  * ADVERT PROCESSING AND GENERATION FUNCTIONS
  */
-BitMap SDDRRadio::generateAdvert(size_t advertNum)
+char const* SDDRRadio::generateAdvert(const ECDH &dhExchange)
 {
-  BitMap advert(25 * 8);
-  size_t advertOffset = 0;
+  	size_t messageOffset = 0;
+  	size_t messageSize = dhExchange.getPublicSize();
+  	vector<uint8_t> message(messageSize, 0);
 
-  advert.setAll(false);
-
-  // NOTE: Version bit is 0, since we are not an infrastructure node
-  advertOffset += 1;
-
-  // Inserting the advertisement number as the first portion of the advert
-  for(int b = 0; b < ADV_N_LOG2; b++)
-  {
-    advert.set(b + advertOffset, (advertNum >> b) & 0x1);
-  }
-  advertOffset += ADV_N_LOG2;
-
-  // Insert the RS coded symbols for the DH public value. For the first K-1
-  // adverts of an epoch, add in a symbol from the previous epoch. This allows a
-  // user to decode if they receive any K consecutive packets
-  advert.copyFrom(dhEncoder_.getSymbol(advertNum), 0, advertOffset, 8 * RS_W);
-  advertOffset += 8 * RS_W;
-
-  if(advertNum < (RS_K - 1))
-  {
-    advert.copyFrom(dhPrevSymbols_.data() + (advertNum * RS_W), 0, advertOffset, 8 * RS_W);
-    advertOffset += 8 * RS_W;
-  }
-
-  // Computing a new Bloom filter every BF_B advertisements
-  uint32_t bloomNum = advertNum / BF_B;
-
-  if(((advertNum % BF_B) == 0) || (bloomNum != advertBloomNum_))
-  {
-    BitMap prefix(ADV_N_LOG2 + keySize_);
-    for(int b = 0; b < ADV_N_LOG2; b++)
-    {
-      prefix.set(b, (bloomNum >> b) & 0x1);
-    }
-    prefix.copyFrom(dhExchange_.getPublicX(), 0, ADV_N_LOG2, keySize_);
-
-    uint32_t totalSize = 0;
-    vector<uint32_t> segmentSizes;
-    for(int s = bloomNum * BF_B; s < (bloomNum + 1) * BF_B; s++)
-    {
-      uint32_t segmentSize = (s < (RS_K - 1)) ? (BF_SM - (8 * RS_W)) : BF_SM;
-      segmentSizes.push_back(segmentSize);
-      totalSize += segmentSize;
-    }
-
-    advertBloom_ = SegmentedBloomFilter(BF_N, totalSize, BF_K, BF_B, segmentSizes);
-    fillBloomFilter(&advertBloom_, prefix.toByteArray(), prefix.sizeBytes());
-    advertBloomNum_ = bloomNum;
-  }
-  advertBloom_.getSegment(advertNum % BF_B, advert.toByteArray(), advertOffset);
-   
-  return advert;
+  	// Adding the full public key (X and Y coordinates) to the message
+  	memcpy(message.data(), dhExchange.getPublic(), dhExchange.getPublicSize());
+	const char str[] = dhExchange_.getPublicX();
+  	unsigned char hash[SHA_DIGEST_LENGTH]; // == 20
+  	SHA1(message.data(), messageSize, hash);
+	return hash;
 }
 
 bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *data)
 {
-  BitMap advert(ADVERT_LEN * 8, data);
-  size_t advertOffset = 0;
+	std::string advert = std::string(data, ADVERT_LEN); 
+	LOG_P(TAG, "Processing advert %u from device %d - '%s'", advertNum, device->getID(), advert.toHexString().c_str());
 
-  // NOTE: Ignoring the version bit for now
-  advertOffset += 1;
-
-  uint32_t advertNum = 0;
-  for(int b = 0; b < ADV_N_LOG2; b++)
-  {
-    if(advert.get(b + advertOffset))
-    {
-      advertNum |= (1 << b);
-    }
-  }
-  advertOffset += ADV_N_LOG2;
-
-  LOG_P(TAG, "Processing advert %u from device %d - '%s'", advertNum, device->getID(), advert.toHexString().c_str());
-
-  if(advertNum < (RS_K + RS_M))
-  {
-    LOG_P(TAG, "-- advertnum < RS_K + RS_M");
     EbNDevice::Epoch *curEpoch = NULL;
     EbNDevice::Epoch *prevEpoch = NULL;
     bool isDuplicate = false;
@@ -520,6 +392,7 @@ bool SDDRRadio::processAdvert(EbNDevice *device, uint64_t time, const uint8_t *d
         prevEpoch = NULL;
       }
 
+	  if (curEpoch->advert = advert)
       uint64_t diffAdvertTime = time - curEpoch->lastAdvertTime;
       uint32_t diffAdvertNum = advertNum - curEpoch->lastAdvertNum;
 

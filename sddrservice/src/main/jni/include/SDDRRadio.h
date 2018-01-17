@@ -18,7 +18,6 @@
 #include "EbNDeviceMap.h"
 #include "ECDH.h"
 #include "Logger.h"
-#include "RSErasureEncoder.h"
 #include "Timing.h"
 #include "sddr.pb.h"
 #include <jni.h>
@@ -80,8 +79,6 @@ protected:
   bool allowRetroactiveLinking_;
 
   EbNDeviceMap<EbNDevice> deviceMap_;
-  RSMatrix dhCodeMatrix_;
-  RSErasureEncoder dhEncoder_;
   std::vector<uint8_t> dhPrevSymbols_;
   ECDH dhExchange_;
   std::mutex dhExchangeMutex_;
@@ -92,9 +89,9 @@ protected:
   std::list<DiscoverEvent> discovered_;
   EbNHystPolicy hystPolicy_;
   uint64_t rssiReportInterval_;
+  char* advert_;
 
 private:
-  BitMap generateAdvert(size_t advertNum);
   bool processAdvert(EbNDevice *device, uint64_t time, const uint8_t *data);
   void processEpochs(EbNDevice *device);
   std::set<DeviceID> handshake(const std::set<DeviceID> &deviceIDs);
@@ -111,14 +108,13 @@ private:
           uint32_t prefixSize, bool includePassive = true);
   void fillBloomFilter(BloomFilter *bloom, const LinkValueList &advertisedSet, 
           const uint8_t *prefix, uint32_t prefixSize, bool includePassive = true);
-  static size_t computeRSSymbolSize(size_t keySize, size_t advertBits);
 
 public: // to be called via JNI
   SDDRRadio(size_t keySize, ConfirmScheme confirmScheme, 
           MemoryScheme memoryScheme, bool retroActive,
           int adapterID, EbNHystPolicy hystPolicy,
           uint64_t rssiReportInterval);
-  char const* changeAndGetAdvert();
+  char const* generateAdvert();
   void preDiscovery();
   std::vector<std::string> postDiscoveryGetEncounters();
   const Address getRandomAddr();

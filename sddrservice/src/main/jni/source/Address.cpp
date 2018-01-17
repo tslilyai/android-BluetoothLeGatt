@@ -85,4 +85,3 @@ uint8_t Address::computeChecksum(const uint8_t *part, size_t size)
 
   return checksum & 0x0F;
 }
-

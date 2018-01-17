@@ -47,7 +47,6 @@
   /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/RSMatrix.h \
   /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/EbNHystPolicy.h \
   /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/EbNDeviceMap.h \
-  /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/RSErasureEncoder.h \
   /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/sddr.pb.h \
   /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/source/protobuf/src/google/protobuf/stubs/common.h \
   /home/tslilyai/Android/Sdk/ndk-bundle/sources/cxx-stl/gnu-libstdc++/4.9/include/iostream \
@@ -188,8 +187,6 @@
 /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/EbNHystPolicy.h:
 
 /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/EbNDeviceMap.h:
-
-/home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/RSErasureEncoder.h:
 
 /home/tslilyai/AndroidStudioProjects/sddr-library/sddrservice/src/main/jni/include/sddr.pb.h:
 
