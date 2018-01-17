@@ -145,7 +145,7 @@ public class SDDR_Core implements Runnable {
             List<Identifier> adverts = encounter.getAdverts(mService);
             for (Identifier advert : adverts) {
                 new ESTopics(mService).find_and_act_on_topic(
-                        new ESTopics.TopicAction(ESTopics.TopicAction.TATyp.CreateAdvertTopic, advert.toString()));
+                        new ESTopics.TopicAction(ESTopics.TopicAction.TATyp.CreateAdvertTopic, advert.toString(), mDHKey, encounter.getPKID()));
             }
         }
     }

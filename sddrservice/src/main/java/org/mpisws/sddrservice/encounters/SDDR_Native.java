@@ -23,6 +23,7 @@ public class SDDR_Native {
     static public native void c_preDiscovery();
     static public native void c_postDiscovery();
     static public native byte[] c_getMyDHKey();
+    static public native byte[] c_computeSecretKey(byte[] dhkey);
 
     static public long c_RadioPtr;
     static protected ArrayList<byte[]> c_EncounterMsgs = new ArrayList<>();

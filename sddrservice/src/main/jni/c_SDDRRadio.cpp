@@ -215,7 +215,16 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     env->SetByteArrayRegion(jbytes, 0, advert.length(), (jbyte*)advert.c_str());
     return jbytes;
 }
+
 JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHKey(JNIEnv *env, jobject obj) {
+    SDDRRadio* radioPtr = getRadioPtr(env, obj);
+    std::string dhkey = radioPtr->dhkey_;
+    jbyteArray jbytes = env->NewByteArray(dhkey.length());
+    env->SetByteArrayRegion(jbytes, 0, dhkey.length(), (jbyte*)dhkey.c_str());
+    return jbytes;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1computeSecretKey(JNIEnv *env, jobject obj, jbyteArray otherDHKey) {
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
     std::string dhkey = radioPtr->dhkey_;
     jbyteArray jbytes = env->NewByteArray(dhkey.length());

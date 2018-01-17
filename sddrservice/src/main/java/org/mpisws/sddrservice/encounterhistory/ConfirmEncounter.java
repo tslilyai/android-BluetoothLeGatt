@@ -28,19 +28,19 @@ import java.util.List;
 
 public class ConfirmEncounter {
     private static final String TAG = ConfirmEncounter.class.getSimpleName();
-    protected final long pkid;
-    protected final List<Identifier> sharedSecrets;
-    protected final Long confirmationTime;
+    protected static long pkid;
+    protected static List<Identifier> sharedSecrets;
+    protected static Long confirmationTime;
 
-    public ConfirmEncounter(Context context, long pkid, List<Identifier> sharedSecrets, Long confirmationTime) {
-        this.pkid = pkid;
-        this.sharedSecrets = sharedSecrets;
-        this.confirmationTime = confirmationTime;
+    public static void confirmWithSharedSecrets(Context context, long pkid, List<Identifier> sharedSecrets, Long confirmationTime) {
+        pkid = pkid;
+        sharedSecrets = sharedSecrets;
+        confirmationTime = confirmationTime;
         persistIntoDatabase(context);
         insertSharedSecrets(context);
     }
 
-    private void persistIntoDatabase(Context context) {
+    private static void persistIntoDatabase(Context context) {
         final ContentValues values = toContentValues(context, false);
         final Uri uri = ContentUris.withAppendedId(EncounterHistoryAPM.encounters.getContentURI(), pkid);
         final int updatedRows = context.getContentResolver().update(uri, values, null, null);
@@ -49,7 +49,7 @@ public class ConfirmEncounter {
         }
     }
 
-    private ContentValues toContentValues(final Context context, final boolean putPKID) {
+    private static ContentValues toContentValues(final Context context, final boolean putPKID) {
         final ContentValues values = new ContentValues();
         if (putPKID) {
             values.put(PEncounters.Columns.pkid, pkid);
@@ -61,13 +61,13 @@ public class ConfirmEncounter {
         return values;
     }
 
-    private void insertSharedSecrets(final Context context) {
+    private static void insertSharedSecrets(final Context context) {
         if (sharedSecrets != null) {
             insertSharedSecrets(context, sharedSecrets);
         }
     }
 
-    private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
+    private static void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
         Log.v(TAG, "Inserting shared secrets " + sharedSecrets.size());
         for (Identifier sharedSecret : sharedSecrets) {
             Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret);
