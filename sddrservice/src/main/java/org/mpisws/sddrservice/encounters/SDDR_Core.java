@@ -96,7 +96,6 @@ public class SDDR_Core implements Runnable {
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
         mScanner = new Scanner();
-        mGattServerClient = new GattServerClient();
         mSleeper = new Sleeper(mService);
         mLinkBridge = new LinkabilityBridge(mService);
         mEncounterBridge = new EncounterBridge(mService);
@@ -205,14 +204,6 @@ public class SDDR_Core implements Runnable {
             Log.v(TAG, "ID " + entry.getIdValue() + " not found, adding to database");
             mLinkBridge.addItem(entry);
             return true;
-        }
-    }
-
-    private void sendActiveConfirmations() {
-        BluetoothDevice dev = mScanner.newDevices.poll();
-        while (dev != null) {
-            mGattServerClient.connectToDevice(dev);
-            dev= mScanner.newDevices.poll();
         }
     }
 
@@ -326,8 +317,6 @@ public class SDDR_Core implements Runnable {
             encEvent.broadcast(context);
             iterator.remove();
         }
-
-        sendActiveConfirmations();
 
         if (numNewEncounters >= EncountersService.BUFFERED_MESSAGES_THRESHOLD) {
             EncountersService.getInstance().sendRepeatingBroadcastMessages();

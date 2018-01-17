@@ -51,7 +51,6 @@ public class Scanner {
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
-    public ConcurrentLinkedQueue<BluetoothDevice> newDevices;
 
     public Scanner() {}
 
@@ -59,7 +58,6 @@ public class Scanner {
         this.mBluetoothAdapter = btAdapter;
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mHandler = new Handler();
-        newDevices = new ConcurrentLinkedQueue<>();
         Log.v(TAG, "Initialized Scanner");
     }
 
@@ -178,9 +176,6 @@ public class Scanner {
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi);
-                    if (SDDR_Native.c_processScanResult(ID, rssi, advert)) {
-                        newDevices.add(result.getDevice());
-                    }
                 }
             }
         }
