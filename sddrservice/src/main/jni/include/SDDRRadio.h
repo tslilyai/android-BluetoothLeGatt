@@ -26,32 +26,6 @@
 class SDDRRadio 
 {
 public:
-  struct ConfirmScheme
-  {
-    enum Type
-    {
-      None = 0,
-      Passive = 1,
-      Active = 2,
-      Hybrid = 3,
-      END
-    } type;
-    float threshold;
-  };
-  static const char *confirmSchemeStrings[];
-  static ConfirmScheme::Type stringToConfirmScheme(const char* name);
-
-  struct MemoryScheme_
-  {
-    enum Type
-    {
-      Standard,
-      NoMemory
-    };
-  };
-  typedef MemoryScheme_::Type MemoryScheme;
-  static const char *memorySchemeStrings[];
-
   struct Action_
   {
     enum Type
@@ -73,32 +47,14 @@ public:
     {
     }
   };
-
-  static ConfirmScheme getDefaultConfirmScheme();
 public: 
   static const uint64_t ADVERT_LEN = 22;
 
 private:
-  const size_t RS_W;
-  const size_t RS_K;
-  const size_t RS_M;
-  const size_t BF_SM;
-  const size_t BF_K;
-  const size_t BF_B;
-
-  static const uint32_t BF_N = 256;
-  static const uint32_t BF_N_PASSIVE = 128;
   static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);//15);
   static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 30000; // ms
   static const uint64_t SCAN_INTERVAL_IDLE = 30000; // ms
   static const uint64_t TIME_IDLE_MODE = 300000; // ms
-
-  static const size_t ADV_N = 2 * ((EPOCH_INTERVAL + (SCAN_INTERVAL_ENCOUNTERS - 1)) / SCAN_INTERVAL_ENCOUNTERS);
-  static const size_t ADV_N_LOG2 = CLog<ADV_N>::value;
-
-  static const size_t ACTIVE_BF_M = 1108;
-  static const size_t ACTIVE_BF_K = 3;
-  static const bool ACTIVE_BF_ENABLED = true;
 
 protected:
   typedef std::list<EbNDevice *> RecentDeviceList;
@@ -109,8 +65,6 @@ protected:
 protected:
   DeviceID nextDeviceID_;
   size_t keySize_;
-  ConfirmScheme confirmScheme_;
-  MemoryScheme memoryScheme_;
   LinkValueList advertisedSet_;
   LinkValueList listenSet_;
   std::mutex setMutex_;
