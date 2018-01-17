@@ -26,5 +26,7 @@ public class SDDR_Native {
     static public native byte[] c_getRetroactiveMatches(byte[] arr);
 
     static public long c_RadioPtr;
+    static public byte[] c_MyDHKey;
     static protected ArrayList<byte[]> c_EncounterMsgs = new ArrayList<>();
+    static protected ArrayList<byte[]> c_DevAddrs = new ArrayList<>();
 }

@@ -140,6 +140,7 @@ protected:
   std::list<DiscoverEvent> discovered_;
   EbNHystPolicy hystPolicy_;
   uint64_t rssiReportInterval_;
+  std::list<std::string> newDevicesAddrs_;
 
 private:
   BitMap generateAdvert(size_t advertNum);
@@ -168,7 +169,7 @@ public: // to be called via JNI
           uint64_t rssiReportInterval);
   char const* changeAndGetAdvert();
   void preDiscovery();
-  std::vector<std::string> postDiscoveryGetEncounters();
+  std::pair<std::vector<std::string>,std::vector<std::string>> postDiscoveryGetEncounters();
   const Address getRandomAddr();
   void changeEpoch();
   void processScanResponse(Address addr, int8_t rssi, uint8_t* data, std::string dev_addr);

@@ -166,6 +166,7 @@ void SDDRRadio::preDiscovery()
     if(memoryScheme_ == MemoryScheme::NoMemory)
         deviceMap_.clear();
     discovered_.clear();
+    newDevicesAddrs_.clear();
 }
 
 void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data, std::string dev_addr)
@@ -184,8 +185,9 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data, st
     {
       lock_guard<mutex> setLock(setMutex_);
 
-      device = new EbNDevice(generateDeviceID(), addr, listenSet_, dev_addr);
+      device = new EbNDevice(generateDeviceID(), addr, listenSet_);
       deviceMap_.add(addr, device);
+      newDevicesAddrs_.push_back(dev_addr);
 
       LOG_D("ENCOUNTERS_TEST", "-- Discovered new SDDR device (ID %ld, Address %s)", 
               device->getID(), device->getAddress().toString().c_str());
@@ -200,7 +202,7 @@ void SDDRRadio::processScanResponse(Address addr, int8_t rssi, uint8_t* data, st
     processEpochs(device);
 }
 
-vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
+pair<std::vector<std::string>,std::vector<std::string>> postDiscoveryGetEncounters()
 {
     // discovered_ is set from processScanResult
     // get the encounters from this discovery and store them away
@@ -259,7 +261,7 @@ vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
     LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
  
     LOG_P(TAG, "-- Sending %d encounters", messages.size());
-    return messages;
+    return std::make_pair(messages, newDevicesAddrs_);
 }
 
 /* 

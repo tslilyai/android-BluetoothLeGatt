@@ -6,10 +6,9 @@ extern uint64_t sddrStartTimestamp;
 
 using namespace std;
 
-EbNDevice::EbNDevice(DeviceID id, const Address &address, const LinkValueList &listenSet, const std::string dev_addr)
+EbNDevice::EbNDevice(DeviceID id, const Address &address, const LinkValueList &listenSet)
    : id_(id),
      address_(address),
-     dev_addr_(dev_addr),
      matching_(listenSet),
      updatedMatching_(false),
      matchingPFalse_(1),
@@ -167,7 +166,6 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
     dest.type = EncounterEvent::Ended;
     dest.id = id_;
     dest.address = address_.toString();
-    dest.dev_addr = dev_addr_;
     dest.matchingSetUpdated = false;
 
     if(!rssiToReport_.empty())
