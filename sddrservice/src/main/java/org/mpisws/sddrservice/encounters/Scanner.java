@@ -175,7 +175,7 @@ public class Scanner {
                     Log.v(TAG, "Scan Result (SDDR): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
-                            "advert " + Utils.getHexString(advert) + ", rssi " + rssi);
+                            "advert " + Utils.getHexString(advert) + ", rssi " + rssi + ", address " + result.getDevice().getAddress());
                 }
             }
         }

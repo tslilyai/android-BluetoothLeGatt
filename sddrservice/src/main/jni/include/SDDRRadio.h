@@ -90,7 +90,7 @@ private:
   static const uint32_t BF_N_PASSIVE = 128;
   static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);//15);
   static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 30000; // ms
-  static const uint64_t SCAN_INTERVAL_IDLE = 120000; // ms
+  static const uint64_t SCAN_INTERVAL_IDLE = 30000; // ms
   static const uint64_t TIME_IDLE_MODE = 300000; // ms
 
   static const size_t ADV_N = 2 * ((EPOCH_INTERVAL + (SCAN_INTERVAL_ENCOUNTERS - 1)) / SCAN_INTERVAL_ENCOUNTERS);

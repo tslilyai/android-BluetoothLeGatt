@@ -148,7 +148,7 @@ public class Advertiser {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setConnectable(true); // TODO
+        settingsBuilder.setConnectable(false); // TODO
         settingsBuilder.setAdvertiseMode(ADVERTISE_MODE_LOW_LATENCY);
         settingsBuilder.setTimeout(0);
         settingsBuilder.setTxPowerLevel(ADVERTISE_TX_POWER_LOW);
