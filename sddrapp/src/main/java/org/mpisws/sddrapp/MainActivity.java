@@ -90,7 +90,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         encountersService.confirmEncounters();
                     }
                 };
-                new Handler().postDelayed(runnable, 15000);
+                for (int i = 0; i < 10; ++i) {
+                    Log.d(TAG, "Running confirm encounters");
+                    new Handler().postDelayed(runnable, i * 15000);
+                }
 
                 /*final ESTopics.GetMessagesCallback msgsCallback = new ESTopics.GetMessagesCallback() {
                     @Override

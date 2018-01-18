@@ -110,6 +110,7 @@ bool SDDRRadio::processScanResponse(Address addr, int8_t rssi, std::string adver
     discovered_.push_back(DiscoverEvent(scanTime, device->getID(), rssi));
     LOG_P(TAG, "-- Discovered device %d", device->getID());
     addRecentDevice(device);
+    advert = advert.substr(0, SHA_DIGEST_LENGTH);
     device->addAdvert(advert);
     return newlyFound;
 }
@@ -200,6 +201,7 @@ std::string SDDRRadio::encounterToMsg(const EncounterEvent &event)
   encounterEvent->set_id(event.id);
   encounterEvent->set_pkid(event.getPKID());
   encounterEvent->set_address(event.address);
+  encounterEvent->set_matchingsetupdated(false);
 
   for(auto it = event.rssiEvents.begin(); it != event.rssiEvents.end(); it++)
   {
@@ -277,8 +279,8 @@ void SDDRRadio::setAdvert()
     dhpubkey_ = std::string((const char*) message.data(), messageSize);
     dhkey_ = dhExchange_.getSerializedKey();
 
-    std::string((const char*) message.data(), messageSize);
-	advert_ = std::string((char*) hash);
+	advert_ = std::string((const char*) hash, SHA_DIGEST_LENGTH);
+    LOG_D("c_sddr", "Advert is %s with len %d", advert_.c_str(), advert_.length());
 }
 
 void SDDRRadio::addRecentDevice(EbNDevice *device)

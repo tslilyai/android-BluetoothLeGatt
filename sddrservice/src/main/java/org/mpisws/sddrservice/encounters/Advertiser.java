@@ -47,8 +47,7 @@ public class Advertiser {
         System.arraycopy(addr, 0, mAddr, 0, Constants.ADDR_LENGTH);
     }
 
-    public void setAdData(Identifier newDataID) {
-        byte[] newData = newDataID.getBytes();
+    public void setAdData(byte[] newData) {
         int amountToIncludeInPUUID = Constants.PUUID_LENGTH - Constants.ADDR_LENGTH;
         Utils.myAssert(newData.length<=Constants.ADVERT_LENGTH + amountToIncludeInPUUID);
         // copy what data can fit into the puuid slot
@@ -60,8 +59,8 @@ public class Advertiser {
         long high = bb.getLong();
         long low = bb.getLong();
         mUUID = new UUID(high, low);
-        Log.v(TAG, "Setting UUID " +  mUUID.toString());
-        Log.v(TAG, "Setting Advert " +  Utils.getHexString(mAddr) + Utils.getHexString(mAdData));
+        Log.v(TAG, "Setting UUID " + mUUID.toString());
+        Log.v(TAG, "Setting Advert " + Utils.getHexString(mAddr) + Utils.getHexString(mAdData));
     }
 
     public void resetAdvertiser() {

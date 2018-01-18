@@ -176,6 +176,7 @@ public class Scanner {
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi);
+                    SDDR_Native.c_processScanResult(ID, rssi, advert);
                 }
             }
         }

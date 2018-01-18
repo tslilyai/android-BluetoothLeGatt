@@ -80,7 +80,13 @@ public abstract class EncounterEvent implements Serializable {
             values.put(PEncounters.Columns.confirmationTime, confirmationTime);
         }
         if (myAdvert != null) {
-            values.put(PEncounters.Columns.myAdvert, myAdvert.toString());
+            values.put(PEncounters.Columns.myAdvert, myAdvert.getBytes());
+        }
+        if (myDHKey!= null) {
+            values.put(PEncounters.Columns.myDHKey, myDHKey.getBytes());
+        }
+        if (myDHPubKey!= null) {
+            values.put(PEncounters.Columns.myDHPubKey, myDHPubKey.getBytes());
         }
 
         values.put(PEncounters.Columns.facebookEventStatus, FacebookEventStatus.NonExistent.toInt());
@@ -148,9 +154,6 @@ public abstract class EncounterEvent implements Serializable {
         if (adverts != null) {
             insertAdverts(context, adverts);
         }
-        if (myAdvert != null) {
-            insertMyAdvert(context, myAdvert);
-        }
     }
 
     private void insertAdverts(final Context context, final List<Identifier> adverts) {
@@ -163,15 +166,6 @@ public abstract class EncounterEvent implements Serializable {
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
         }
     }
-    private void insertMyAdvert(final Context context, Identifier advert) {
-        final ContentValues values = new ContentValues();
-        values.put(PMyAdverts.Columns.myadvert, advert.getBytes());
-        values.put(PMyAdverts.Columns.myDHPubKey, myDHPubKey.getBytes());
-        values.put(PMyAdverts.Columns.myDHKey, myDHKey.getBytes());
-        values.put(PMyAdverts.Columns.postedTopic, 0);
-        values.put(PMyAdverts.Columns.postedComment, 0);
-        context.getContentResolver().insert(EncounterHistoryAPM.myAdverts.getContentURI(), values);
-    }
 
     protected void insertSharedSecrets(final Context context) {
         if (sharedSecrets != null) {
@@ -182,7 +176,7 @@ public abstract class EncounterEvent implements Serializable {
     private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
         Log.v(TAG, "Inserting shared secrets " + sharedSecrets.size());
         for (Identifier sharedSecret : sharedSecrets) {
-            Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret);
+            Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret.getBytes());
             final ContentValues values = new ContentValues();
             values.put(PSharedSecrets.Columns.encounterPKID, pkid);
             values.put(PSharedSecrets.Columns.sharedSecret, sharedSecret.getBytes());

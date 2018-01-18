@@ -24,6 +24,7 @@ public class EncounterHistoryAPM extends AggregatePersistenceModel {
         models.add(sharedSecrets);
         models.add(locations);
         models.add(blooms);
+        models.add(myAdverts);
     }
 
     private EncounterHistoryAPM() {

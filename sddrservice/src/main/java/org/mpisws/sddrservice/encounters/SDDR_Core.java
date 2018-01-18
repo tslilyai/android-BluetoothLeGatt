@@ -6,23 +6,22 @@ package org.mpisws.sddrservice.encounters;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
-import android.util.Pair;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.mpisws.sddrservice.EncountersService;
-import org.mpisws.sddrservice.embeddedsocial.ESAdvertTopics;
-import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
+import org.mpisws.sddrservice.encounterhistory.EncounterHistoryAPM;
 import org.mpisws.sddrservice.encounterhistory.EncounterStartedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterUpdatedEvent;
-import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
+import org.mpisws.sddrservice.encounterhistory.PMyAdverts;
 import org.mpisws.sddrservice.encounterhistory.RSSIEntry;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Sleeper;
@@ -45,7 +44,6 @@ public class SDDR_Core implements Runnable {
     private Advertiser mAdvertiser;
     private Scanner mScanner;
     private Sleeper mSleeper;
-    private EncounterBridge mEncounterBridge;
     private Identifier mDHPubKey;
     private Identifier mAdvert;
     private Identifier mDHKey;
@@ -81,8 +79,9 @@ public class SDDR_Core implements Runnable {
         mDHKey = new Identifier(SDDR_Native.c_getMyDHKey());
         mAdvert = new Identifier(SDDR_Native.c_getMyAdvert());
         mAdvertiser.setAddr(SDDR_Native.c_getRandomAddr());
-        mAdvertiser.setAdData(mAdvert);
+        mAdvertiser.setAdData(mAdvert.getBytes());
         mAdvertiser.resetAdvertiser();
+        new MyAdvertsBridge(mService).insertAdvert(mAdvert, mDHPubKey, mDHKey);
     }
 
     public void initialize() {
@@ -92,7 +91,6 @@ public class SDDR_Core implements Runnable {
         mAdvertiser = new Advertiser();
         mScanner = new Scanner();
         mSleeper = new Sleeper(mService);
-        mEncounterBridge = new EncounterBridge(mService);
 
         // initialize the C radio class
         Log.v(TAG, "Initializing radio");
@@ -101,7 +99,7 @@ public class SDDR_Core implements Runnable {
         mScanner.initialize(mBluetoothAdapter);
 
         // initialize the databases for encounters and links
-        mEncounterBridge.finalizeAbandonedEncounters();
+        //TODO
         numNewEncounters = 0;
     }
 

@@ -56,10 +56,10 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         this.myDHKey = myDHKey;
     }
 
-    public static Identifier convertSharedSecretToEncounterID(final Identifier sharedSecret) {
+    public static Identifier convertSharedSecretToEncounterID(final byte[] sharedSecret) {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-1");
-            md.update(sharedSecret.getBytes(), 0, sharedSecret.getBytes().length);
+            md.update(sharedSecret, 0, sharedSecret.length);
             return new Identifier(md.digest());
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex);
@@ -98,7 +98,7 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
     }
 
     public List<Identifier> getAdverts(final Context context) { // Ordered by PKID ASC
-        final List<Identifier> adverts = new LinkedList<Identifier>();
+        final List<Identifier> adverts = new LinkedList<>();
         final Cursor cursor = context.getContentResolver().query(EncounterHistoryAPM.sharedSecrets.getContentURI(), null,
                 PSharedSecrets.Columns.encounterPKID + " = ?", new String[] { String.valueOf(pkid) },
                 PSharedSecrets.Columns.pkid + " ASC");

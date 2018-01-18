@@ -12,6 +12,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -92,6 +93,7 @@ public abstract class ContentProviderBase extends ContentProvider {
     }
 
     public String addPKIDConditionToWhereClause(final String where, final String pkidString) { // TODO add to whereArgs instead
+        Log.d("ADVERT", "Adding PKID Condition to Where Clause " + where);
         final StringBuilder whereSB = new StringBuilder();
         if (where != null) {
             whereSB.append("(").append(where).append(") AND ");
