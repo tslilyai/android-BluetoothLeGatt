@@ -68,13 +68,6 @@ void SDDRRadio::changeEpoch()
 
     // Generate a new secret for this epoch's DH exchanges
     dhExchange_.generateSecret();
-    
-    // Computing new shared secrets in the case of passive or hybrid confirmation
-    // TODO ES?
-    /*LOG_D("ENCOUNTERS_TEST", "-- Adding shared secret %s for id %ld", 
-            sharedSecret.toString().c_str(),
-            device->getID());
-    device->addSharedSecret(sharedSecret);*/
     nextChangeEpoch_ += EPOCH_INTERVAL;
     setAdvert();
 }
@@ -281,7 +274,10 @@ void SDDRRadio::setAdvert()
   	unsigned char hash[SHA_DIGEST_LENGTH]; // == 20
   	SHA1(message.data(), messageSize, hash);
     
-    dhkey_ = std::string((const char*) message.data(), messageSize);
+    dhpubkey_ = std::string((const char*) message.data(), messageSize);
+    dhkey_ = dhExchange_.getSerializedKey();
+
+    std::string((const char*) message.data(), messageSize);
 	advert_ = std::string((char*) hash);
 }
 
@@ -317,4 +313,23 @@ bool SDDRRadio::getDeviceEvent(EncounterEvent &event, DeviceID id, uint64_t rssi
   }
 
   return false;
+}
+
+std::string SDDRRadio::computeSecretKey(std::string myDHKey, std::string SHA1DHKey, std::string otherDHKey) {
+
+  	unsigned char hash[SHA_DIGEST_LENGTH]; // == 20
+  	SHA1((const unsigned char*)otherDHKey.c_str(), otherDHKey.length(), hash);
+    if (std::string((const char*)hash, SHA_DIGEST_LENGTH).compare(SHA1DHKey) != 0) {
+        LOG_D("c_SDDR", "UhOh.... hash is %s, otherDHKey is %s");
+        return NULL;
+    }
+    char dest[keySize_ / 8];
+    ECDH::computeSharedSecret(
+            (char*)dest,
+            myDHKey,
+            (const uint8_t*)otherDHKey.c_str(),
+            keySize_
+    );
+    LOG_D("c_sddr", "shared secret!!!! %s ", std::string(dest, keySize_/8).c_str());
+    return std::string(dest, keySize_/8);
 }

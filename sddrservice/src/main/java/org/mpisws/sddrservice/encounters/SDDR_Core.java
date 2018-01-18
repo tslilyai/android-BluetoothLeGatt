@@ -8,11 +8,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.mpisws.sddrservice.EncountersService;
+import org.mpisws.sddrservice.embeddedsocial.ESAdvertTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
@@ -20,6 +22,7 @@ import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterStartedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterUpdatedEvent;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
+import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
 import org.mpisws.sddrservice.encounterhistory.RSSIEntry;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Sleeper;
@@ -43,8 +46,9 @@ public class SDDR_Core implements Runnable {
     private Scanner mScanner;
     private Sleeper mSleeper;
     private EncounterBridge mEncounterBridge;
-    private byte[] mDHKey;
-    private byte[] mAdvert;
+    private Identifier mDHPubKey;
+    private Identifier mAdvert;
+    private Identifier mDHKey;
 
     public boolean should_run;
     public int numNewEncounters;
@@ -73,8 +77,9 @@ public class SDDR_Core implements Runnable {
     }
 
     private void updateInformation() {
-        mDHKey = SDDR_Native.c_getMyDHKey();
-        mAdvert = SDDR_Native.c_getMyAdvert();
+        mDHPubKey = new Identifier(SDDR_Native.c_getMyDHPubKey());
+        mDHKey = new Identifier(SDDR_Native.c_getMyDHKey());
+        mAdvert = new Identifier(SDDR_Native.c_getMyAdvert());
         mAdvertiser.setAddr(SDDR_Native.c_getRandomAddr());
         mAdvertiser.setAdData(mAdvert);
         mAdvertiser.resetAdvertiser();
@@ -139,16 +144,6 @@ public class SDDR_Core implements Runnable {
         mScanner.stopScanning();
     }
 
-    protected void getUnconfirmedEncountersSharedSecrets() {
-        List<MEncounter> encounters = new EncounterBridge(mService).getEncountersUnconfirmed();
-        for (MEncounter encounter : encounters) {
-            List<Identifier> adverts = encounter.getAdverts(mService);
-            for (Identifier advert : adverts) {
-                new ESTopics(mService).find_and_act_on_topic(
-                        new ESTopics.TopicAction(ESTopics.TopicAction.TATyp.CreateAdvertTopic, advert.toString(), mDHKey, encounter.getPKID()));
-            }
-        }
-    }
 
     public void processEncounters(Context context) {
         Log.v(TAG, "Processing " + SDDR_Native.c_EncounterMsgs.size() + " encounters");
@@ -188,7 +183,7 @@ public class SDDR_Core implements Runnable {
             switch (type) {
                 case UnconfirmedStart: // brand new unconfirmed
                     numNewEncounters++;
-                    encEvent = new EncounterStartedEvent(pkid, time);
+                    encEvent = new EncounterStartedEvent(pkid, time, mAdvert, mDHPubKey, mDHKey);
                     Log.v(TAG, "[EncounterEvent] Tentative encounter started at " + time);
                     break;
                 case Start:
@@ -196,7 +191,7 @@ public class SDDR_Core implements Runnable {
                     if (new EncounterBridge(context).getItemByPKID(pkid) == null) {
                         // brand new confirmed from incoming connection, TODO get from native instead of DB
                         Log.v(TAG, "[EncounterEvent] Already confirmed encounter started at " + time);
-                        encEvent = new EncounterStartedEvent(pkid, time, rssiEvents, address);
+                        encEvent = new EncounterStartedEvent(pkid, time, rssiEvents, address, mAdvert, mDHPubKey, mDHKey);
                     } else { // previously unconfirmed becomes confirmed
                         Log.v(TAG, "[EncounterEvent] Encounter confirmed at " + time);
                         encEvent = new EncounterUpdatedEvent(pkid, time, adverts, rssiEvents, address);
@@ -221,7 +216,6 @@ public class SDDR_Core implements Runnable {
                 Log.v(TAG, "\t\t" + i.toString());
             }
 
-            encEvent.setMyAdvert(mAdvert);
             encEvent.broadcast(context);
             iterator.remove();
         }

@@ -3,6 +3,7 @@ package org.mpisws.sddrservice;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.util.Pair;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.autorest.models.Reason;
@@ -10,12 +11,14 @@ import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 
 import org.joda.time.DateTime;
+import org.mpisws.sddrservice.embeddedsocial.ESAdvertTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.embeddedsocial.ESUser;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
+import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
 import org.mpisws.sddrservice.lib.Identifier;
@@ -101,6 +104,23 @@ public class EncountersService implements IEncountersService {
 
         this.context = context;
         this.isRunning = true;
+    }
+
+    @Override
+    public void confirmEncounters() {
+        if (!shouldRunCommand(true)) {
+            return;
+        }
+        // create topics for adverts and post the DHPubKey on them if we haven't yet
+        List<Pair<Identifier, Identifier>> myUnposted = new MyAdvertsBridge(context).getAdvertsUnposted();
+        for (Pair<Identifier, Identifier> pair : myUnposted) {
+            ESAdvertTopics.tryPostAdvertAndDHPubKey(context, pair.first, pair.second);
+        }
+        // try and confirm unconfirmed encounters
+        List<MEncounter> encounters = new EncounterBridge(context).getEncountersUnconfirmed();
+        for (MEncounter encounter : encounters) {
+            ESAdvertTopics.tryGetSecretKeys(context, encounter.getMyDHKey(), encounter.getPKID(), encounter.getAdverts(context));
+        }
     }
 
     @Override

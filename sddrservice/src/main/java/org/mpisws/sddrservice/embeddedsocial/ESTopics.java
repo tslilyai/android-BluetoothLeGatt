@@ -20,10 +20,7 @@ import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
 import org.mpisws.sddrservice.IEncountersService;
-import org.mpisws.sddrservice.encounterhistory.ConfirmEncounter;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
-import org.mpisws.sddrservice.encounters.SDDR_Native;
-import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Utils;
 
 import java.sql.SQLException;
@@ -220,9 +217,6 @@ public class ESTopics {
                 case GetMsgs:
                     get_msgs_helper(ta, topicToComment);
                     break;
-                case CreateAdvertTopic:
-                    get_dhkeys_helper(ta.dhkey, ta.pkid, topicToComment);
-                    break;
                 case CreateEIDTopic:
                 case SendMsg:
                     find_reply_comment_and_do_action(ta, topicToComment);
@@ -230,60 +224,6 @@ public class ESTopics {
                     break;
             }
         }
-    }
-
-    private void get_dhkeys_helper(byte[] dhKey, long pkid, TopicView topic) {
-        Fetcher<Object> commentFeedFetcher = FetchersFactory.createCommentFeedFetcher(topic.getHandle(), topic);
-        if (commentFeedFetcher.isLoading()) { return; }
-        Callback callback = new Callback() {
-            @Override
-            public void onStateChanged(FetcherState newState) {
-                List<Identifier> secretKeys = new ArrayList<>();
-                List<String> comments = new ArrayList<>();
-                super.onStateChanged(newState);
-                switch (newState) {
-                    case LOADING:
-                        break;
-                    case LAST_ATTEMPT_FAILED:
-                        Log.v(TAG, "Last attempt failed");
-                        commentFeedFetcher.requestMoreData();
-                        break;
-                    default: // ENDED or MORE_DATA
-                        for (Object obj : commentFeedFetcher.getAllData()) {
-                            if (CommentView.class.isInstance(obj)) {
-                                CommentView comment = CommentView.class.cast(obj);
-                                comments.add(comment.getCommentText());
-                                Log.v(TAG, "Msg on Advert Topic: " + comment.getCommentText());
-                            }
-                        }
-                }
-                if (newState == FetcherState.DATA_ENDED) {
-                    Log.v(TAG, "Found " + commentFeedFetcher.getAllData().size());
-                    boolean found_mydhkey = false;
-                    for (String comment : comments) {
-                        if (comment.compareTo(dhKey.toString())==0) {
-                            found_mydhkey = true;
-                        } else {
-                            // this is the other party's DH key!
-                            Identifier secretKey = new Identifier(SDDR_Native.c_computeSecretKey(comment.getBytes()));
-                            secretKeys.add(secretKey);
-                        }
-                    }
-                    if (!found_mydhkey) {
-                        try {
-                            postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), dhKey.toString(), null));
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    ConfirmEncounter.confirmWithSharedSecrets(context, pkid, secretKeys, System.currentTimeMillis());
-                } else {
-                    commentFeedFetcher.clearData();
-                    commentFeedFetcher.requestMoreData();
-                }
-            }
-        };
-        commentFeedFetcher.setCallback(callback);
     }
 
     private void find_reply_comment_and_do_action(TopicAction ta, TopicView topic) {

@@ -192,6 +192,11 @@ public interface IEncountersService {
     public void startEncounterService(Context context);
 
     /**
+     * Performs a DH-Key-Exchange via embedded social in order to confirm encounters.
+     */
+     public void confirmEncounters();
+
+    /**
      * Retrieves all encounters that satisfy the constraints of the filter.
      *
      * @param filter a filter consisting of a time frame, required linkable identifier matches, and location; if this is null, all encounters are retrieved

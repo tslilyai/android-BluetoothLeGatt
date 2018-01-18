@@ -216,6 +216,14 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     return jbytes;
 }
 
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHPubKey(JNIEnv *env, jobject obj) {
+    SDDRRadio* radioPtr = getRadioPtr(env, obj);
+    std::string dhpubkey = radioPtr->dhpubkey_;
+    jbyteArray jbytes = env->NewByteArray(dhpubkey.length());
+    env->SetByteArrayRegion(jbytes, 0, dhpubkey.length(), (jbyte*)dhpubkey.c_str());
+    return jbytes;
+}
+
 JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getMyDHKey(JNIEnv *env, jobject obj) {
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
     std::string dhkey = radioPtr->dhkey_;
@@ -224,10 +232,23 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     return jbytes;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1computeSecretKey(JNIEnv *env, jobject obj, jbyteArray otherDHKey) {
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1computeSecretKey(JNIEnv *env, jobject obj, jbyteArray jmyDHKey, jbyteArray jshaOtherDHKey, jbyteArray jotherDHKey) {
+    int myDHKeyLen = env->GetArrayLength(jmyDHKey);
+    int shaOtherDHKeyLen = env->GetArrayLength(jshaOtherDHKey);
+    int otherDHKeyLen = env->GetArrayLength(jotherDHKey);
+    char* myDHKey = new char[myDHKeyLen];
+    char* shaOtherDHKey = new char[shaOtherDHKeyLen];
+    char* otherDHKey = new char[otherDHKeyLen];
+    env->GetByteArrayRegion(jmyDHKey, 0, myDHKeyLen, reinterpret_cast<jbyte*>(myDHKey));
+    env->GetByteArrayRegion(jotherDHKey, 0, otherDHKeyLen, reinterpret_cast<jbyte*>(otherDHKey));
+    env->GetByteArrayRegion(jshaOtherDHKey, 0, shaOtherDHKeyLen, reinterpret_cast<jbyte*>(shaOtherDHKey));
+    std::string myDHKeyStr(myDHKey, myDHKeyLen);
+    std::string otherDHKeyStr(otherDHKey, otherDHKeyLen);
+    std::string shaOtherDHKeyStr(shaOtherDHKey, shaOtherDHKeyLen);
+    
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
-    std::string dhkey = radioPtr->dhkey_;
-    jbyteArray jbytes = env->NewByteArray(dhkey.length());
-    env->SetByteArrayRegion(jbytes, 0, dhkey.length(), (jbyte*)dhkey.c_str());
+    std::string secretKey = radioPtr->computeSecretKey(myDHKeyStr, shaOtherDHKeyStr, otherDHKeyStr);
+    jbyteArray jbytes = env->NewByteArray(secretKey.length());
+    env->SetByteArrayRegion(jbytes, 0, secretKey.length(), (jbyte*)secretKey.c_str());
     return jbytes;
 }

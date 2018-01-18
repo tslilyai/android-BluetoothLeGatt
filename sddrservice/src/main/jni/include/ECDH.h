@@ -29,6 +29,7 @@ private:
 public:
   ECDH(); 
   ECDH(size_t keySize); 
+  ECDH(size_t keySize, const unsigned char* buf, int len); 
 
   const uint8_t* getPublic() const;
   const uint8_t* getPublicX() const;
@@ -38,12 +39,15 @@ public:
   size_t getPublicSize() const; 
 
   void generateSecret();
+  std::string getSerializedKey();
 
   bool computeSharedSecret(SharedSecret &dest, const uint8_t *remotePublicX, bool remotePublicY) const;
   bool computeSharedSecret(SharedSecret &dest, const uint8_t *remotePublic) const; 
+  static bool computeSharedSecret(char* dest, std::string dhKey, const uint8_t *remotePublic, size_t keySize);
 
 private:
   static void* derivateKey(const void *in, size_t inLength, void *out, size_t *outLength);
+  void setSecretFromSerialized(char* buf, int len);
 };
 
 inline const uint8_t* ECDH::getPublic() const

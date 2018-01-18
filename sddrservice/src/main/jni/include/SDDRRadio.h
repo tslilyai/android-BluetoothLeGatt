@@ -49,6 +49,7 @@ public:
 public: 
   static const uint64_t ADVERT_LEN = 22;
   std::string dhkey_;
+  std::string dhpubkey_;
   std::string advert_;
 
 private:
@@ -113,6 +114,7 @@ public: // to be called via JNI
   const Address getRandomAddr();
   void changeEpoch();
   bool processScanResponse(Address addr, int8_t rssi, std::string advert);
+  std::string computeSecretKey(std::string myDHKey, std::string sha1OtherDHKey, std::string otherDHKey);
   ActionInfo getNextAction();
 };
 

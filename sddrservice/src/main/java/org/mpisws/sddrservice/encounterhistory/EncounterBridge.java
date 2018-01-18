@@ -97,10 +97,13 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
         final long confirmationTime = PEncounters.extractConfirmationTime(cursor);
         final FacebookEventStatus facebookEventStatus = PEncounters.extractFacebookEventStatus(cursor);
         final long conduitID = PEncounters.extractConduitID(cursor);
+        final Identifier myAdvert = new Identifier(PEncounters.extractMyAdvert(cursor));
+        final Identifier myDHPubKey = new Identifier(PEncounters.extractMyDHPubKey(cursor));
+        final Identifier myDHKey = new Identifier(PEncounters.extractMyDHKey(cursor));
 
         return new MEncounter(pkID, commonIDsList, encounterTimeInterval,
                 lastSeen, confirmationTime, facebookEventStatus,
-                conduitID);
+                conduitID, myAdvert, myDHPubKey, myDHKey);
     }
 
     public boolean isEncounterValid(EncountersService.Filter filter, MEncounter encounter) {

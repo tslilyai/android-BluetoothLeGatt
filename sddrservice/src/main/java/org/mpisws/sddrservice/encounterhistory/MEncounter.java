@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -36,9 +37,13 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
     private final long confirmationTime;
     private final FacebookEventStatus facebookEventStatus;
     private final long conduitID;
+    private final Identifier myAdvert;
+    private final Identifier myDHPubKey;
+    private final Identifier myDHKey;
 
     public MEncounter(final long pkid, final List<Identifier> commonIDs, final TimeInterval timeInterval,
-            final long lastTimeSeen, final long confirmationTime, final FacebookEventStatus facebookEventStatus, final long conduitID) {
+            final long lastTimeSeen, final long confirmationTime, final FacebookEventStatus facebookEventStatus, final long conduitID,
+                      final Identifier myAdvert, final Identifier myDHPubKey, final Identifier myDHKey) {
         super(pkid);
         this.commonIDs = commonIDs;
         this.timeInterval = timeInterval;
@@ -46,6 +51,9 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         this.confirmationTime = confirmationTime;
         this.facebookEventStatus = facebookEventStatus;
         this.conduitID = conduitID;
+        this.myAdvert = myAdvert;
+        this.myDHPubKey = myDHPubKey;
+        this.myDHKey = myDHKey;
     }
 
     public static Identifier convertSharedSecretToEncounterID(final Identifier sharedSecret) {
@@ -119,6 +127,16 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
 
     public long getLastTimeSeen() {
         return lastTimeSeen;
+    }
+
+    public Identifier getMyAdvert() {
+        return myAdvert;
+    }
+    public Identifier getMyDHKey() {
+        return myDHKey;
+    }
+    public Identifier getMyDHPubKey() {
+        return myDHPubKey;
     }
 
     public FacebookEventStatus getFacebookEventStatus() {

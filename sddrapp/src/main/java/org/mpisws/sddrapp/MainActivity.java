@@ -84,7 +84,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 encountersService.signIn();
                 encountersService.startTestESEnabled(this);
 
-                final ESTopics.GetMessagesCallback msgsCallback = new ESTopics.GetMessagesCallback() {
+                final Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        encountersService.confirmEncounters();
+                    }
+                };
+                new Handler().postDelayed(runnable, 15000);
+
+                /*final ESTopics.GetMessagesCallback msgsCallback = new ESTopics.GetMessagesCallback() {
                     @Override
                     public void onReceiveMessages(final List<ESTopics.Msg> msgs) {
                         Log.d("ESACTIVE_TEST", "End Recv Msgs : " + DateTime.now().getMillis());
@@ -126,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 };
                 for (int i = 0; i < 100; ++i) {
                     handler.postDelayed(runnable, i * 15000);
-                }
+                }*/
                 break;
             default:
                 return;

@@ -13,6 +13,7 @@ public class EncounterHistoryAPM extends AggregatePersistenceModel {
     public static final PEncounters encounters = new PEncounters();
     public static final PDiscoveryEvents discoveryEvents = new PDiscoveryEvents();
     public static final PSharedSecrets sharedSecrets = new PSharedSecrets();
+    public static final PMyAdverts myAdverts = new PMyAdverts();
     public static final PLocation locations = new PLocation();
     public static final PBlooms blooms = new PBlooms();
     public static final List<PersistenceModel> models = new LinkedList<PersistenceModel>();

@@ -14,7 +14,7 @@ public class EncounterEndedEvent extends EncounterEvent {
     private static final long serialVersionUID = -6822428069212190684L;
 
     public EncounterEndedEvent(final long pkid, final long endTime, final List<RSSIEntry> rssiEntries, final String currentAddress) {
-        super(pkid, null, endTime, endTime, null, rssiEntries, currentAddress, null);
+        super(pkid, null, endTime, endTime, null, rssiEntries, currentAddress, null, null, null, null, null);
     }
 
     @Override

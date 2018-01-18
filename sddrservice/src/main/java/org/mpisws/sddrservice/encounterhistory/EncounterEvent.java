@@ -13,15 +13,11 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.mpisws.sddrservice.EncountersService;
-import org.mpisws.sddrservice.encounters.SDDR_Proto;
-import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.FacebookEventStatus;
 import org.mpisws.sddrservice.lib.Identifier;
-import org.mpisws.sddrservice.lib.Utils;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
 public abstract class EncounterEvent implements Serializable {
@@ -32,13 +28,17 @@ public abstract class EncounterEvent implements Serializable {
     protected final Long lastTimeSeen;
     protected final Long endTime;
     protected final List<Identifier> adverts;
+    protected final List<Identifier> sharedSecrets;
     protected final List<RSSIEntry> newRSSIEntries;
     protected final String currentWirelessAddress;
     protected final Long confirmationTime;
-    private Identifier myAdvert;
+    private final Identifier myAdvert;
+    private final Identifier myDHPubKey;
+    private final Identifier myDHKey;
 
     public EncounterEvent(long pkid, Long startTime, Long lastTimeSeen, Long endTime, List<Identifier> adverts, List<RSSIEntry> newRSSIEntries,
-                          String currentWirelessAddress, Long confirmationTime) {
+                          String currentWirelessAddress, Long confirmationTime,
+                          Identifier myAdvert, Identifier myDHPubKey, Identifier myDHKey, List<Identifier> secrets) {
         this.pkid = pkid;
         this.startTime = startTime;
         this.lastTimeSeen = lastTimeSeen;
@@ -46,16 +46,16 @@ public abstract class EncounterEvent implements Serializable {
         this.adverts = adverts;
         this.newRSSIEntries = newRSSIEntries;
         this.currentWirelessAddress = currentWirelessAddress;
+        this.sharedSecrets = secrets;
         this.confirmationTime = confirmationTime;
+        this.myAdvert = myAdvert;
+        this.myDHPubKey = myDHPubKey;
+        this.myDHKey = myDHKey;
     }
 
     public abstract void broadcast(final Context context);
 
     public abstract void persistIntoDatabase(Context context);
-
-    public void setMyAdvert(byte[] advert) {
-       myAdvert = new Identifier(advert);
-    }
 
     protected ContentValues toContentValues(final Context context, final boolean putPKID) {
         Log.v(TAG, "\tPKID: " + pkid + "\n\tstartTime: " + startTime + "\n\tlastTimeSeen: " + lastTimeSeen
@@ -79,6 +79,10 @@ public abstract class EncounterEvent implements Serializable {
         if (confirmationTime != null) {
             values.put(PEncounters.Columns.confirmationTime, confirmationTime);
         }
+        if (myAdvert != null) {
+            values.put(PEncounters.Columns.myAdvert, myAdvert.toString());
+        }
+
         values.put(PEncounters.Columns.facebookEventStatus, FacebookEventStatus.NonExistent.toInt());
         values.put(PEncounters.Columns.conduitID, -1);
         return values;
@@ -90,26 +94,6 @@ public abstract class EncounterEvent implements Serializable {
         }
         insertLocation(context);
         insertAdverts(context);
-    }
-
-
-    // TODO this means that all common identifiers must be of size Constants.HANDSHAKE_DH_SIZE
-    protected byte[] identifierListToByteArray(final Collection<Identifier> list) {
-        final byte[] sharedSecretsConcatenated = new byte[list.size() * Constants.HANDSHAKE_DH_SIZE];
-        int pos = 0;
-        for (Identifier identifier : list) {
-            byte[] bytes = identifier.getBytes();
-            for (int i = 0; i < Constants.HANDSHAKE_DH_SIZE; ++i) {
-                if (i >= bytes.length) {
-                    sharedSecretsConcatenated[pos+i] = 0;
-                } else {
-                    sharedSecretsConcatenated[pos + i] = bytes[i];
-                }
-            }
-            pos+=Constants.HANDSHAKE_DH_SIZE;
-        }
-        Utils.myAssert(pos == sharedSecretsConcatenated.length);
-        return sharedSecretsConcatenated;
     }
 
     private void insertRSSIEntries(final Context context, final List<RSSIEntry> rssiEntries) {
@@ -164,22 +148,51 @@ public abstract class EncounterEvent implements Serializable {
         if (adverts != null) {
             insertAdverts(context, adverts);
         }
+        if (myAdvert != null) {
+            insertMyAdvert(context, myAdvert);
+        }
     }
 
     private void insertAdverts(final Context context, final List<Identifier> adverts) {
         Log.v(TAG, "Inserting adverts" + adverts.size());
-        String concat_advert;
         for (Identifier advert: adverts) {
-            if (myAdvert.toString().compareTo(advert.toString()) <= 0) {
-                concat_advert = myAdvert.toString().concat(advert.toString());
-            } else {
-                concat_advert = advert.toString().concat(myAdvert.toString());
-            }
             final ContentValues values = new ContentValues();
             values.put(PSharedSecrets.Columns.encounterPKID, pkid);
-            values.put(PSharedSecrets.Columns.advert, concat_advert.getBytes());
+            values.put(PSharedSecrets.Columns.advert, advert.getBytes());
             values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
             context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
+        }
+    }
+    private void insertMyAdvert(final Context context, Identifier advert) {
+        final ContentValues values = new ContentValues();
+        values.put(PMyAdverts.Columns.myadvert, advert.getBytes());
+        values.put(PMyAdverts.Columns.myDHPubKey, myDHPubKey.getBytes());
+        values.put(PMyAdverts.Columns.myDHKey, myDHKey.getBytes());
+        values.put(PMyAdverts.Columns.postedTopic, 0);
+        values.put(PMyAdverts.Columns.postedComment, 0);
+        context.getContentResolver().insert(EncounterHistoryAPM.myAdverts.getContentURI(), values);
+    }
+
+    protected void insertSharedSecrets(final Context context) {
+        if (sharedSecrets != null) {
+            insertSharedSecrets(context, sharedSecrets);
+        }
+    }
+
+    private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
+        Log.v(TAG, "Inserting shared secrets " + sharedSecrets.size());
+        for (Identifier sharedSecret : sharedSecrets) {
+            Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret);
+            final ContentValues values = new ContentValues();
+            values.put(PSharedSecrets.Columns.encounterPKID, pkid);
+            values.put(PSharedSecrets.Columns.sharedSecret, sharedSecret.getBytes());
+            values.put(PSharedSecrets.Columns.encounterID, eid.getBytes());
+            values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
+            context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
+
+            // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
+            Log.v(TAG, "Create topic for " + eid.toString());
+            EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
         }
     }
 }

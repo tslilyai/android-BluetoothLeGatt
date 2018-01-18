@@ -8,34 +8,39 @@ import android.net.Uri;
 import android.util.Log;
 
 import org.mpisws.sddrservice.lib.Identifier;
-import org.mpisws.sddrservice.lib.Utils;
 
 import java.util.List;
 
-public class EncounterUpdatedEvent extends EncounterEvent {
-    private static final String TAG = Utils.getTAG(EncounterUpdatedEvent.class);
-    private static final long serialVersionUID = 8765808577556790959L;
+public class ConfirmEncounterEvent extends EncounterEvent {
+    private static final String TAG = ConfirmEncounterEvent.class.getSimpleName();
+    protected static long pkid;
+    protected static List<Identifier> sharedSecrets;
+    protected static Long confirmationTime;
 
-    public EncounterUpdatedEvent(long pkid, long lastTimeSeen, List<Identifier> adverts, List<RSSIEntry> newRSSIEntries,
-                                 String currentWirelessAddress) {
-        super(pkid, null, lastTimeSeen, null, adverts, newRSSIEntries, currentWirelessAddress, null, null, null, null, null);
+    public ConfirmEncounterEvent(long pkid, List<Identifier> sharedSecrets, Long confirmationTime) {
+        super(pkid, null, null, null, null, null, null, confirmationTime, null, null, null, sharedSecrets);
+        this.pkid = pkid;
+        this.sharedSecrets = sharedSecrets;
+        this.confirmationTime = confirmationTime;
     }
 
     @Override
     public void broadcast(Context context) {
-        Log.v(TAG, "Broadcasting updated encounter");
+        Log.v(TAG, "Broadcasting confirmed encounter");
         final Intent i = new Intent(context, EncounterEventReceiver.class);
         i.putExtra("encounterEvent", this);
         context.sendBroadcast(i);
     }
+
     @Override
-    public void persistIntoDatabase(Context context) { // TODO applybatch for all events
+    public void persistIntoDatabase(Context context) {
         final ContentValues values = toContentValues(context, false);
         final Uri uri = ContentUris.withAppendedId(EncounterHistoryAPM.encounters.getContentURI(), pkid);
         final int updatedRows = context.getContentResolver().update(uri, values, null, null);
         if (updatedRows != 1) {
             throw new RuntimeException("Update returned non-1 value: " + updatedRows);
         }
-        insertLocationRSSIandAdverts(context);
+        insertSharedSecrets(context);
     }
+
 }

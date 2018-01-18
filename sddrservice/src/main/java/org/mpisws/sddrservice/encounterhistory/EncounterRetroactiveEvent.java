@@ -17,7 +17,7 @@ public class EncounterRetroactiveEvent extends EncounterEvent {
     private static final long serialVersionUID = 1765308277559790385L;
 
     public EncounterRetroactiveEvent(long pkid, List<Identifier> commonIDs) {
-        super(pkid, null, null, null, null, null, null, null);
+        super(pkid, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Override

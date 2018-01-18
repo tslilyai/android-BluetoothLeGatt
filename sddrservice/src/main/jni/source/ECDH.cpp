@@ -20,14 +20,6 @@ ECDH::ECDH(size_t keySize)
   /*
    * TODO Figure out why 192-key curve is not supported
    */
-  int nitems = 100;
-  EC_builtin_curve curves[nitems];
-  int total = EC_get_builtin_curves(curves, nitems);
-  LOG_P("SDDR", "%d builtin curves", total);
-  for (int i = 0; i < total; ++i) {
-      LOG_P("SDDR", "curve %s", curves[i].comment);
-  }
-
   switch(keySize)
   {
   case 192:
@@ -35,7 +27,6 @@ ECDH::ECDH(size_t keySize)
     break;
   case 224:
     secret_.reset(EC_KEY_new_by_curve_name(NID_secp224r1), &EC_KEY_free);        // NIST P-224 Curve
-    LOG_P(TAG, "Got secret %s", secret_.get());
     break;
   case 256:
     secret_.reset(EC_KEY_new_by_curve_name(NID_X9_62_prime256v1), &EC_KEY_free); // NIST P-256 Curve
@@ -62,9 +53,15 @@ void ECDH::generateSecret()
 {
   secret_.reset(EC_KEY_dup(secret_.get()), &EC_KEY_free);
   EC_KEY_generate_key(secret_.get());
-  LOG_P("SDDR", "EC_point2oct with secret, group, public key, LP data, LP size: %d, %d, %d, %s, %d", secret_.get(), EC_KEY_get0_group(secret_.get()), EC_KEY_get0_public_key(secret_.get()), 
-          localPublic_.data(), localPublic_.size(), NULL);
   EC_POINT_point2oct(EC_KEY_get0_group(secret_.get()), EC_KEY_get0_public_key(secret_.get()), POINT_CONVERSION_COMPRESSED, localPublic_.data(), localPublic_.size(), NULL);
+}
+
+std::string ECDH::getSerializedKey() {
+    int len = i2d_ECPrivateKey(secret_.get(), NULL);    
+    unsigned char derkey[len];
+    unsigned char * derkeyPtr = (unsigned char*) derkey;
+    i2d_ECPrivateKey(secret_.get(), &derkeyPtr);
+    return std::string((const char*)derkey, len);
 }
 
 bool ECDH::computeSharedSecret(SharedSecret &dest, const uint8_t *remotePublicX, bool remotePublicY) const
@@ -86,6 +83,25 @@ bool ECDH::computeSharedSecret(SharedSecret &dest, const uint8_t *remotePublic) 
   {
     dest.value = LinkValue(new uint8_t[keySize_ / 8], keySize_ / 8);
     if(ECDH_compute_key((void *)dest.value.get(), keySize_ / 8, remotePublicPoint.get(), secret_.get(), derivateKey))
+    {
+      success = true;
+    }
+  }
+
+  return success;
+}
+
+bool ECDH::computeSharedSecret(char* dest, std::string dhKey, const uint8_t *remotePublic, size_t keySize) 
+{
+  bool success = false;
+
+  const unsigned char* dhKeyBytes = (const unsigned char*)dhKey.c_str();
+  EC_KEY* myKey = d2i_ECPrivateKey(NULL, &dhKeyBytes, dhKey.length());
+  const EC_GROUP *group = EC_KEY_get0_group(myKey);
+  ECPointPtr remotePublicPoint(EC_POINT_new(group), &EC_POINT_free);
+  if(EC_POINT_oct2point(group, remotePublicPoint.get(), remotePublic, (keySize / 8) + 1, NULL))
+  {
+    if(ECDH_compute_key((void *)dest, keySize / 8, remotePublicPoint.get(), myKey, derivateKey))
     {
       success = true;
     }

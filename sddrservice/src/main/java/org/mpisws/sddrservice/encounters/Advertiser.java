@@ -13,6 +13,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 
 import org.mpisws.sddrservice.lib.Constants;
+import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Utils;
 
 import java.nio.ByteBuffer;
@@ -46,12 +47,14 @@ public class Advertiser {
         System.arraycopy(addr, 0, mAddr, 0, Constants.ADDR_LENGTH);
     }
 
-    public void setAdData(byte[] newData) {
-        Utils.myAssert(newData.length==Constants.ADVERT_LENGTH + Constants.PUUID_LENGTH - Constants.ADDR_LENGTH);
+    public void setAdData(Identifier newDataID) {
+        byte[] newData = newDataID.getBytes();
+        int amountToIncludeInPUUID = Constants.PUUID_LENGTH - Constants.ADDR_LENGTH;
+        Utils.myAssert(newData.length<=Constants.ADVERT_LENGTH + amountToIncludeInPUUID);
         // copy what data can fit into the puuid slot
-        System.arraycopy(newData, 0, mAddr, Constants.ADDR_LENGTH, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH);
+        System.arraycopy(newData, 0, mAddr, Constants.ADDR_LENGTH, amountToIncludeInPUUID);
         // copy the rest of the data into the advert
-        System.arraycopy(newData, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH, mAdData, 0, Constants.ADVERT_LENGTH);
+        System.arraycopy(newData, amountToIncludeInPUUID, mAdData, 0, newData.length - amountToIncludeInPUUID);
 
         ByteBuffer bb = ByteBuffer.wrap(mAddr);
         long high = bb.getLong();
