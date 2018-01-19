@@ -13,12 +13,12 @@ public class EncounterStartedEvent extends EncounterEvent {
     private static final String TAG = EncounterStartedEvent.class.getSimpleName();
     private static final long serialVersionUID = 3977070185056288814L;
 
-    public EncounterStartedEvent(long pkid, long startTime, Identifier myAdvert, Identifier myDHPubKey, Identifier myDHKey) {
-        super(pkid, startTime, startTime, -1L, null, null, null, -1L, myAdvert, myDHPubKey, myDHKey, null);
+    public EncounterStartedEvent(long pkid, long startTime, List<Identifier> adverts, Identifier myAdvert, Identifier myDHPubKey, Identifier myDHKey) {
+        super(pkid, startTime, startTime, -1L, adverts, null, null, -1L, myAdvert, myDHPubKey, myDHKey, null);
     }
 
-    public EncounterStartedEvent(long pkid, long startTime, List<RSSIEntry> newRSSIEntries, String currentWirelessAddress, Identifier myAdvert, Identifier myDHPubKey, Identifier myDHKey) {
-        super(pkid, startTime, startTime, -1L, null, newRSSIEntries, currentWirelessAddress, -1L, myAdvert, myDHPubKey, myDHKey, null);
+    public EncounterStartedEvent(long pkid, long startTime, List<Identifier> adverts, List<RSSIEntry> newRSSIEntries, String currentWirelessAddress, Identifier myAdvert, Identifier myDHPubKey, Identifier myDHKey) {
+        super(pkid, startTime, startTime, -1L, adverts, newRSSIEntries, currentWirelessAddress, -1L, myAdvert, myDHPubKey, myDHKey, null);
     }
 
     @Override

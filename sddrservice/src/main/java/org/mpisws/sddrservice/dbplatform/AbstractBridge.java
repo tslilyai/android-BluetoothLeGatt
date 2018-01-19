@@ -109,6 +109,7 @@ public abstract class AbstractBridge<T extends AbstractMemoryObject> {
             result.add(cursorToItem(cursor));
         }
         cursor.close();
+        Log.d("AbstractBridge", "Got number of column items: " + result.size());
         return result;
     }
 

@@ -15,11 +15,13 @@ import com.microsoft.embeddedsocial.actions.ActionsLauncher;
 import com.microsoft.embeddedsocial.actions.OngoingActions;
 import com.microsoft.embeddedsocial.auth.SocialNetworkTokens;
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
+import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.base.event.EventBus;
 import com.microsoft.embeddedsocial.data.Preferences;
 import com.microsoft.embeddedsocial.data.model.AccountData;
 import com.microsoft.embeddedsocial.data.storage.DatabaseHelper;
+import com.microsoft.embeddedsocial.data.storage.PostStorage;
 import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.event.RequestSignInEvent;
 import com.microsoft.embeddedsocial.event.relationship.UserBlockedEvent;
@@ -32,6 +34,8 @@ import com.microsoft.embeddedsocial.pending.PendingAction;
 import com.microsoft.embeddedsocial.pending.PendingBlock;
 import com.microsoft.embeddedsocial.pending.PendingFollow;
 import com.microsoft.embeddedsocial.server.model.view.UserCompactView;
+import com.microsoft.embeddedsocial.service.ServiceAction;
+import com.microsoft.embeddedsocial.service.WorkerService;
 import com.microsoft.embeddedsocial.ui.util.NotificationCountChecker;
 import com.microsoft.embeddedsocial.ui.util.SocialNetworkAccount;
 
@@ -253,6 +257,14 @@ public class UserAccount {
 	 */
 	public void rejectFollowRequest(String anotherUserHandle) {
 		userActionProxy.rejectUser(anotherUserHandle);
+	}
+
+	public void postTopicUnique(String title, String text) {
+		if (!accountDetails.pendingTopic(title.toString())) {
+            accountDetails.addPendingTopic(title);
+            new PostStorage(context).storePost(title, text, null, PublisherType.USER);
+            WorkerService.getLauncher(context).launchService((ServiceAction.SYNC_DATA));
+        }
 	}
 
 	/**

@@ -48,6 +48,17 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, bool expired, bool retroa
   return getEncounterInfo(dest, numeric_limits<uint64_t>::max(), expired, retroactive);
 }
 
+void EbNDevice::getEncounterStartAdvert(EncounterEvent &dest)
+{
+    lock_guard<mutex> advertsLock(advertsMutex_);
+    if (!adverts_to_report_.empty()) {
+        LOG_P(TAG, "Reporting %d adverts", adverts_.size());
+        dest.adverts = adverts_;
+        dest.advertsUpdated = true;
+        adverts_to_report_.clear();
+    }
+}
+
 bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInterval, bool expired, bool retroactive)
 {
   bool success = false;
@@ -74,7 +85,6 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
     const bool reportRSSI = !rssiToReport_.empty() && ((getTimeMS() - lastReportTime_) > rssiReportingInterval);
     const bool reportAdverts = !adverts_to_report_.empty();
     const bool isUpdated = shakenHands_ && (reportRSSI || reportAdverts);
-
     LOG_P(TAG, "getEncounterInfo -- Updated ? %d", isUpdated);
     if(isUpdated)
     {
@@ -88,11 +98,11 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
         rssiToReport_.clear();
       }
       if (!adverts_to_report_.empty()) {
-          dest.adverts = adverts_;
-          dest.advertsUpdated = true;
-          adverts_to_report_.clear();
+          LOG_P(TAG, "Reporting %d adverts", adverts_.size());
+            dest.adverts = adverts_;
+            dest.advertsUpdated = true;
+            adverts_to_report_.clear();
       }
-
       reported_ = true;
       lastReportTime_ = getTimeMS();
    }

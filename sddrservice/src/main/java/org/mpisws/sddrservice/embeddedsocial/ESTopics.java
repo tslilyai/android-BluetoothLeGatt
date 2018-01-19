@@ -55,16 +55,12 @@ public class ESTopics {
             GetMsgs,
             SendMsg,
             CreateEIDTopic,
-            CreateAdvertTopic
         }
 
         TATyp typ;
         String msg;
         GetMessagesCallback getMessagesCallback;
         String eid;
-        String title;
-        long pkid;
-        byte[] dhkey;
         String cursor;
         long thresholdAge;
 
@@ -85,17 +81,9 @@ public class ESTopics {
             this.getMessagesCallback = getMessagesCallback;
         }
 
-        public TopicAction(TATyp typ, String title) {
+        public TopicAction(TATyp typ, String eid) {
             Utils.myAssert(typ == CreateEIDTopic);
-            this.title = title;
-            this.typ = typ;
-        }
-
-        public TopicAction(TATyp typ, String title, byte[] DHKey, long pkid) {
-            Utils.myAssert(typ == TATyp.CreateAdvertTopic);
-            this.title = title;
-            this.dhkey= dhkey;
-            this.pkid = pkid;
+            this.eid = eid;
             this.typ = typ;
         }
     }
@@ -191,11 +179,7 @@ public class ESTopics {
             }
             // Remember that we're trying to create this topic so we don't create it twice. Then
             // actually try and create the topic
-            if (!UserAccount.getInstance().getAccountDetails().pendingTopic(ta.title)) {
-                UserAccount.getInstance().getAccountDetails().addPendingTopic(ta.title);
-                postStorage.storePost(ta.eid, DUMMY_TOPIC_TEXT, null, PublisherType.USER);
-                WorkerService.getLauncher(context).launchService((ServiceAction.SYNC_DATA));
-            }
+            UserAccount.getInstance().postTopicUnique(ta.eid, DUMMY_TOPIC_TEXT);
         } else {
             // We've created this topic but run into a race condition with the other encounter partner
             // who also created the topic. Remove the bad topic, but post the comments to the remaining topic
@@ -220,6 +204,7 @@ public class ESTopics {
                 case CreateEIDTopic:
                 case SendMsg:
                     find_reply_comment_and_do_action(ta, topicToComment);
+                    break;
                 default:
                     break;
             }
@@ -313,10 +298,8 @@ public class ESTopics {
                     }
                     break;
                 }
-                case CreateAdvertTopic:
-                    postStorage.storeDiscussionItem(DiscussionItem.newComment(topic.getHandle(), ta.dhkey.toString(), null));
-                    break;
                 case CreateEIDTopic: {
+                    Log.d(TAG, "Done creating EID topic " + ta.eid);
                     break;
                 }
             }

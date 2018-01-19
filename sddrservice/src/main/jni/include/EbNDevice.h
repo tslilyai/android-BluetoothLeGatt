@@ -53,6 +53,7 @@ public:
 
   bool getEncounterInfo(EncounterEvent &dest, bool expired = false, bool retroactive = true);
   bool getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInterval, bool expired = false, bool retroactive = true);
+  void getEncounterStartAdvert(EncounterEvent &dest);
 };
 
 inline DeviceID EbNDevice::getID() const

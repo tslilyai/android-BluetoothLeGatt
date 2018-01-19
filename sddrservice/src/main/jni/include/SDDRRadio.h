@@ -95,6 +95,7 @@ private:
   std::set<DeviceID> handshake(const std::set<DeviceID> &deviceIDs);
   std::string encounterToMsg(const EncounterEvent &event);
 
+  void getDeviceAdvert(EncounterEvent &event, DeviceID id);
   bool getDeviceEvent(EncounterEvent &event, DeviceID id, uint64_t rssiReportInterval);
   DeviceID generateDeviceID();
   EncounterEvent doneWithDevice(DeviceID id);

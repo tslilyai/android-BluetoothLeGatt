@@ -181,7 +181,7 @@ public class SDDR_Core implements Runnable {
             switch (type) {
                 case UnconfirmedStart: // brand new unconfirmed
                     numNewEncounters++;
-                    encEvent = new EncounterStartedEvent(pkid, time, mAdvert, mDHPubKey, mDHKey);
+                    encEvent = new EncounterStartedEvent(pkid, time, adverts, mAdvert, mDHPubKey, mDHKey);
                     Log.v(TAG, "[EncounterEvent] Tentative encounter started at " + time);
                     break;
                 case Start:
@@ -189,7 +189,7 @@ public class SDDR_Core implements Runnable {
                     if (new EncounterBridge(context).getItemByPKID(pkid) == null) {
                         // brand new confirmed from incoming connection, TODO get from native instead of DB
                         Log.v(TAG, "[EncounterEvent] Already confirmed encounter started at " + time);
-                        encEvent = new EncounterStartedEvent(pkid, time, rssiEvents, address, mAdvert, mDHPubKey, mDHKey);
+                        encEvent = new EncounterStartedEvent(pkid, time, adverts, rssiEvents, address, mAdvert, mDHPubKey, mDHKey);
                     } else { // previously unconfirmed becomes confirmed
                         Log.v(TAG, "[EncounterEvent] Encounter confirmed at " + time);
                         encEvent = new EncounterUpdatedEvent(pkid, time, adverts, rssiEvents, address);

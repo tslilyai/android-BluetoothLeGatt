@@ -236,19 +236,28 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     int myDHKeyLen = env->GetArrayLength(jmyDHKey);
     int shaOtherDHKeyLen = env->GetArrayLength(jshaOtherDHKey);
     int otherDHKeyLen = env->GetArrayLength(jotherDHKey);
+    
     char* myDHKey = new char[myDHKeyLen];
     char* shaOtherDHKey = new char[shaOtherDHKeyLen];
     char* otherDHKey = new char[otherDHKeyLen];
+
     env->GetByteArrayRegion(jmyDHKey, 0, myDHKeyLen, reinterpret_cast<jbyte*>(myDHKey));
     env->GetByteArrayRegion(jotherDHKey, 0, otherDHKeyLen, reinterpret_cast<jbyte*>(otherDHKey));
     env->GetByteArrayRegion(jshaOtherDHKey, 0, shaOtherDHKeyLen, reinterpret_cast<jbyte*>(shaOtherDHKey));
+
+    LOG_D("C_SDDR", "Lengths: %d, %d, %d", myDHKeyLen, otherDHKeyLen, shaOtherDHKeyLen); 
+
     std::string myDHKeyStr(myDHKey, myDHKeyLen);
     std::string otherDHKeyStr(otherDHKey, otherDHKeyLen);
     std::string shaOtherDHKeyStr(shaOtherDHKey, shaOtherDHKeyLen);
     
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
     std::string secretKey = radioPtr->computeSecretKey(myDHKeyStr, shaOtherDHKeyStr, otherDHKeyStr);
-    jbyteArray jbytes = env->NewByteArray(secretKey.length());
-    env->SetByteArrayRegion(jbytes, 0, secretKey.length(), (jbyte*)secretKey.c_str());
-    return jbytes;
+    if (secretKey.length() != 0) {
+        jbyteArray jbytes = env->NewByteArray(secretKey.length());
+        env->SetByteArrayRegion(jbytes, 0, secretKey.length(), (jbyte*)secretKey.c_str());
+        return jbytes;
+    } else {
+        return NULL;
+    }
 }

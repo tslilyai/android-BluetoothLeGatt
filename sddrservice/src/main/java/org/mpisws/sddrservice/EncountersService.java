@@ -114,12 +114,13 @@ public class EncountersService implements IEncountersService {
         // create topics for adverts and post the DHPubKey on them if we haven't yet
         List<Pair<Identifier, Identifier>> adverts = new MyAdvertsBridge(context).getAdverts();
         for (Pair<Identifier, Identifier> pair : adverts) {
-            Log.d(TAG, "Got advert and dhpubkey " + pair.first.toString() + ", " + pair.second.toString());
+            Log.d(TAG, "Create topic for advert and dhpubkey " + pair.first.toString() + ", " + pair.second.toString());
             ESAdvertTopics.postAdvertAndDHPubKey(context, pair.first, pair.second);
         }
         // try and confirm unconfirmed encounters
         List<MEncounter> encounters = new EncounterBridge(context).getEncountersUnconfirmed();
         for (MEncounter encounter : encounters) {
+            Log.d(TAG, "Confirm encounter " + encounter.getPKID());
             ESAdvertTopics.tryGetSecretKeys(context, encounter.getMyDHKey(), encounter.getPKID(), encounter.getAdverts(context));
         }
     }

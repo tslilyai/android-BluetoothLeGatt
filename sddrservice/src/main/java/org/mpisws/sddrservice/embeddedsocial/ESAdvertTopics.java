@@ -1,7 +1,9 @@
 package org.mpisws.sddrservice.embeddedsocial;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
 import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
@@ -17,6 +19,7 @@ import org.mpisws.sddrservice.encounterhistory.ConfirmEncounterEvent;
 import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
 import org.mpisws.sddrservice.encounters.SDDR_Native;
 import org.mpisws.sddrservice.lib.Identifier;
+import org.mpisws.sddrservice.lib.Utils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,13 +32,14 @@ public class ESAdvertTopics {
     private static final String TAG = ESAdvertTopics.class.getSimpleName();
 
     public static void postAdvertAndDHPubKey(Context context, Identifier myAdvert, Identifier myDHPubKey) {
-        new PostStorage(context).storePost(myAdvert.toString(), myDHPubKey.toString(), null, PublisherType.USER);
-        WorkerService.getLauncher(context).launchService((ServiceAction.SYNC_DATA));
+        UserAccount.getInstance().postTopicUnique(myAdvert.toString(), myDHPubKey.toString());
         new MyAdvertsBridge(context).deleteAdvert(myAdvert);
     }
 
     public static void tryGetSecretKeys(Context context, Identifier myDHKey, long pkid, List<Identifier> adverts) {
+        Log.d(TAG, "Looking for #adverts: " + adverts.size());
         for (Identifier advert : adverts) {
+            Log.d(TAG, "Looking for " + advert.toString());
             getTopicAndAct(context, advert, myDHKey, pkid);
         }
     }
@@ -52,6 +56,10 @@ public class ESAdvertTopics {
                         break;
                     case DATA_ENDED:
                         List<TopicView> topics = (topicFeedFetcher.getAllData());
+                        if (topics.isEmpty()) {
+                            Log.d(TAG, "Topic for advert doesn't exist: " + advert.toString());
+                            return;
+                        }
                         TopicView topic_to_save = topics.get(0);
 
                         // somehow we created more than one topic. remove all but the
@@ -67,6 +75,7 @@ public class ESAdvertTopics {
                                 }
                             }
                         }
+                        Log.d(TAG, "Got topic for advert " + advert.toString());
                         getKeyFromTopic(context, myDHKey, advert, pkid, topic_to_save.getTopicText());
                         break;
                     default:
@@ -79,7 +88,12 @@ public class ESAdvertTopics {
     }
 
     private static void getKeyFromTopic(Context context, Identifier myDHKey, Identifier advert, long pkid, String dhPubKey) {
-        Identifier secretKey = new Identifier(SDDR_Native.c_computeSecretKey(myDHKey.getBytes(), advert.getBytes(), dhPubKey.getBytes()));
-        new ConfirmEncounterEvent(pkid, Arrays.asList((secretKey)), System.currentTimeMillis()).broadcast(context);
+        Log.d(TAG, "Computing secret key with myDHKey " + myDHKey.toString() + " " + advert.toString() + " and " + dhPubKey);
+        byte[] secretKey = SDDR_Native.c_computeSecretKey(myDHKey.getBytes(), advert.getBytes(), Utils.hexStringToByteArray(dhPubKey));
+        if (secretKey!= null) {
+            Identifier secretKeyID = new Identifier(secretKey);
+            Log.d(TAG, "Got secret key for advert " + advert.toString() + " " + secretKeyID.toString());
+            new ConfirmEncounterEvent(pkid, Arrays.asList((secretKeyID)), System.currentTimeMillis()).broadcast(context);
+        }
     }
 }

@@ -157,7 +157,7 @@ public abstract class EncounterEvent implements Serializable {
     }
 
     private void insertAdverts(final Context context, final List<Identifier> adverts) {
-        Log.v(TAG, "Inserting adverts" + adverts.size());
+        Log.v(TAG, "Inserting adverts " + adverts.size());
         for (Identifier advert: adverts) {
             final ContentValues values = new ContentValues();
             values.put(PSharedSecrets.Columns.encounterPKID, pkid);
