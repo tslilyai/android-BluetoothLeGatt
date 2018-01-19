@@ -67,7 +67,6 @@ public abstract class ContentProviderBase extends ContentProvider {
         final Cursor c = db.query(
                 matchType.getModel().getTableName(), projection, realselection, selectionArgs, null, null, sortOrder);
         c.setNotificationUri(getContext().getContentResolver(), uri); // TODO ???
-        //Log.d(TAG, "Query done");
         return c;
     }
 
@@ -93,7 +92,6 @@ public abstract class ContentProviderBase extends ContentProvider {
     }
 
     public String addPKIDConditionToWhereClause(final String where, final String pkidString) { // TODO add to whereArgs instead
-        Log.d("ADVERT", "Adding PKID Condition to Where Clause " + where);
         final StringBuilder whereSB = new StringBuilder();
         if (where != null) {
             whereSB.append("(").append(where).append(") AND ");
