@@ -107,10 +107,6 @@ public class SDDR_Core implements Runnable {
         Log.v(TAG, "Running core");
         updateInformation();
 
-        // enable advertising
-        mAdvertiser.stopAdvertising();
-        mAdvertiser.startAdvertising();
-
         should_run = true;
         while (should_run) {
             mRA = SDDR_Native.c_getNextRadioAction();

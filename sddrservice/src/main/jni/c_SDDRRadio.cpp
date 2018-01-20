@@ -144,7 +144,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
   (JNIEnv *env, jobject obj) {
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
 
-    Address addr = radioPtr->getRandomAddr();
+    Address addr = radioPtr->getSDDRAddr();
     uint8_t* bytes = addr.toByteArray();
     LOG_P("c_encounters_SDDR", "Got Addr %s with len %d", addr.toString().c_str(), addr.len());
     const jbyte* nativemsg = reinterpret_cast<const jbyte*>(bytes);
@@ -160,7 +160,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
  * Signature: ([BI[B)V
  */
 JNIEXPORT jboolean JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1processScanResult
-  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert){
+  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert, jbyteArray jdevaddr) {
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
 
     int addr_len = env->GetArrayLength(jaddr);
@@ -169,10 +169,15 @@ JNIEXPORT jboolean JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c
     assert(addr_len / 8 == ADDR_LEN);
     Address myAddr(ADDR_LEN, (uint8_t*)addr);
     
+    int dev_addr_len = env->GetArrayLength(jdevaddr);
+    char* dev_addr = new char[dev_addr_len];
+    env->GetByteArrayRegion(jdevaddr, 0, dev_addr_len, reinterpret_cast<jbyte*>(dev_addr));
+    Address devAddr(dev_addr_len, (uint8_t*)dev_addr);
+    
     int advert_len = env->GetArrayLength(jadvert);
     char* advert = new char[advert_len];
     env->GetByteArrayRegion(jadvert, 0, advert_len, reinterpret_cast<jbyte*>(advert));
-    return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(advert));
+    return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(advert), devAddr);
 }
 
 /*

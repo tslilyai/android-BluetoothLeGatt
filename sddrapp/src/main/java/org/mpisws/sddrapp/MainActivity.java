@@ -19,17 +19,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import org.joda.time.DateTime;
 import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.EncountersService;
-import org.mpisws.sddrservice.IEncountersService;
-import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -44,47 +39,66 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent mStartActivity = new Intent(this, MainActivity.class);
             int mPendingIntentId = 123456;
             PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
-            AlarmManager mgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+            AlarmManager mgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
             mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, mPendingIntent);
             System.exit(0);
         }
         findViewById(R.id.testEncountersOnly).setOnClickListener(this);
-        findViewById(R.id.testESInactive).setOnClickListener(this);
-        findViewById(R.id.testESActive).setOnClickListener(this);
+        findViewById(R.id.testESTopics).setOnClickListener(this);
+        findViewById(R.id.testConfirmES).setOnClickListener(this);
+        findViewById(R.id.testConfirmActive).setOnClickListener(this);
         findViewById(R.id.signIn).setOnClickListener(this);
         findViewById(R.id.deleteAccount).setOnClickListener(this);
-        encountersService.startTestEncountersOnly(this);
    }
 
     @Override
     public void onClick(View v) {
-        final ESNotifs.Notif[] notifHolder = {null};
-
         switch (v.getId()) {
             case R.id.deleteAccount:
-                encountersService.deleteAccount();
-                break;
+               encountersService.startTestESOnly(this);
+               if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
+                    encountersService.registerGoogleUser(GoogleToken.getToken());
+                    encountersService.signIn();
+               }
+               encountersService.deleteAccount();
+               break;
             case R.id.signIn:
+                encountersService.startTestESOnly(this);
                 if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
                     Log.v(TAG, "Not registered with Google yet");
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();
                 }
-                break;
+               break;
             case R.id.testEncountersOnly:
                 encountersService.startTestEncountersOnly(this);
                 break;
-            case R.id.testESInactive:
-                encountersService.registerGoogleUser(GoogleToken.getToken());
-                encountersService.signIn();
-                encountersService.startTestESEnabled(this);
+            case R.id.testESTopics:
+               encountersService.startTestESOnly(this);
+               if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
+                    encountersService.registerGoogleUser(GoogleToken.getToken());
+                    encountersService.signIn();
+               }
+               final Runnable runnableinactive = new Runnable() {
+                    @Override
+                    public void run() {
+                        final int NUM_TOPICS_TO_CREATE = 8;
+                        for (int i = 0; i < NUM_TOPICS_TO_CREATE; ++i) {
+                            Log.d(TAG, "trying to create encounter msging channel " + i);
+                            encountersService.createEncounterMsgingChannel(String.valueOf(System.currentTimeMillis()));
+                        }
+                    }
+                };
+                for (int i = 1; i < 1000; ++i)
+                    new Handler().postDelayed(runnableinactive, 20000*i);
                 break;
-            case R.id.testESActive:
-                encountersService.registerGoogleUser(GoogleToken.getToken());
-                encountersService.signIn();
-                encountersService.startTestESEnabled(this);
-
-                final Runnable runnable = new Runnable() {
+            case R.id.testConfirmActive:
+               encountersService.startTestESOnly(this);
+                // TODO
+               break;
+            case R.id.testConfirmES:
+                encountersService.startTestEncountersES(this);
+                final Runnable runnableactive = new Runnable() {
                     @Override
                     public void run() {
                         encountersService.confirmEncounters();
@@ -92,52 +106,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 };
                 for (int i = 0; i < 10; ++i) {
                     Log.d(TAG, "Running confirm encounters");
-                    new Handler().postDelayed(runnable, i * 15000);
+                    new Handler().postDelayed(runnableactive, i * 30000);
                 }
-
-                /*final ESTopics.GetMessagesCallback msgsCallback = new ESTopics.GetMessagesCallback() {
-                    @Override
-                    public void onReceiveMessages(final List<ESTopics.Msg> msgs) {
-                        Log.d("ESACTIVE_TEST", "End Recv Msgs : " + DateTime.now().getMillis());
-                        Log.d("ESACTIVE_TEST", "Start Process Msgs : " + DateTime.now().getMillis());
-                        for (ESTopics.Msg msg : msgs) {
-                            encountersService.processMessageForBroadcasts(msg);
-                        }
-                        Log.d("ESACTIVE_TEST", "End Process Msgs : " + DateTime.now().getMillis());
-                    }
-                };
-                final ESNotifs.GetNotificationsCallback notifcallback = new ESNotifs.GetNotificationsCallback() {
-                    @Override
-                    public void onReceiveNotifications(List<ESNotifs.Notif> notifs) {
-                        Log.d("ESACTIVE_TEST", "End Get Notifs: " + DateTime.now().getMillis());
-                        Log.v(TAG, "Notif: Calling getNotifsCallback of " + notifs.size() + " notifs");
-                        long newestNotifCursorTime = -1;
-                        for (ESNotifs.Notif notif : notifs) {
-                            if (newestNotifCursorTime < 0 || notif.isNewerThan(newestNotifCursorTime)) {
-                                newestNotifCursorTime = notif.getCreatedTime();
-                                notifHolder[0] = notif;
-                            }
-                        }
-                        if (notifHolder[0] != null) encountersService.markAllPreviousNotificationsAsRead(notifHolder[0]);
-                        Log.d("ESACTIVE_TEST", "Start Recv Msgs : " + DateTime.now().getMillis());
-                        encountersService.getMessagesFromNotifications(notifs, msgsCallback);
-                    }
-                };
-
-                IEncountersService.ForwardingFilter filter = new IEncountersService.ForwardingFilter().setNumHopsLimit(1).setLifetimeTimeMs(Long.MAX_VALUE);
-                encountersService.sendBroadcastMsg("", filter.setIsRepeating(true).setNumHopsLimit(1).setLifetimeTimeMs(Long.MAX_VALUE).setFanoutLimit(1000));
-                final Handler handler = new Handler();
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d("ESACTIVE_TEST", "Start Get Notifs: " + DateTime.now().getMillis());
-                        encountersService.getNotificationsFromNewest(notifcallback, IEncountersService.GetNotificationsRequestFlag.UNREAD_ONLY);
-                        encountersService.sendRepeatingBroadcastMessages();
-                    }
-                };
-                for (int i = 0; i < 100; ++i) {
-                    handler.postDelayed(runnable, i * 15000);
-                }*/
                 break;
             default:
                 return;

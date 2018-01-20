@@ -125,8 +125,6 @@ public class Scanner {
      */
     private List<ScanFilter> buildScanFilters() {
         List<ScanFilter> scanFilters = new ArrayList<>();
-        //ScanFilter filter = new ScanFilter.Builder().setServiceUuid(Constants.SDDR_UUID).build();
-        //scanFilters.add(filter);
         return scanFilters;
     }
 
@@ -172,11 +170,13 @@ public class Scanner {
                     System.arraycopy(datatail, 0, advert, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH, Constants.ADVERT_LENGTH);
 
                     int rssi = result.getRssi();
+                    byte[] devaddress = result.getDevice().getAddress().getBytes();
                     Log.v(TAG, "Scan Result (SDDR): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
-                            "advert " + Utils.getHexString(advert) + ", rssi " + rssi);
-                    SDDR_Native.c_processScanResult(ID, rssi, advert);
+                            "advert " + Utils.getHexString(advert) + ", rssi " + rssi
+                            + " devAddr " + result.getDevice().getAddress());
+                    SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
                 }
             }
         }

@@ -9,6 +9,8 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.TokenResponse;
 import android.support.v7.app.AppCompatActivity;
 
+import org.mpisws.sddrservice.EncountersService;
+
 /**
  * Created by tslilyai on 11/14/17.
  */

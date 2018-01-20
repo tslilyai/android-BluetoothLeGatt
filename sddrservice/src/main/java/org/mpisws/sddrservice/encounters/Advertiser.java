@@ -21,7 +21,9 @@ import java.util.UUID;
 
 import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_BALANCED;
 import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
+import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_LOW_POWER;
 import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_TX_POWER_LOW;
+import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
 
 /**
  * Manages BLE Advertising.
@@ -125,7 +127,6 @@ public class Advertiser {
         settingsBuilder.setConnectable(false); // TODO
         settingsBuilder.setAdvertiseMode(ADVERTISE_MODE_LOW_LATENCY);
         settingsBuilder.setTimeout(0);
-        settingsBuilder.setTxPowerLevel(ADVERTISE_TX_POWER_LOW);
         return settingsBuilder.build();
     }
 

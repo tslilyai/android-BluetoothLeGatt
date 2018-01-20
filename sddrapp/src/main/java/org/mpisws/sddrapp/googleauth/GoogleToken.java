@@ -18,7 +18,5 @@ public class GoogleToken {
     public static void setToken(String newtoken) {
         Log.v(TAG, "Set access token " + newtoken);
         token = newtoken;
-        Log.v(TAG, "Registering with SDDR with new token");
-        EncountersService.getInstance().registerGoogleUser(GoogleToken.getToken());
     }
 }

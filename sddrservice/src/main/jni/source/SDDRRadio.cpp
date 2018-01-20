@@ -28,15 +28,20 @@ SDDRRadio::SDDRRadio(size_t keySize, int adapterID, EbNHystPolicy hystPolicy, ui
         seed |= (uint8_t)getc(urand);
     }
     srand(seed);
+	sddraddr_ = Address::newIDWithPartial((uint8_t)dhExchange_.getPublicY() << 5, 0x20);
 	setAdvert();
 }
 
-const Address SDDRRadio::getRandomAddr() {
+const Address SDDRRadio::getSDDRAddr() {
+    return sddraddr_;
+}
+
+
+void SDDRRadio::shiftAddr() {
     // get a new random address. uses the 1 bit Y coordinate as part of the
     // address since compressed ECDH keys are actually (keySize + 1) bits long
     uint8_t partial = (uint8_t)dhExchange_.getPublicY() << 5;
-    Address addr = Address::newIDWithPartial(partial, 0x20);
-    return addr;
+    sddraddr_ = sddraddr_.shiftWithPartial(partial, 0x20);
 }
 
 SDDRRadio::ActionInfo SDDRRadio::getNextAction()
@@ -82,24 +87,24 @@ void SDDRRadio::preDiscovery()
     discovered_.clear();
 }
 
-bool SDDRRadio::processScanResponse(Address addr, int8_t rssi, std::string advert)
+bool SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string advert, Address dev_addr)
 {
     bool newlyFound = false;
-    LOG_P(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", addr.toString().c_str() , rssi, advert.c_str());
+    LOG_P(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", sddrAddr.toString().c_str() , rssi, advert.c_str());
     
-    if (!addr.verifyChecksum()) {
+    if (!sddrAddr.verifyChecksum()) {
         LOG_P(TAG, "Not an SDDR device, address checksum failed");
         return false;
     }
 
     uint64_t scanTime = getTimeMS();
-    EbNDevice *device = deviceMap_.get(addr);
+    EbNDevice *device = deviceMap_.get(sddrAddr);
     if(device == NULL)
     {
       lock_guard<mutex> setLock(setMutex_);
 
-      device = new EbNDevice(generateDeviceID(), addr);
-      deviceMap_.add(addr, device);
+      device = new EbNDevice(generateDeviceID(), dev_addr);
+      deviceMap_.add(sddrAddr, device);
       newlyFound = true;
 
       LOG_D("ENCOUNTERS_TEST", "-- Discovered new SDDR device (ID %ld, Address %s)", 
@@ -160,11 +165,12 @@ std::vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
     // stay in encounter-forming mode if the last time we saw a 
     // new device or unconfirmed device was less 5 minutes ago
     const uint64_t curTime = getTimeMS();
-    bool SCAN_ENCOUNTERS_DETECTED = curTime - timeDetectedNewDevice_ < TIME_IDLE_MODE;
-    LOG_P(TAG, "Detected scan encounters? %d", SCAN_ENCOUNTERS_DETECTED);
-    nextDiscover_ += SCAN_ENCOUNTERS_DETECTED 
-        ? SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001))
-        : SCAN_INTERVAL_IDLE + (-1000 + (rand() % 2001));
+    //bool SCAN_ENCOUNTERS_DETECTED = curTime - timeDetectedNewDevice_ < TIME_IDLE_MODE;
+    //LOG_P(TAG, "Detected scan encounters? %d", SCAN_ENCOUNTERS_DETECTED);
+    //nextDiscover_ += SCAN_ENCOUNTERS_DETECTED 
+        //? SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001))
+        //: SCAN_INTERVAL_IDLE + (-1000 + (rand() % 2001));
+    nextDiscover_ += SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001));
     LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
  
     LOG_P(TAG, "-- Sending %d encounters", messages.size());

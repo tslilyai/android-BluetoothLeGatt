@@ -78,7 +78,17 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void startTestESEnabled(Context context) {
+    public void startTestESOnly(Context context) {
+        esUser = new ESUser(context);
+        esMsg = new ESTopics(context);
+        esNotifs = new ESNotifs();
+
+        this.context = context;
+        this.isRunning = true;
+    }
+
+    @Override
+    public void startTestEncountersES(Context context) {
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.start_sddr_service", 0);
         context.startService(serviceIntent);
@@ -240,6 +250,7 @@ public class EncountersService implements IEncountersService {
     @Override
     public void createEncounterMsgingChannel(String encounterId) {
         if (!shouldRunCommand(true)) return;
+        Log.d(TAG, "Creating EID topic "+ encounterId);
         esMsg.find_and_act_on_topic(new ESTopics.TopicAction(
                 ESTopics.TopicAction.TATyp.CreateEIDTopic, encounterId));
     }

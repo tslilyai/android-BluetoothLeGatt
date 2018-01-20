@@ -37,6 +37,72 @@ Address Address::newIDWithPartial(uint8_t partial, uint8_t mask)
   return address;
 }
 
+Address Address::shiftWithPartial(uint8_t value, uint8_t mask) const
+{
+  Address address(value_.size());
+
+  size_t halfSize = value_.size() / 2;
+  for(size_t i = 0; i < halfSize; i++) 
+  {
+    address.value_[i + halfSize] = value_[i];
+  }
+
+  do
+  {
+    for(size_t i = 0; i < halfSize; i++) 
+    {
+      address.value_[i] = rand() & 0xFF; 
+    }
+
+    address.value_[0] = (address.value_[0] & ~mask) | (value & mask);
+    address.value_[halfSize - 1] &= 0xF0; 
+    address.value_[halfSize - 1] |= computeChecksum(&address.value_[0], value_.size() / 2); 
+  }
+  while(address == *this);
+
+  return address;
+}
+
+Address Address::unshift() const
+{
+  Address address(value_.size());
+
+  size_t halfSize = value_.size() / 2;
+  for(size_t i = 0; i < halfSize; i++)
+  {
+    address.value_[i] = value_[i + halfSize];
+  }
+
+  return address;
+}
+
+Address Address::swap() const
+{
+  Address address(value_.size());
+
+  for(size_t i = 0; i < value_.size(); i++) 
+  {
+    address.value_[i] = value_[value_.size() - i - 1];
+  }
+
+  return address;
+}
+
+bool Address::isShift(const Address& other) const
+{
+ 	bool success = true;
+	size_t halfSize = value_.size() / 2; 
+	for(size_t i = 0; i < halfSize; i++) 
+	{
+		if(value_[i + halfSize] != other.value_[i]) 
+		{
+		success = false; 
+		}
+	}
+
+	return success;
+}
+
 string Address::toCharString() const
 {
   const char* data = (const char*)value_.data();

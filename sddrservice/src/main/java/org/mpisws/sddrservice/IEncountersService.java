@@ -180,7 +180,8 @@ public interface IEncountersService {
     }
 
     public void startTestEncountersOnly(Context context);
-    public void startTestESEnabled(Context context);
+    public void startTestESOnly(Context context);
+    public void startTestEncountersES(Context context);
     /**
      * Starts up the encounter-formation service that begins encounter formation
      * and turns on all encounter-based functionality

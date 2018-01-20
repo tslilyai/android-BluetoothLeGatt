@@ -38,7 +38,11 @@ public:
 
   static Address newIDWithPartial(uint8_t partial, uint8_t mask);
   uint8_t getPartialValue(uint8_t mask) const;
+  Address shift() const;
+  Address shiftWithPartial(uint8_t value, uint8_t mask) const;
+  Address unshift() const;
 
+  Address swap() const;
   uint8_t* toByteArray(); 
   const uint8_t* toByteArray() const; 
   std::string toCharString() const;

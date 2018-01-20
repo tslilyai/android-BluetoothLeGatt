@@ -53,8 +53,8 @@ public:
   std::string advert_;
 
 private:
-  static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);//15);
-  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 30000; // ms
+  static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);
+  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 120000; // ms
   static const uint64_t SCAN_INTERVAL_IDLE = 30000; // ms
   static const uint64_t TIME_IDLE_MODE = 300000; // ms
 
@@ -87,9 +87,11 @@ protected:
   std::list<DiscoverEvent> discovered_;
   EbNHystPolicy hystPolicy_;
   uint64_t rssiReportInterval_;
+  Address sddraddr_;
 
 private:
   void setAdvert();
+  void shiftAddr();
   bool processAdvert(EbNDevice *device, uint64_t time, const uint8_t *data);
   void processEpochs(EbNDevice *device);
   std::set<DeviceID> handshake(const std::set<DeviceID> &deviceIDs);
@@ -112,9 +114,9 @@ public: // to be called via JNI
           uint64_t rssiReportInterval);
   void preDiscovery();
   std::vector<std::string> postDiscoveryGetEncounters();
-  const Address getRandomAddr();
+  const Address getSDDRAddr();
   void changeEpoch();
-  bool processScanResponse(Address addr, int8_t rssi, std::string advert);
+  bool processScanResponse(Address sddraddr, int8_t rssi, std::string advert, Address dev_addr);
   std::string computeSecretKey(std::string myDHKey, std::string sha1OtherDHKey, std::string otherDHKey);
   ActionInfo getNextAction();
 };
