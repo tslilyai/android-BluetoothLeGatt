@@ -88,6 +88,7 @@ TDevice* EbNDeviceMap<TDevice>::findShiftedMatch(const Address &address)
 			addressToDevice_.erase(it->first);
 			addressToDevice_.insert(std::make_pair(address, device));
 
+			LOG_D("Device", "Found shifted address device");
 			return device;
 		}
 	}
@@ -115,7 +116,7 @@ TDevice* EbNDeviceMap<TDevice>::get(const Address &address)
     	device = findShiftedMatch(address);
     }
     
-	return device;return findExactMatch(address);
+	return device;
 }
 
 template<typename TDevice>

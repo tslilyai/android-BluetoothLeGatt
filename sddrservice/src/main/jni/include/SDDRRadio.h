@@ -53,8 +53,8 @@ public:
   std::string advert_;
 
 private:
-  static const uint32_t EPOCH_INTERVAL = 30000;//TIME_MIN_TO_MS(15);
-  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 30000; // ms
+  static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);
+  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 120000; // ms
   static const uint64_t SCAN_INTERVAL_IDLE = 30000; // ms
   static const uint64_t TIME_IDLE_MODE = 300000; // ms
 
