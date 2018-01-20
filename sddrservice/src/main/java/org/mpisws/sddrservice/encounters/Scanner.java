@@ -19,7 +19,6 @@ package org.mpisws.sddrservice.encounters;
  */
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -41,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 
@@ -196,11 +194,13 @@ public class Scanner {
                     // if this is a new device
                     long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
 
-                    // only attempt to connect to the device if (1) you are running the GATT server for active connections and
+                    // only attempt to connect to the device if
+                    // (1) you are running the GATT server for active connections and
                     // (2) if the device is a new one
                     if (serverRunning && pkid != -1L) {
-                        mGattServerClient.connectToDevice(result.getDevice(), pkid, SDDR_Core.mDHPubKey, SDDR_Core.mDHKey, new Identifier(advert));
+                        mGattServerClient.connectToDevice(result.getDevice(), pkid, new Identifier(advert));
                     };
+                    // TODO number adverts --> scan duration
                 }
             }
         }

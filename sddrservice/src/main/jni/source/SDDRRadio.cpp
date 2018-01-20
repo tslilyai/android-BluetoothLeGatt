@@ -75,6 +75,7 @@ void SDDRRadio::changeEpoch()
     dhExchange_.generateSecret();
     nextChangeEpoch_ += EPOCH_INTERVAL;
     setAdvert();
+	shiftAddr();
 }
 
 

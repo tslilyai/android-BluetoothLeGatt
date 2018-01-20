@@ -179,8 +179,8 @@ public interface IEncountersService {
         ALL
     }
 
-    public void startTestESOnly(Context context);
     public void startTestEncountersES(Context context);
+    public void stopEncounters();
     /**
      * Starts up the encounter-formation service that begins encounter formation
      * and turns on all encounter-based functionality

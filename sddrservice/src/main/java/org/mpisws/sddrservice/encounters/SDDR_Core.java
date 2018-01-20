@@ -189,13 +189,12 @@ public class SDDR_Core implements Runnable {
                     numNewEncounters++;
                     if (new EncounterBridge(context).getItemByPKID(pkid) == null) {
                         // brand new confirmed from incoming connection, TODO get from native instead of DB
-                        Log.v(TAG, "[EncounterEvent] Already confirmed encounter started at " + time);
+                        Log.v(TAG, "[EncounterEvent] New encounter starting again at " + time);
                         encEvent = new EncounterStartedEvent(pkid, time, adverts, rssiEvents, address, mAdvert, mDHPubKey, mDHKey);
                     } else { // previously unconfirmed becomes confirmed
-                        Log.v(TAG, "[EncounterEvent] Encounter confirmed at " + time);
+                        Log.v(TAG, "[EncounterEvent] Reported encounter starting again at " + time);
                         encEvent = new EncounterUpdatedEvent(pkid, time, adverts, rssiEvents, address);
                     }
-
                     break;
                 case Update: // updated
                     encEvent = new EncounterUpdatedEvent(pkid, time, adverts, rssiEvents, address);

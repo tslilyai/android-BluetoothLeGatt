@@ -66,16 +66,6 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void startTestESOnly(Context context) {
-        esUser = new ESUser(context);
-        esMsg = new ESTopics(context);
-        esNotifs = new ESNotifs();
-
-        this.context = context;
-        this.isRunning = true;
-    }
-
-    @Override
     public void startTestEncountersES(Context context) {
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.start_sddr_service", 0);
@@ -89,6 +79,12 @@ public class EncountersService implements IEncountersService {
         this.isRunning = true;
     }
 
+    @Override
+    public void stopEncounters() {
+        Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
+        serviceIntent.putExtra("stop_sddr_service", 0);
+        context.startService(serviceIntent);
+    }
 
     @Override
     public void startEncounterService(Context context) {

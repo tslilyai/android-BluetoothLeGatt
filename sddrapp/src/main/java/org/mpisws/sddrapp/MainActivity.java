@@ -23,7 +23,6 @@ import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.EncountersService;
-import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.lib.Constants;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -45,17 +44,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         findViewById(R.id.testEncountersOnly).setOnClickListener(this);
         findViewById(R.id.testESTopics).setOnClickListener(this);
+        findViewById(R.id.testConfirmESOther).setOnClickListener(this);
         findViewById(R.id.testConfirmES).setOnClickListener(this);
         findViewById(R.id.testConfirmActive).setOnClickListener(this);
         findViewById(R.id.signIn).setOnClickListener(this);
         findViewById(R.id.deleteAccount).setOnClickListener(this);
+        encountersService.startTestEncountersES(this);
    }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.deleteAccount:
-               encountersService.startTestESOnly(this);
                if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
                     encountersService.signIn();
@@ -63,18 +63,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                encountersService.deleteAccount();
                break;
             case R.id.signIn:
-                encountersService.startTestESOnly(this);
                 if (!encountersService.isSignedIn() && GoogleToken.getToken() == null) {
                     Log.v(TAG, "Not registered with Google yet");
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();
-                }
+               }
                break;
-            case R.id.testEncountersOnly:
-                encountersService.startTestEncountersES(this);
-                break;
             case R.id.testESTopics:
-               encountersService.startTestESOnly(this);
+                encountersService.stopEncounters();
                if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
                     encountersService.signIn();
@@ -93,12 +89,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     new Handler().postDelayed(runnableinactive, 20000*i);
                 break;
             case R.id.testConfirmActive:
-                encountersService.startTestEncountersES(this);
-                encountersService.setConfirmEncountersOverBT(true);
+              encountersService.setConfirmEncountersOverBT(true);
                break;
             case R.id.testConfirmES:
-                encountersService.startTestEncountersES(this);
-                final Runnable runnableactive = new Runnable() {
+               if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
+                    encountersService.registerGoogleUser(GoogleToken.getToken());
+                    encountersService.signIn();
+               }
+                 final Runnable runnableactive = new Runnable() {
                     @Override
                     public void run() {
                         encountersService.confirmEncountersOverES();

@@ -182,7 +182,8 @@ public abstract class EncounterEvent implements Serializable {
             values.put(PSharedSecrets.Columns.sharedSecret, sharedSecret.getBytes());
             values.put(PSharedSecrets.Columns.encounterID, eid.getBytes());
             values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
-            context.getContentResolver().insert(EncounterHistoryAPM.sharedSecrets.getContentURI(), values);
+            context.getContentResolver().update(EncounterHistoryAPM.sharedSecrets.getContentURI(), values,
+                    PSharedSecrets.Columns.encounterPKID + " = ?", new String[] { String.valueOf(pkid) });
 
             // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
             Log.v(TAG, "Create topic for " + eid.toString());
