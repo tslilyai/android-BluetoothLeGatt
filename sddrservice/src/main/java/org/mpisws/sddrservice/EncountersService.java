@@ -1,5 +1,6 @@
 package org.mpisws.sddrservice;
 
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -20,6 +21,7 @@ import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
+import org.mpisws.sddrservice.encounters.GattServerClient;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
@@ -64,20 +66,6 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void startTestEncountersOnly(Context context) {
-        Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
-        serviceIntent.putExtra("@string.start_sddr_service", 0);
-        context.startService(serviceIntent);
-
-        esUser = new ESUser(context);
-        esMsg = new ESTopics(context);
-        esNotifs = new ESNotifs();
-
-        this.context = context;
-        this.isRunning = false;
-    }
-
-    @Override
     public void startTestESOnly(Context context) {
         esUser = new ESUser(context);
         esMsg = new ESTopics(context);
@@ -117,7 +105,17 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void confirmEncounters() {
+    public void setConfirmEncountersOverBT(boolean active) {
+        if (!shouldRunCommand(false)) {
+            return;
+        }
+        Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
+        serviceIntent.putExtra("activeConfirmation", active);
+        context.startService(serviceIntent);
+    }
+
+    @Override
+    public void confirmEncountersOverES() {
         if (!shouldRunCommand(true)) {
             return;
         }

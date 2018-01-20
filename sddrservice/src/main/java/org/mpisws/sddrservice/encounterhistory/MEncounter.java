@@ -40,10 +40,11 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
     private final Identifier myAdvert;
     private final Identifier myDHPubKey;
     private final Identifier myDHKey;
+    private final String myDevAddr;
 
     public MEncounter(final long pkid, final List<Identifier> commonIDs, final TimeInterval timeInterval,
             final long lastTimeSeen, final long confirmationTime, final FacebookEventStatus facebookEventStatus, final long conduitID,
-                      final Identifier myAdvert, final Identifier myDHPubKey, final Identifier myDHKey) {
+                      final Identifier myAdvert, final Identifier myDHPubKey, final Identifier myDHKey, final String devAddr) {
         super(pkid);
         this.commonIDs = commonIDs;
         this.timeInterval = timeInterval;
@@ -54,6 +55,7 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         this.myAdvert = myAdvert;
         this.myDHPubKey = myDHPubKey;
         this.myDHKey = myDHKey;
+        this.myDevAddr = devAddr;
     }
 
     public static Identifier convertSharedSecretToEncounterID(final byte[] sharedSecret) {
@@ -129,6 +131,9 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         return lastTimeSeen;
     }
 
+    public String getMyDevAddress() {
+        return myDevAddr;
+    }
     public Identifier getMyAdvert() {
         return myAdvert;
     }

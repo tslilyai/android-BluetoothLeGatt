@@ -35,11 +35,13 @@ public class Advertiser {
     private AdvertiseCallback mAdvertiseCallback;
     private AdvertiseSettings mAdvertiseSettings;
     private UUID mUUID;
+    private boolean connectable;
     private byte[] mAddr = new byte[Constants.PUUID_LENGTH];
     private byte[] mAdData = new byte[Constants.ADVERT_LENGTH];
 
     public void initialize(BluetoothAdapter btAdapter) {
         mBluetoothLeAdvertiser = btAdapter.getBluetoothLeAdvertiser();
+        connectable = false;
         Log.v(TAG, "Initialized Advertiser");
     }
 
@@ -47,6 +49,10 @@ public class Advertiser {
         Utils.myAssert(addr.length == Constants.ADDR_LENGTH);
         Log.v(TAG, "Setting Addr " + Utils.getHexString(addr));
         System.arraycopy(addr, 0, mAddr, 0, Constants.ADDR_LENGTH);
+    }
+
+    public void setConnectable(boolean connect) {
+        this.connectable = connect;
     }
 
     public void setAdData(byte[] newData) {
@@ -124,7 +130,7 @@ public class Advertiser {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setConnectable(false); // TODO
+        settingsBuilder.setConnectable(connectable);
         settingsBuilder.setAdvertiseMode(ADVERTISE_MODE_LOW_LATENCY);
         settingsBuilder.setTimeout(0);
         return settingsBuilder.build();

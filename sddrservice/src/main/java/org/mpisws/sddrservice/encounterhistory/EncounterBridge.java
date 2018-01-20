@@ -103,7 +103,7 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
 
         return new MEncounter(pkID, commonIDsList, encounterTimeInterval,
                 lastSeen, confirmationTime, facebookEventStatus,
-                conduitID, myAdvert, myDHPubKey, myDHKey);
+                conduitID, myAdvert, myDHPubKey, myDHKey, PEncounters.extractCurrentWirelessAddress(cursor));
     }
 
     public boolean isEncounterValid(EncountersService.Filter filter, MEncounter encounter) {

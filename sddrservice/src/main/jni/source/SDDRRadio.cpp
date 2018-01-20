@@ -87,7 +87,7 @@ void SDDRRadio::preDiscovery()
     discovered_.clear();
 }
 
-bool SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string advert, Address dev_addr)
+long SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string advert, Address dev_addr)
 {
     bool newlyFound = false;
     LOG_P(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", sddrAddr.toString().c_str() , rssi, advert.c_str());
@@ -117,7 +117,7 @@ bool SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string a
     addRecentDevice(device);
     advert = advert.substr(0, SHA_DIGEST_LENGTH);
     device->addAdvert(advert);
-    return newlyFound;
+	return newlyFound ? sddrStartTimestamp + device->getID() : -1;
 }
 
 std::vector<std::string> SDDRRadio::postDiscoveryGetEncounters()

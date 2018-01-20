@@ -116,7 +116,7 @@ public: // to be called via JNI
   std::vector<std::string> postDiscoveryGetEncounters();
   const Address getSDDRAddr();
   void changeEpoch();
-  bool processScanResponse(Address sddraddr, int8_t rssi, std::string advert, Address dev_addr);
+  long processScanResponse(Address sddraddr, int8_t rssi, std::string advert, Address dev_addr);
   std::string computeSecretKey(std::string myDHKey, std::string sha1OtherDHKey, std::string otherDHKey);
   ActionInfo getNextAction();
 };

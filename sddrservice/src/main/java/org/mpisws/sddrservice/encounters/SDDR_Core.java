@@ -6,7 +6,6 @@ package org.mpisws.sddrservice.encounters;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
-import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
 
@@ -17,11 +16,9 @@ import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
-import org.mpisws.sddrservice.encounterhistory.EncounterHistoryAPM;
 import org.mpisws.sddrservice.encounterhistory.EncounterStartedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterUpdatedEvent;
 import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
-import org.mpisws.sddrservice.encounterhistory.PMyAdverts;
 import org.mpisws.sddrservice.encounterhistory.RSSIEntry;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Sleeper;
@@ -39,14 +36,15 @@ import java.util.List;
  */
 public class SDDR_Core implements Runnable {
     private static final String TAG = SDDR_Core.class.getSimpleName();
+    protected static Identifier mDHPubKey;
+    protected static Identifier mAdvert;
+    protected static Identifier mDHKey;
+
     private SDDR_Core_Service mService;
     private BluetoothAdapter mBluetoothAdapter;
     private Advertiser mAdvertiser;
     private Scanner mScanner;
     private Sleeper mSleeper;
-    private Identifier mDHPubKey;
-    private Identifier mAdvert;
-    private Identifier mDHKey;
 
     public boolean should_run;
     public int numNewEncounters;
@@ -84,12 +82,21 @@ public class SDDR_Core implements Runnable {
         new MyAdvertsBridge(mService).insertAdvert(mAdvert, mDHPubKey, mDHKey);
     }
 
+    protected void startServerAndActivelyConnect() {
+        mScanner.startServer();
+        mAdvertiser.setConnectable(true);
+    }
+    protected void stopServerActiveConnections() {
+        mScanner.stopServer();
+        mAdvertiser.setConnectable(false);
+    }
+
     public void initialize() {
         Log.v(TAG, "onCreate");
         final BluetoothManager bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
-        mScanner = new Scanner();
+        mScanner = new Scanner(mService);
         mSleeper = new Sleeper(mService);
 
         // initialize the C radio class
@@ -98,8 +105,6 @@ public class SDDR_Core implements Runnable {
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter);
 
-        // initialize the databases for encounters and links
-        //TODO
         numNewEncounters = 0;
     }
 

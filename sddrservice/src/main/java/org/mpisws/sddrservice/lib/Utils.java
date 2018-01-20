@@ -273,4 +273,15 @@ public class Utils {
         }
         return null;
     }
+
+    public static byte[] SHA1(byte[] toHash) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        }
+        catch(NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return md.digest(toHash);
+    }
 }

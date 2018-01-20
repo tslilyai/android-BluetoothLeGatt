@@ -179,7 +179,6 @@ public interface IEncountersService {
         ALL
     }
 
-    public void startTestEncountersOnly(Context context);
     public void startTestESOnly(Context context);
     public void startTestEncountersES(Context context);
     /**
@@ -193,9 +192,16 @@ public interface IEncountersService {
     public void startEncounterService(Context context);
 
     /**
+     * Performs a DH-Key-Exchange via BT in order to confirm encounters.
+     *
+     * @param active flag to indicate whether to activate or not
+     */
+     public void setConfirmEncountersOverBT(boolean active);
+
+    /**
      * Performs a DH-Key-Exchange via embedded social in order to confirm encounters.
      */
-     public void confirmEncounters();
+     public void confirmEncountersOverES();
 
     /**
      * Retrieves all encounters that satisfy the constraints of the filter.

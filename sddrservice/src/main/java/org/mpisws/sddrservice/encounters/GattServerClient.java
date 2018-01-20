@@ -9,9 +9,15 @@ import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.util.Log;
 
+import org.mpisws.sddrservice.encounterhistory.ConfirmEncounterEvent;
 import org.mpisws.sddrservice.lib.Constants;
+import org.mpisws.sddrservice.lib.Identifier;
+import org.mpisws.sddrservice.lib.Utils;
+
+import java.util.Arrays;
 
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 import static android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ;
@@ -29,11 +35,16 @@ public class GattServerClient {
     private static final String TAG = GattServerClient.class.getSimpleName();
     private BluetoothGatt mGatt;
     private BluetoothGattServer mGattServer;
-    private SDDR_Core_Service mService;
-    private byte[] mDHKey;
+    private Context mService;
+    private Identifier myDHKey;
+    private Identifier myDHPubKey;
+    private Identifier advert;
+    private long pkid;
 
-    public void initialize(BluetoothManager btmanager, SDDR_Core_Service service) {
-        mService = service;
+    public GattServerClient(BluetoothManager btmanager, Context context) {
+        mService = context;
+        myDHKey = SDDR_Core.mDHKey;
+        myDHPubKey = SDDR_Core.mDHPubKey;
         mGattServer = btmanager.openGattServer(mService, new GattServerCallback());
         mGattServer.addService(createService());
     }
@@ -51,17 +62,21 @@ public class GattServerClient {
                                                 int requestId, int offset,
                                                 BluetoothGattCharacteristic characteristic) {
             if (CHARACTERISTIC_DHKEY_UUID.equals(characteristic.getUuid())) {
-                byte[] value = CHARACTERISTIC_DHKEY_UUID.toString().getBytes();
+                byte[] value = myDHPubKey.getBytes();
                 Log.d(TAG, "Sending DH key " + CHARACTERISTIC_DHKEY_UUID.toString() + " in response!");
                 mGattServer.sendResponse(device, requestId, GATT_SUCCESS, 0, value);
             }
         }
     }
 
-    public void connectToDevice(BluetoothDevice device) {
-        String deviceAddress = device.getAddress();
-        Log.v(TAG, "Got BT address to connect: " + deviceAddress);
-        mGatt = device.connectGatt(mService, false, new GattClientCallback());
+    public void connectToDevice(BluetoothDevice dev, Long pkid, Identifier advert) {
+        this.myDHKey = SDDR_Core.mDHKey;
+        this.myDHPubKey = SDDR_Core.mDHPubKey;
+        this.advert = advert;
+        this.pkid = pkid;
+        String deviceAddress = dev.getAddress();
+        Log.v(TAG, "BT address to connect: " + deviceAddress);
+        mGatt = dev.connectGatt(mService, false, new GattClientCallback());
     }
 
     private class GattClientCallback extends BluetoothGattCallback {
@@ -95,8 +110,10 @@ public class GattServerClient {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             Log.d(TAG, "Got data " + characteristic.getValue());
+            byte[] data = characteristic.getValue();
             disconnectGattServer();
-            //processData(characteristic.getValue());
+            Identifier secretKeyID = new Identifier(SDDR_Native.c_computeSecretKey(myDHKey.getBytes(), advert.getBytes(), data));
+            new ConfirmEncounterEvent(pkid, Arrays.asList((secretKeyID)), System.currentTimeMillis()).broadcast(mService);
         }
 
         public void disconnectGattServer() {

@@ -83,6 +83,16 @@ public class SDDR_Core_Service extends Service {
             return START_STICKY;
         }
 
+        if (intent.getExtras().containsKey("confirmation_active"))
+        {
+            if (core != null && intent.getBooleanExtra("confirmation_active", false)) {
+                core.startServerAndActivelyConnect();
+            } else {
+                core.stopServerActiveConnections();
+            }
+            return START_STICKY;
+        }
+
         if (intent.getExtras().containsKey("stop_sddr_service"))
         {
             core.should_run = false;

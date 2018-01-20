@@ -20,17 +20,20 @@ package org.mpisws.sddrservice.encounters;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.Context;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
 import org.mpisws.sddrservice.lib.Constants;
+import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Utils;
 
 import java.nio.ByteBuffer;
@@ -51,8 +54,14 @@ public class Scanner {
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
+    private Context context;
+    private GattServerClient mGattServerClient;
+    private boolean serverRunning;
 
-    public Scanner() {}
+    public Scanner(Context context) {
+        this.context = context;
+        this.serverRunning = false;
+    }
 
     public void initialize(BluetoothAdapter btAdapter) {
         this.mBluetoothAdapter = btAdapter;
@@ -60,6 +69,15 @@ public class Scanner {
         mHandler = new Handler();
         Log.v(TAG, "Initialized Scanner");
     }
+
+    protected void startServer() {
+        mGattServerClient = new GattServerClient((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE), context);
+        this.serverRunning = true;
+    };
+    protected void stopServer() {
+        mGattServerClient = null;
+        this.serverRunning = false;
+    };
 
     private class RunPostDiscovery implements Runnable {
         public boolean done = false;
@@ -78,7 +96,6 @@ public class Scanner {
         }
     }
     private final RunPostDiscovery RunPD = new RunPostDiscovery();
-
 
     public void discoverEncounters() {
         Log.v(TAG, "Prediscovery");
@@ -176,7 +193,14 @@ public class Scanner {
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi
                             + " devAddr " + result.getDevice().getAddress());
-                    SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
+                    // if this is a new device
+                    long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
+
+                    // only attempt to connect to the device if (1) you are running the GATT server for active connections and
+                    // (2) if the device is a new one
+                    if (serverRunning && pkid != -1L) {
+                        mGattServerClient.connectToDevice(result.getDevice(), pkid, SDDR_Core.mDHPubKey, SDDR_Core.mDHKey, new Identifier(advert));
+                    };
                 }
             }
         }

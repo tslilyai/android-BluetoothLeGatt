@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                break;
             case R.id.testEncountersOnly:
-                encountersService.startTestEncountersOnly(this);
+                encountersService.startTestEncountersES(this);
                 break;
             case R.id.testESTopics:
                encountersService.startTestESOnly(this);
@@ -93,15 +93,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     new Handler().postDelayed(runnableinactive, 20000*i);
                 break;
             case R.id.testConfirmActive:
-               encountersService.startTestESOnly(this);
-                // TODO
+                encountersService.startTestEncountersES(this);
+                encountersService.setConfirmEncountersOverBT(true);
                break;
             case R.id.testConfirmES:
                 encountersService.startTestEncountersES(this);
                 final Runnable runnableactive = new Runnable() {
                     @Override
                     public void run() {
-                        encountersService.confirmEncounters();
+                        encountersService.confirmEncountersOverES();
                     }
                 };
                 for (int i = 0; i < 10; ++i) {
