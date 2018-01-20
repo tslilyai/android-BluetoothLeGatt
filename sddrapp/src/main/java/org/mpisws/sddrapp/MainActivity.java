@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         findViewById(R.id.testEncountersOnly).setOnClickListener(this);
         findViewById(R.id.testESTopics).setOnClickListener(this);
-        findViewById(R.id.testConfirmESOther).setOnClickListener(this);
         findViewById(R.id.testConfirmES).setOnClickListener(this);
         findViewById(R.id.testConfirmActive).setOnClickListener(this);
         findViewById(R.id.signIn).setOnClickListener(this);

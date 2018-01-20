@@ -104,7 +104,7 @@ long SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string a
     {
       lock_guard<mutex> setLock(setMutex_);
 
-      device = new EbNDevice(generateDeviceID(), dev_addr);
+      device = new EbNDevice(generateDeviceID(), sddrAddr);
       deviceMap_.add(sddrAddr, device);
       newlyFound = true;
 

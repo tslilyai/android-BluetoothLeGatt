@@ -33,6 +33,7 @@ public:
   ~EbNDeviceMap();
 
   TDevice* findExactMatch(const Address& address) const;
+  TDevice* findShiftedMatch(const Address& address);
 
   TDevice* get(DeviceID id);
   TDevice* get(const Address& address);
@@ -71,6 +72,27 @@ TDevice* EbNDeviceMap<TDevice>::findExactMatch(const Address &address) const
 
   return NULL;
 }
+template<typename TDevice>
+TDevice* EbNDeviceMap<TDevice>::findShiftedMatch(const Address &address)
+{
+	Address oldAddress = address.unshift();
+
+	size_t bucket = addressToDevice_.bucket(oldAddress);
+	for(AddressToDeviceMap_ConstLocalIter it = addressToDevice_.begin(bucket); it != addressToDevice_.end(bucket); it++)
+	{
+		if(address.isShift(it->first))
+		{
+			TDevice *device = it->second;
+			device->setAddress(address);
+
+			addressToDevice_.erase(it->first);
+			addressToDevice_.insert(std::make_pair(address, device));
+
+			return device;
+		}
+	}
+	return NULL;
+}
 
 template<typename TDevice>
 TDevice* EbNDeviceMap<TDevice>::get(DeviceID id)
@@ -87,7 +109,13 @@ TDevice* EbNDeviceMap<TDevice>::get(DeviceID id)
 template<typename TDevice>
 TDevice* EbNDeviceMap<TDevice>::get(const Address &address)
 {
-  return findExactMatch(address);
+ 	TDevice *device = NULL;
+    if((device = findExactMatch(address)) == NULL)
+    {
+    	device = findShiftedMatch(address);
+    }
+    
+	return device;return findExactMatch(address);
 }
 
 template<typename TDevice>

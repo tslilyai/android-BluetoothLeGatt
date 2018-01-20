@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "SipHash.h"
-#define ADDR_LEN 3
+#define ADDR_LEN 4
 
 class Address
 {

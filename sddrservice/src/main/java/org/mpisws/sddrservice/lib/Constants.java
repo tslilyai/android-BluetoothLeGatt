@@ -26,7 +26,7 @@ public class Constants {
      */
     public static final int TOTAL_LENGTH = 31;
     public static final int PUUID_LENGTH = 16;
-    public static final int ADDR_LENGTH = 3;
+    public static final int ADDR_LENGTH = 4;
     public static final int ADVERT_LENGTH = TOTAL_LENGTH-PUUID_LENGTH-6;
 
     /**
