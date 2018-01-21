@@ -8,9 +8,6 @@ import android.net.Uri;
 import android.util.Log;
 
 import org.mpisws.sddrservice.lib.Identifier;
-import org.mpisws.sddrservice.lib.Utils;
-
-import java.util.List;
 
 public class ConfirmEncounterEvent extends EncounterEvent {
     private static final String TAG = ConfirmEncounterEvent.class.getSimpleName();
@@ -35,12 +32,11 @@ public class ConfirmEncounterEvent extends EncounterEvent {
 
     @Override
     public void persistIntoDatabase(Context context) {
-        final ContentValues values = toContentValues(context, false);
+        final ContentValues values = toContentValues(false);
         final Uri uri = ContentUris.withAppendedId(EncounterHistoryAPM.encounters.getContentURI(), pkid);
         final int updatedRows = context.getContentResolver().update(uri, values, null, null);
-        if (updatedRows == 0) {
-            Log.d(TAG, "Update returned 0 value");
-            Utils.myAssert(false);
+        if (updatedRows != 1) {
+            throw new RuntimeException("Confirm returned non-1 value: " + updatedRows);
         }
         insertSharedSecret(context);
     }

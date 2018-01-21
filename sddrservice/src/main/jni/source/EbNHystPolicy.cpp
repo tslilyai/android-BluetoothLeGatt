@@ -40,10 +40,10 @@ set<DeviceID> EbNHystPolicy::discovered(const list<DiscoverEvent> &events, list<
     {
         info.seen++;
     }
+
     switch(info.state)
     {
       case HystState::Discovered:
-          // only handshake if we've seen the new device for x amount of time
         if((info.seen >= startSeen_) && ((info.lastTime - info.firstTime) >= minStartTime_))
         {
           info.state = HystState::Encountered;

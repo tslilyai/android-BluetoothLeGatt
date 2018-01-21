@@ -28,7 +28,7 @@ public class EncounterEndedEvent extends EncounterEvent {
     @Override
     public void persistIntoDatabase(Context context) {
         final Uri uri = ContentUris.withAppendedId(EncounterHistoryAPM.encounters.getContentURI(), pkid);
-        final ContentValues values = toContentValues(context, false);
+        final ContentValues values = toContentValues(false);
         // TODO slight hack...
         // Update (regardless IF confirmed, *will* touch unconfirmed ones)
         context.getContentResolver().update(uri, values, null, null);

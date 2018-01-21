@@ -30,7 +30,7 @@ public class EncounterUpdatedEvent extends EncounterEvent {
     }
     @Override
     public void persistIntoDatabase(Context context) { // TODO applybatch for all events
-        final ContentValues values = toContentValues(context, false);
+        final ContentValues values = toContentValues(false);
         final Uri uri = ContentUris.withAppendedId(EncounterHistoryAPM.encounters.getContentURI(), pkid);
         final int updatedRows = context.getContentResolver().update(uri, values, null, null);
         if (updatedRows != 1) {

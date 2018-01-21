@@ -58,7 +58,7 @@ public abstract class EncounterEvent implements Serializable {
 
     public abstract void persistIntoDatabase(Context context);
 
-    protected ContentValues toContentValues(final Context context, final boolean putPKID) {
+    protected ContentValues toContentValues(final boolean putPKID) {
         Log.v(TAG, "\tPKID: " + pkid + "\n\tstartTime: " + startTime + "\n\tlastTimeSeen: " + lastTimeSeen
                 + "\n\tendTime: " + endTime);
         final ContentValues values = new ContentValues();

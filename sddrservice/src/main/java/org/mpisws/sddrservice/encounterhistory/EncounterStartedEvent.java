@@ -17,10 +17,6 @@ public class EncounterStartedEvent extends EncounterEvent {
         super(pkid, startTime, startTime, -1L, adverts, null, null, -1L, myAdvert, myDHPubKey, myDHKey, null);
     }
 
-    public EncounterStartedEvent(long pkid, long startTime, List<Identifier> adverts, List<RSSIEntry> newRSSIEntries, String currentWirelessAddress, Identifier myAdvert, Identifier myDHPubKey, Identifier myDHKey) {
-        super(pkid, startTime, startTime, -1L, adverts, newRSSIEntries, currentWirelessAddress, -1L, myAdvert, myDHPubKey, myDHKey, null);
-    }
-
     @Override
     public void broadcast(Context context) {
         Log.v(TAG, "Broadcasting started encounter");
@@ -31,7 +27,7 @@ public class EncounterStartedEvent extends EncounterEvent {
 
     @Override
     public void persistIntoDatabase(Context context) {
-        final ContentValues values = toContentValues(context, true);
+        final ContentValues values = toContentValues(true);
         context.getContentResolver().insert(EncounterHistoryAPM.encounters.getContentURI(), values);
         insertLocationRSSIandAdverts(context);
     }

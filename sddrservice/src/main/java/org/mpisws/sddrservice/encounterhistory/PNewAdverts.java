@@ -28,7 +28,7 @@ public class PNewAdverts extends PersistenceModel {
     }
 
     public long extractEPKID(final Cursor cursor) {
-        return cursor.getInt(cursor.getColumnIndexOrThrow(Columns.encounterPKID));
+        return cursor.getLong(cursor.getColumnIndexOrThrow(Columns.encounterPKID));
     }
 
     public byte[] extractNewAdvert(final Cursor cursor) {
