@@ -176,18 +176,20 @@ public abstract class EncounterEvent implements Serializable {
     private void insertSharedSecrets(final Context context, final List<Identifier> sharedSecrets) {
         Log.v(TAG, "Inserting shared secrets " + sharedSecrets.size());
         for (Identifier sharedSecret : sharedSecrets) {
-            Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret.getBytes());
-            final ContentValues values = new ContentValues();
-            values.put(PSharedSecrets.Columns.encounterPKID, pkid);
-            values.put(PSharedSecrets.Columns.sharedSecret, sharedSecret.getBytes());
-            values.put(PSharedSecrets.Columns.encounterID, eid.getBytes());
-            values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
-            context.getContentResolver().update(EncounterHistoryAPM.sharedSecrets.getContentURI(), values,
-                    PSharedSecrets.Columns.encounterPKID + " = ?", new String[] { String.valueOf(pkid) });
+            if (sharedSecret.getBytes() != null) {
+                Identifier eid = MEncounter.convertSharedSecretToEncounterID(sharedSecret.getBytes());
+                final ContentValues values = new ContentValues();
+                values.put(PSharedSecrets.Columns.encounterPKID, pkid);
+                values.put(PSharedSecrets.Columns.sharedSecret, sharedSecret.getBytes());
+                values.put(PSharedSecrets.Columns.encounterID, eid.getBytes());
+                values.put(PSharedSecrets.Columns.timestamp, System.currentTimeMillis());
+                context.getContentResolver().update(EncounterHistoryAPM.sharedSecrets.getContentURI(), values,
+                    PSharedSecrets.Columns.encounterPKID + " = ?", new String[]{String.valueOf(pkid)});
 
-            // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
-            Log.v(TAG, "Create topic for " + eid.toString());
-            EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
+                // this creates topics that may not be used (since an encounter only communicates over its first encounterID)
+                Log.v(TAG, "Create topic for " + eid.toString());
+                EncountersService.getInstance().createEncounterMsgingChannel(eid.toString());
+            }
         }
     }
 }

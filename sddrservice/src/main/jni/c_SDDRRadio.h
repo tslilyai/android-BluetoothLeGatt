@@ -144,6 +144,8 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
 
 JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1computeSecretKey(JNIEnv *env, jobject obj, jbyteArray jmyDHKey, jbyteArray jSHA1Key, jbyteArray jotherDHKey);
 
+JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1computeSecretKey(JNIEnv *env, jobject obj, jbyteArray jmyDHKey, jbyteArray jSHA1Key, jbyteArray jotherDHKey);
+
 #ifdef __cplusplus
 }
 #endif

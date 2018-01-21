@@ -32,7 +32,6 @@ private:
   uint64_t lastReportTime_;
   bool confirmed_;
   bool shakenHands_;
-  bool reported_;
 
 public:
   EbNDevice(DeviceID id, const Address &address);

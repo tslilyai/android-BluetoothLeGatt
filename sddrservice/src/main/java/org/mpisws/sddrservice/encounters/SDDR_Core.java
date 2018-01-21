@@ -13,6 +13,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.mpisws.sddrservice.EncountersService;
+import org.mpisws.sddrservice.encounterhistory.ConfirmEncounterEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.EncounterEndedEvent;
 import org.mpisws.sddrservice.encounterhistory.EncounterEvent;
@@ -26,6 +27,7 @@ import org.mpisws.sddrservice.lib.Sleeper;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * SDDR_Core implements the core functionality of the SDDR protocol. It is started and called by the
@@ -39,8 +41,10 @@ public class SDDR_Core implements Runnable {
     protected static Identifier mDHPubKey;
     protected static Identifier mAdvert;
     protected static Identifier mDHKey;
+    public static ConcurrentLinkedQueue<ConfirmEncounterEvent> confirmEvents;
 
     private SDDR_Core_Service mService;
+    private BluetoothManager bluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private Advertiser mAdvertiser;
     private Scanner mScanner;
@@ -71,7 +75,6 @@ public class SDDR_Core implements Runnable {
         mService = service;
         initialize();
     }
-
     private void updateInformation() {
         mDHPubKey = new Identifier(SDDR_Native.c_getMyDHPubKey());
         mDHKey = new Identifier(SDDR_Native.c_getMyDHKey());
@@ -81,27 +84,29 @@ public class SDDR_Core implements Runnable {
         mAdvertiser.resetAdvertiser();
         new MyAdvertsBridge(mService).insertAdvert(mAdvert, mDHPubKey, mDHKey);
     }
-
     protected void startServerAndActivelyConnect() {
         mScanner.startServer();
         mAdvertiser.setConnectable(true);
+        confirmEvents = new ConcurrentLinkedQueue();
     }
     protected void stopServerActiveConnections() {
         mScanner.stopServer();
         mAdvertiser.setConnectable(false);
+        confirmEvents = null;
     }
 
     public void initialize() {
         Log.v(TAG, "onCreate");
-        final BluetoothManager bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
+        this.bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
-        mScanner = new Scanner(mService);
+        mScanner = new Scanner(bluetoothManager, mService);
         mSleeper = new Sleeper(mService);
 
         // initialize the C radio class
         Log.v(TAG, "Initializing radio");
         SDDR_Native.c_mallocRadio();
+
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter);
 
@@ -185,17 +190,6 @@ public class SDDR_Core implements Runnable {
                     encEvent = new EncounterStartedEvent(pkid, time, adverts, mAdvert, mDHPubKey, mDHKey);
                     Log.v(TAG, "[EncounterEvent] Tentative encounter started at " + time);
                     break;
-                case Start:
-                    numNewEncounters++;
-                    if (new EncounterBridge(context).getItemByPKID(pkid) == null) {
-                        // brand new confirmed from incoming connection, TODO get from native instead of DB
-                        Log.v(TAG, "[EncounterEvent] New encounter starting again at " + time);
-                        encEvent = new EncounterStartedEvent(pkid, time, adverts, rssiEvents, address, mAdvert, mDHPubKey, mDHKey);
-                    } else { // previously unconfirmed becomes confirmed
-                        Log.v(TAG, "[EncounterEvent] Reported encounter starting again at " + time);
-                        encEvent = new EncounterUpdatedEvent(pkid, time, adverts, rssiEvents, address);
-                    }
-                    break;
                 case Update: // updated
                     encEvent = new EncounterUpdatedEvent(pkid, time, adverts, rssiEvents, address);
                     Log.v(TAG, "[EncounterEvent] Encounter Updated at " + time);
@@ -221,6 +215,13 @@ public class SDDR_Core implements Runnable {
         if (numNewEncounters >= EncountersService.BUFFERED_MESSAGES_THRESHOLD) {
             EncountersService.getInstance().sendRepeatingBroadcastMessages();
             numNewEncounters = 0;
+        }
+        if (confirmEvents != null) {
+            ConfirmEncounterEvent ce = confirmEvents.poll();
+                while (ce != null) {
+                ce.broadcast(mService);
+                ce = confirmEvents.poll();
+            }
         }
     }
 }

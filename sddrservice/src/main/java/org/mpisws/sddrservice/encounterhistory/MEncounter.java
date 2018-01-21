@@ -61,8 +61,12 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
     public static Identifier convertSharedSecretToEncounterID(final byte[] sharedSecret) {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-1");
-            md.update(sharedSecret, 0, sharedSecret.length);
-            return new Identifier(md.digest());
+            if (sharedSecret != null) {
+                md.update(sharedSecret, 0, sharedSecret.length);
+                return new Identifier(md.digest());
+            } else {
+                return null;
+            }
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex);
         }

@@ -14,8 +14,7 @@ EbNDevice::EbNDevice(DeviceID id, const Address &address)
      advertsMutex_(),
      rssiToReport_(),
      lastReportTime_(0),
-     shakenHands_(false),
-     reported_(false)
+     shakenHands_(false)
 {
 }
 
@@ -88,7 +87,7 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
     LOG_P(TAG, "getEncounterInfo -- Updated ? %d", isUpdated);
     if(isUpdated)
     {
-      dest.type = (reported_ ? EncounterEvent::Updated : EncounterEvent::Started);
+      dest.type = EncounterEvent::Updated;
       dest.id = id_;
       dest.address = address_.toString();
 
@@ -103,7 +102,6 @@ bool EbNDevice::getEncounterInfo(EncounterEvent &dest, uint64_t rssiReportingInt
             dest.advertsUpdated = true;
             adverts_to_report_.clear();
       }
-      reported_ = true;
       lastReportTime_ = getTimeMS();
    }
 

@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                }
                break;
             case R.id.testESTopics:
-                encountersService.stopEncounters();
+               encountersService.stopEncounters();
                if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
                     encountersService.signIn();
@@ -88,8 +88,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     new Handler().postDelayed(runnableinactive, 20000*i);
                 break;
             case R.id.testConfirmActive:
-              encountersService.setConfirmEncountersOverBT(true);
-               break;
+                encountersService.setConfirmEncountersOverBT(true);
+                break;
             case R.id.testConfirmES:
                if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 };
                 for (int i = 0; i < 10; ++i) {
                     Log.d(TAG, "Running confirm encounters");
-                    new Handler().postDelayed(runnableactive, i * 30000);
+                    new Handler().postDelayed(runnableactive, i * 15*60*1000);
                 }
                 break;
             default:

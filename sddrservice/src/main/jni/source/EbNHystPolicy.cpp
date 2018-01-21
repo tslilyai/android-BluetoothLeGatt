@@ -27,28 +27,24 @@ set<DeviceID> EbNHystPolicy::discovered(const list<DiscoverEvent> &events, list<
 
     LOG_P("EbNHystPolicy", "[D] [%" PRIu64 "] %d %d", discovery.time, discovery.id, discovery.rssi);
 
-    // Policy with memory about the device state
-    if(!(scheme_ & Scheme::ImmediateNoMem))
+    DeviceInfoMap::iterator infoIt = deviceInfo_.find(discovery.id);
+    // we haven't seen this device before! add it to newly discovered devices
+    if(infoIt == deviceInfo_.end())
     {
-      DeviceInfoMap::iterator infoIt = deviceInfo_.find(discovery.id);
-      if(infoIt == deviceInfo_.end())
-      {
         infoIt = deviceInfo_.insert(make_pair(discovery.id, DeviceInfo(time))).first;
         newlyDiscovered.push_back(make_pair(discovery.id, time));
-      }
-
-      DeviceInfo &info = infoIt->second;
-      info.lastTime = time;
-
-      if(discovery.rssi > rssiThreshold_)
-      {
+    }
+    DeviceInfo &info = infoIt->second;
+    info.lastTime = time;
+    if(discovery.rssi > rssiThreshold_)
+    {
         info.seen++;
-      }
-
-      switch(info.state)
-      {
+    }
+    switch(info.state)
+    {
       case HystState::Discovered:
-        if(((info.seen >= startSeen_) && ((info.lastTime - info.firstTime) >= minStartTime_)) || ((scheme_ & Scheme::Immediate) != 0))
+          // only handshake if we've seen the new device for x amount of time
+        if((info.seen >= startSeen_) && ((info.lastTime - info.firstTime) >= minStartTime_))
         {
           info.state = HystState::Encountered;
           toHandshake.insert(discovery.id);
@@ -62,18 +58,7 @@ set<DeviceID> EbNHystPolicy::discovered(const list<DiscoverEvent> &events, list<
         break;
       }
     }
-    // Memoryless, immediate encounter policy
-    else
-    {
-      newlyDiscovered.push_back(make_pair(discovery.id, time));
-      toHandshake.insert(discovery.id);
-
-      LOG_P("EbNHystPolicy", "Changing state for device %d to 'Encountered'", discovery.id);
-      LOG_P("EbNHystPolicy", "[EStart] [%" PRIu64 "] %d", discovery.time, discovery.id);
-    }
-  }
-
-  return toHandshake;
+    return toHandshake;
 }
 
 void EbNHystPolicy::encountered(const std::set<DeviceID> &devices)

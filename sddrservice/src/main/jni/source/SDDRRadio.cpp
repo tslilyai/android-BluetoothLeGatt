@@ -41,7 +41,8 @@ void SDDRRadio::shiftAddr() {
     // get a new random address. uses the 1 bit Y coordinate as part of the
     // address since compressed ECDH keys are actually (keySize + 1) bits long
     uint8_t partial = (uint8_t)dhExchange_.getPublicY() << 5;
-    sddraddr_ = sddraddr_.shiftWithPartial(partial, 0x20);
+    sddraddr_ = Address::newIDWithPartial(partial, 0x20);//TODO just for testing 
+    //sddraddr_ = sddraddr_.shiftWithPartial(partial, 0x20);
 }
 
 SDDRRadio::ActionInfo SDDRRadio::getNextAction()
@@ -116,7 +117,6 @@ long SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string a
     discovered_.push_back(DiscoverEvent(scanTime, device->getID(), rssi));
     LOG_P(TAG, "-- Discovered device %d", device->getID());
     addRecentDevice(device);
-    advert = advert.substr(0, SHA_DIGEST_LENGTH);
     device->addAdvert(advert);
 	return newlyFound ? sddrStartTimestamp + device->getID() : -1;
 }
@@ -165,12 +165,13 @@ std::vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
 
     // stay in encounter-forming mode if the last time we saw a 
     // new device or unconfirmed device was less 5 minutes ago
-    const uint64_t curTime = getTimeMS();
+    //const uint64_t curTime = getTimeMS();
     //bool SCAN_ENCOUNTERS_DETECTED = curTime - timeDetectedNewDevice_ < TIME_IDLE_MODE;
     //LOG_P(TAG, "Detected scan encounters? %d", SCAN_ENCOUNTERS_DETECTED);
     //nextDiscover_ += SCAN_ENCOUNTERS_DETECTED 
         //? SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001))
         //: SCAN_INTERVAL_IDLE + (-1000 + (rand() % 2001));
+        
     nextDiscover_ += SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001));
     LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
  
@@ -241,7 +242,7 @@ std::set<DeviceID> SDDRRadio::handshake(const std::set<DeviceID> &deviceIDs)
     }
 
     // Going through all devices to report 'encountered' devices, meaning
-    // the devices we have shaken hands with and confirmed
+    // the devices we have shaken hands with
     for(auto it = deviceMap_.begin(); it != deviceMap_.end(); it++)
     {
         EbNDevice *device = it->second;

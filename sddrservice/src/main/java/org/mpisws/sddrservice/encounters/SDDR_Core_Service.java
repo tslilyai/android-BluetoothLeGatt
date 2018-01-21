@@ -97,7 +97,7 @@ public class SDDR_Core_Service extends Service {
         {
             core.should_run = false;
             core = null;
-            return START_STICKY;
+            return START_NOT_STICKY;
         }
         else {
             Log.v(TAG, "Unknown intent");

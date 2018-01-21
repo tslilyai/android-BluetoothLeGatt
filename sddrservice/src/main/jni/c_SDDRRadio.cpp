@@ -177,7 +177,7 @@ JNIEXPORT jlong JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1p
     int advert_len = env->GetArrayLength(jadvert);
     char* advert = new char[advert_len];
     env->GetByteArrayRegion(jadvert, 0, advert_len, reinterpret_cast<jbyte*>(advert));
-    return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(advert), devAddr);
+    return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(advert, SHA_DIGEST_LENGTH), devAddr);
 }
 
 /*
@@ -243,7 +243,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
     int otherDHKeyLen = env->GetArrayLength(jotherDHKey);
     
     char* myDHKey = new char[myDHKeyLen];
-    char* shaOtherDHKey = new char[shaOtherDHKeyLen];
+    char* shaOtherDHKey = new char[SHA_DIGEST_LENGTH];
     char* otherDHKey = new char[otherDHKeyLen];
 
     env->GetByteArrayRegion(jmyDHKey, 0, myDHKeyLen, reinterpret_cast<jbyte*>(myDHKey));

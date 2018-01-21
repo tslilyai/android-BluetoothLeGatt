@@ -38,8 +38,11 @@ import org.mpisws.sddrservice.lib.Utils;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 
@@ -49,16 +52,19 @@ import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 public class Scanner {
     private static final String TAG = "SDDR_API: " + Scanner.class.getSimpleName();
     private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothManager btManager;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
-    private Context context;
-    private GattServerClient mGattServerClient;
     private boolean serverRunning;
+    private GattServerClient mGattServerClient;
+    private Context context;
+    private Set<byte[]> uniqueDevices = new HashSet<>();
 
-    public Scanner(Context context) {
-        this.context = context;
+    public Scanner(BluetoothManager btManager, Context context) {
         this.serverRunning = false;
+        this.btManager = btManager;
+        this.context = context;
     }
 
     public void initialize(BluetoothAdapter btAdapter) {
@@ -68,14 +74,14 @@ public class Scanner {
         Log.v(TAG, "Initialized Scanner");
     }
 
-    protected void startServer() {
-        mGattServerClient = new GattServerClient((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE), context);
-        this.serverRunning = true;
-    };
-    protected void stopServer() {
-        mGattServerClient = null;
-        this.serverRunning = false;
-    };
+    public void startServer() {
+        this.mGattServerClient = new GattServerClient(btManager, context);
+        serverRunning = true;
+    }
+    public void stopServer() {
+        serverRunning = false;
+        this.mGattServerClient = null;
+    }
 
     private class RunPostDiscovery implements Runnable {
         public boolean done = false;
@@ -132,7 +138,9 @@ public class Scanner {
    public void stopScanning() {
         Log.v(TAG, "Stopping Scanning");
         mBluetoothLeScanner.stopScan(mScanCallback);
-    }
+        Log.d(TAG, "Unique devices: " + uniqueDevices.size());
+        uniqueDevices.clear();
+   }
 
 
     /**
@@ -156,7 +164,7 @@ public class Scanner {
      * Custom ScanCallback object. Calls the native function to process discoveries for encounters.
      */
     private class SDDRScanCallback extends ScanCallback {
-       private void processResult(ScanResult result) {
+        private void processResult(ScanResult result) {
             Log.v(TAG, "Scan result processing");
             ScanRecord record = result.getScanRecord();
             if (record == null) {
@@ -194,12 +202,15 @@ public class Scanner {
                     // if this is a new device
                     long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
 
+                    if (!uniqueDevices.contains(devaddress))
+                        uniqueDevices.add(devaddress);
+
                     // only attempt to connect to the device if
                     // (1) you are running the GATT server for active connections and
                     // (2) if the device is a new one
                     if (serverRunning && pkid != -1L) {
                         mGattServerClient.connectToDevice(result.getDevice(), pkid, new Identifier(advert));
-                    };
+                    }
                     // TODO number adverts --> scan duration
                 }
             }
@@ -211,6 +222,7 @@ public class Scanner {
             for (ScanResult result : results) {
                 processResult(result);
             }
+
         }
 
         @Override

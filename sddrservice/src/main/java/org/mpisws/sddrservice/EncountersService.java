@@ -106,7 +106,7 @@ public class EncountersService implements IEncountersService {
             return;
         }
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
-        serviceIntent.putExtra("activeConfirmation", active);
+        serviceIntent.putExtra("confirmation_active", active);
         context.startService(serviceIntent);
     }
 
