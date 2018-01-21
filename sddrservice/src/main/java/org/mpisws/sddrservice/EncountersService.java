@@ -20,6 +20,7 @@ import org.mpisws.sddrservice.embeddedsocial.ESUser;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
 import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
+import org.mpisws.sddrservice.encounterhistory.NewAdvertsBridge;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.encounters.GattServerClient;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
@@ -116,16 +117,15 @@ public class EncountersService implements IEncountersService {
             return;
         }
         // create topics for adverts and post the DHPubKey on them if we haven't yet
-        List<Pair<Identifier, Identifier>> adverts = new MyAdvertsBridge(context).getAdverts();
+        List<Pair<Identifier, Identifier>> adverts = new MyAdvertsBridge(context).getMyUnpostedAdverts();
         for (Pair<Identifier, Identifier> pair : adverts) {
             Log.d(TAG, "Create topic for advert and dhpubkey " + pair.first.toString() + ", " + pair.second.toString());
             ESAdvertTopics.postAdvertAndDHPubKey(context, pair.first, pair.second);
         }
-        // try and confirm unconfirmed encounters
-        List<MEncounter> encounters = new EncounterBridge(context).getEncountersUnconfirmed();
-        for (MEncounter encounter : encounters) {
-            Log.d(TAG, "Confirm encounter " + encounter.getPKID());
-            ESAdvertTopics.tryGetSecretKeys(context, encounter.getMyDHKey(), encounter.getPKID(), encounter.getAdverts(context));
+        List<NewAdvertsBridge.NewAdvertData> advertsToConfirm = new NewAdvertsBridge(context).getMyUnconfirmedAdverts();
+        for (NewAdvertsBridge.NewAdvertData advert : advertsToConfirm) {
+            Log.d(TAG, "Confirm encounter " + advert.epkid);
+            ESAdvertTopics.tryToComputeSecret(context, advert.myDHKey, advert.epkid, advert.advert);
         }
     }
 

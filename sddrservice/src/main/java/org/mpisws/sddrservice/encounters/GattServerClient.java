@@ -130,7 +130,7 @@ public class GattServerClient {
                 Identifier secretKeyID = new Identifier(SDDR_Native.c_computeSecretKey(myDHKey.getBytes(), advert.getBytes(), data));
 
                 Utils.myAssert(SDDR_Core.confirmEvents != null);
-                SDDR_Core.confirmEvents.add(new ConfirmEncounterEvent(pkid, Arrays.asList((secretKeyID)), System.currentTimeMillis()));
+                SDDR_Core.confirmEvents.add(new ConfirmEncounterEvent(pkid, secretKeyID, System.currentTimeMillis()));
             }
         }
 

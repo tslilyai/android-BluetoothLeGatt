@@ -33,9 +33,6 @@ public class PEncounters extends PersistenceModel {
         public static final String longitudes = "longitude";
         public static final String facebookEventStatus = "facebookEventStatus";
         public static final String conduitID = "conduitID";
-        public static final String myAdvert = "myAdvert";
-        public static final String myDHPubKey = "myDHPubKey";
-        public static final String myDHKey = "myDHKey";
     }
 
     public List<DBColumn> getColumns() {
@@ -51,9 +48,6 @@ public class PEncounters extends PersistenceModel {
         columns.add(new DBColumn(Columns.conduitID, "INTEGER"));
         columns.add(new DBColumn(Columns.latitudes, "BLOB"));
         columns.add(new DBColumn(Columns.longitudes, "BLOB"));
-        columns.add(new DBColumn(Columns.myAdvert, "BLOB"));
-        columns.add(new DBColumn(Columns.myDHPubKey, "BLOB"));
-        columns.add(new DBColumn(Columns.myDHKey, "BLOB"));
         return columns;
     }
 
@@ -87,18 +81,6 @@ public class PEncounters extends PersistenceModel {
 
     public static byte[] extractLongitudes(final Cursor cursor) {
         return cursor.getBlob(cursor.getColumnIndexOrThrow(Columns.longitudes));
-    }
-
-    public static byte[] extractMyAdvert(final Cursor cursor) {
-        return cursor.getBlob(cursor.getColumnIndex(Columns.myAdvert));
-    }
-
-    public static byte[] extractMyDHPubKey(final Cursor cursor) {
-        return cursor.getBlob(cursor.getColumnIndex(Columns.myDHPubKey));
-    }
-
-    public static byte[] extractMyDHKey(final Cursor cursor) {
-        return cursor.getBlob(cursor.getColumnIndex(Columns.myDHKey));
     }
 
     public static FacebookEventStatus extractFacebookEventStatus(final Cursor cursor) {

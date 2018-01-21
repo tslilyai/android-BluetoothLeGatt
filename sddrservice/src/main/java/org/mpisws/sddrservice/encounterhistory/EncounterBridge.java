@@ -97,13 +97,10 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
         final long confirmationTime = PEncounters.extractConfirmationTime(cursor);
         final FacebookEventStatus facebookEventStatus = PEncounters.extractFacebookEventStatus(cursor);
         final long conduitID = PEncounters.extractConduitID(cursor);
-        final Identifier myAdvert = new Identifier(PEncounters.extractMyAdvert(cursor));
-        final Identifier myDHPubKey = new Identifier(PEncounters.extractMyDHPubKey(cursor));
-        final Identifier myDHKey = new Identifier(PEncounters.extractMyDHKey(cursor));
 
         return new MEncounter(pkID, commonIDsList, encounterTimeInterval,
                 lastSeen, confirmationTime, facebookEventStatus,
-                conduitID, myAdvert, myDHPubKey, myDHKey, PEncounters.extractCurrentWirelessAddress(cursor));
+                conduitID, PEncounters.extractCurrentWirelessAddress(cursor));
     }
 
     public boolean isEncounterValid(EncountersService.Filter filter, MEncounter encounter) {
@@ -142,9 +139,6 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
         return isNeeded;
     }
 
-    public List<MEncounter> getEncountersUnconfirmed() {
-        return getItemsByColumn(PEncounters.Columns.confirmationTime, String.valueOf(-1L));
-    }
     /**
      * Gets all encounters that overlap with the requested filtered results. Not efficient since it's filtering the results after
      * retrieving them.

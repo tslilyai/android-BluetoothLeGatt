@@ -14,7 +14,6 @@ public class PSharedSecrets extends PersistenceModel {
     public class Columns extends PersistenceModel.Columns {
         public static final String encounterPKID = "encPKID";
         public static final String sharedSecret = "ss";
-        public static final String advert = "advert";
         public static final String encounterID = "encID";
         public static final String timestamp = "time";
     }
@@ -25,7 +24,6 @@ public class PSharedSecrets extends PersistenceModel {
         columns.add(new DBColumn(Columns.pkid, "INTEGER PRIMARY KEY AUTOINCREMENT"));
         columns.add(new DBColumn(Columns.encounterPKID, "INTEGER"));
         columns.add(new DBColumn(Columns.sharedSecret, "BLOB"));
-        columns.add(new DBColumn(Columns.advert, "BLOB"));
         columns.add(new DBColumn(Columns.encounterID, "BLOB"));
         columns.add(new DBColumn(Columns.timestamp, "INTEGER"));
         return columns;
@@ -33,10 +31,6 @@ public class PSharedSecrets extends PersistenceModel {
 
     public long extractEncounterPKID(final Cursor cursor) {
         return cursor.getLong(cursor.getColumnIndexOrThrow(Columns.encounterPKID));
-    }
-
-    public byte[] extractAdvert(final Cursor cursor) {
-        return cursor.getBlob(cursor.getColumnIndexOrThrow(Columns.advert));
     }
 
     public byte[] extractSharedSecret(final Cursor cursor) {

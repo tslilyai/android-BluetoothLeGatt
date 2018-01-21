@@ -14,7 +14,6 @@ public class PMyAdverts extends PersistenceModel {
     public class Columns extends PersistenceModel.Columns {
         public static final String myAdvert = "advert";
         public static final String myDHPubKey = "dhpubkey";
-        public static final String myDHKey = "dhkey";
     }
 
     @Override
@@ -23,20 +22,15 @@ public class PMyAdverts extends PersistenceModel {
         columns.add(new DBColumn(Columns.pkid, "INTEGER PRIMARY KEY AUTOINCREMENT"));
         columns.add(new DBColumn(Columns.myAdvert, "BLOB"));
         columns.add(new DBColumn(Columns.myDHPubKey, "BLOB"));
-        columns.add(new DBColumn(Columns.myDHKey, "BLOB"));
         return columns;
     }
 
-    public byte[] extractAdvert(final Cursor cursor) {
+    public byte[] extractMyAdvert(final Cursor cursor) {
         return cursor.getBlob(cursor.getColumnIndexOrThrow(Columns.myAdvert));
     }
 
-    public byte[] extractDHPubKey(final Cursor cursor) {
+    public byte[] extractMyDHPubKey(final Cursor cursor) {
         return cursor.getBlob(cursor.getColumnIndexOrThrow(Columns.myDHPubKey));
-    }
-
-    public byte[] extractDHKey(final Cursor cursor) {
-        return cursor.getBlob(cursor.getColumnIndexOrThrow(Columns.myDHKey));
     }
 
     @Override

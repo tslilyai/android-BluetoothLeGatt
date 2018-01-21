@@ -82,7 +82,7 @@ public class SDDR_Core implements Runnable {
         mAdvertiser.setAddr(SDDR_Native.c_getRandomAddr());
         mAdvertiser.setAdData(mAdvert.getBytes());
         mAdvertiser.resetAdvertiser();
-        new MyAdvertsBridge(mService).insertAdvert(mAdvert, mDHPubKey, mDHKey);
+        new MyAdvertsBridge(mService).insertMyAdvert(mAdvert, mDHPubKey);
     }
     protected void startServerAndActivelyConnect() {
         mScanner.startServer();

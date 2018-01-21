@@ -4,19 +4,16 @@ import android.content.Context;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
-import com.microsoft.embeddedsocial.autorest.models.PublisherType;
-import com.microsoft.embeddedsocial.data.storage.PostStorage;
 import com.microsoft.embeddedsocial.data.storage.UserActionProxy;
 import com.microsoft.embeddedsocial.fetcher.FetchersFactory;
 import com.microsoft.embeddedsocial.fetcher.base.Callback;
 import com.microsoft.embeddedsocial.fetcher.base.Fetcher;
 import com.microsoft.embeddedsocial.fetcher.base.FetcherState;
 import com.microsoft.embeddedsocial.server.model.view.TopicView;
-import com.microsoft.embeddedsocial.service.ServiceAction;
-import com.microsoft.embeddedsocial.service.WorkerService;
 
 import org.mpisws.sddrservice.encounterhistory.ConfirmEncounterEvent;
 import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
+import org.mpisws.sddrservice.encounterhistory.NewAdvertsBridge;
 import org.mpisws.sddrservice.encounters.SDDR_Native;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Utils;
@@ -33,15 +30,12 @@ public class ESAdvertTopics {
 
     public static void postAdvertAndDHPubKey(Context context, Identifier myAdvert, Identifier myDHPubKey) {
         UserAccount.getInstance().postTopicUnique(myAdvert.toString(), myDHPubKey.toString());
-        new MyAdvertsBridge(context).deleteAdvert(myAdvert);
+        new MyAdvertsBridge(context).deleteMyAdvert(myAdvert);
     }
 
-    public static void tryGetSecretKeys(Context context, Identifier myDHKey, long pkid, List<Identifier> adverts) {
-        Log.d(TAG, "Looking for #adverts: " + adverts.size());
-        for (Identifier advert : adverts) {
-            Log.d(TAG, "Looking for " + advert.toString());
-            getTopicAndAct(context, advert, myDHKey, pkid);
-        }
+    public static void tryToComputeSecret(Context context, Identifier myDHKey, long pkid, Identifier advert) {
+        Log.d(TAG, "Looking for " + advert.toString());
+        getTopicAndAct(context, advert, myDHKey, pkid);
     }
 
     private static void getTopicAndAct(Context context, Identifier advert, Identifier myDHKey, Long pkid) {
@@ -93,7 +87,8 @@ public class ESAdvertTopics {
         if (secretKey!= null) {
             Identifier secretKeyID = new Identifier(secretKey);
             Log.d(TAG, "Got secret key for advert " + advert.toString() + " " + secretKeyID.toString());
-            new ConfirmEncounterEvent(pkid, Arrays.asList((secretKeyID)), System.currentTimeMillis()).broadcast(context);
+            new ConfirmEncounterEvent(pkid, secretKeyID, System.currentTimeMillis()).broadcast(context);
+            new NewAdvertsBridge(context).deleteNewAdvert(advert);
         }
     }
 }

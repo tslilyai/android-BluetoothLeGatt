@@ -19,12 +19,12 @@ public class MyAdvertsBridge {
         this.context = context;
     }
 
-    public List<Pair<Identifier,Identifier>> getAdverts() {
+    public List<Pair<Identifier,Identifier>> getMyUnpostedAdverts() {
         List<Pair<Identifier, Identifier>> results = new ArrayList<>();
         final Cursor cursor = context.getContentResolver().query(EncounterHistoryAPM.myAdverts.getContentURI(), null, null, null, null);
         while (cursor.moveToNext()) {
-            Identifier advert = new Identifier(EncounterHistoryAPM.myAdverts.extractAdvert(cursor));
-            Identifier dhpubkey = new Identifier(EncounterHistoryAPM.myAdverts.extractDHPubKey(cursor));
+            Identifier advert = new Identifier(EncounterHistoryAPM.myAdverts.extractMyAdvert(cursor));
+            Identifier dhpubkey = new Identifier(EncounterHistoryAPM.myAdverts.extractMyDHPubKey(cursor));
             Log.d(TAG, "Got " + advert.toString() + " " +dhpubkey.toString());
             results.add(new Pair(advert, dhpubkey));
         }
@@ -32,17 +32,16 @@ public class MyAdvertsBridge {
         return results;
     }
 
-    public void deleteAdvert(Identifier myAdvert) {
+    public void deleteMyAdvert(Identifier myAdvert) {
         Log.d(TAG, "Deleted advert " + myAdvert.toString());
         context.getContentResolver().delete(EncounterHistoryAPM.myAdverts.getContentURI(),
                 "HEX(" + PMyAdverts.Columns.myAdvert + ") = ?", new String[] {myAdvert.toString()});
     }
 
-    public void insertAdvert(Identifier myAdvert, Identifier myDHPubKey, Identifier myDHKey) {
+    public void insertMyAdvert(Identifier myAdvert, Identifier myDHPubKey) {
         final ContentValues values = new ContentValues();
         values.put(PMyAdverts.Columns.myAdvert, myAdvert.getBytes());
         values.put(PMyAdverts.Columns.myDHPubKey, myDHPubKey.getBytes());
-        values.put(PMyAdverts.Columns.myDHKey, myDHKey.getBytes());
         context.getContentResolver().insert(EncounterHistoryAPM.myAdverts.getContentURI(), values);
         Log.d(TAG, "Insert advert " + myAdvert.toString());
         Log.d(TAG, "Insert dhpubkey " + myDHPubKey.toString());

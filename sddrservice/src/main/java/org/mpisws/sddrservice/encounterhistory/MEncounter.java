@@ -37,14 +37,10 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
     private final long confirmationTime;
     private final FacebookEventStatus facebookEventStatus;
     private final long conduitID;
-    private final Identifier myAdvert;
-    private final Identifier myDHPubKey;
-    private final Identifier myDHKey;
     private final String myDevAddr;
 
     public MEncounter(final long pkid, final List<Identifier> commonIDs, final TimeInterval timeInterval,
-            final long lastTimeSeen, final long confirmationTime, final FacebookEventStatus facebookEventStatus, final long conduitID,
-                      final Identifier myAdvert, final Identifier myDHPubKey, final Identifier myDHKey, final String devAddr) {
+            final long lastTimeSeen, final long confirmationTime, final FacebookEventStatus facebookEventStatus, final long conduitID, final String devAddr) {
         super(pkid);
         this.commonIDs = commonIDs;
         this.timeInterval = timeInterval;
@@ -52,9 +48,6 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         this.confirmationTime = confirmationTime;
         this.facebookEventStatus = facebookEventStatus;
         this.conduitID = conduitID;
-        this.myAdvert = myAdvert;
-        this.myDHPubKey = myDHPubKey;
-        this.myDHKey = myDHKey;
         this.myDevAddr = devAddr;
     }
 
@@ -103,18 +96,6 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
         return encounterIDs;
     }
 
-    public List<Identifier> getAdverts(final Context context) { // Ordered by PKID ASC
-        final List<Identifier> adverts = new LinkedList<>();
-        final Cursor cursor = context.getContentResolver().query(EncounterHistoryAPM.sharedSecrets.getContentURI(), null,
-                PSharedSecrets.Columns.encounterPKID + " = ?", new String[] { String.valueOf(pkid) },
-                PSharedSecrets.Columns.pkid + " ASC");
-        while (cursor.moveToNext()) {
-            adverts.add(new Identifier(EncounterHistoryAPM.sharedSecrets.extractAdvert(cursor)));
-        }
-        cursor.close();
-        return adverts;
-    }
-
     public TimeInterval getTimeInterval() {
         return timeInterval;
     }
@@ -137,15 +118,6 @@ public class MEncounter extends AbstractMemoryObject implements Serializable {
 
     public String getMyDevAddress() {
         return myDevAddr;
-    }
-    public Identifier getMyAdvert() {
-        return myAdvert;
-    }
-    public Identifier getMyDHKey() {
-        return myDHKey;
-    }
-    public Identifier getMyDHPubKey() {
-        return myDHPubKey;
     }
 
     public FacebookEventStatus getFacebookEventStatus() {

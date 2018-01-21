@@ -14,6 +14,7 @@ public class EncounterHistoryAPM extends AggregatePersistenceModel {
     public static final PDiscoveryEvents discoveryEvents = new PDiscoveryEvents();
     public static final PSharedSecrets sharedSecrets = new PSharedSecrets();
     public static final PMyAdverts myAdverts = new PMyAdverts();
+    public static final PNewAdverts newAdverts = new PNewAdverts();
     public static final PLocation locations = new PLocation();
     public static final PBlooms blooms = new PBlooms();
     public static final List<PersistenceModel> models = new LinkedList<PersistenceModel>();
@@ -25,6 +26,7 @@ public class EncounterHistoryAPM extends AggregatePersistenceModel {
         models.add(locations);
         models.add(blooms);
         models.add(myAdverts);
+        models.add(newAdverts);
     }
 
     private EncounterHistoryAPM() {

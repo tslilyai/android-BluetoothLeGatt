@@ -15,13 +15,13 @@ import java.util.List;
 public class ConfirmEncounterEvent extends EncounterEvent {
     private static final String TAG = ConfirmEncounterEvent.class.getSimpleName();
     protected static long pkid;
-    protected static List<Identifier> sharedSecrets;
+    protected static Identifier sharedSecret;
     protected static Long confirmationTime;
 
-    public ConfirmEncounterEvent(long pkid, List<Identifier> sharedSecrets, Long confirmationTime) {
-        super(pkid, null, null, null, null, null, null, confirmationTime, null, null, null, sharedSecrets);
+    public ConfirmEncounterEvent(long pkid, Identifier sharedSecret, Long confirmationTime) {
+        super(pkid, null, null, null, null, null, null, confirmationTime, null, null, null, sharedSecret);
         this.pkid = pkid;
-        this.sharedSecrets = sharedSecrets;
+        this.sharedSecret = sharedSecret;
         this.confirmationTime = confirmationTime;
     }
 
@@ -42,6 +42,6 @@ public class ConfirmEncounterEvent extends EncounterEvent {
             Log.d(TAG, "Update returned 0 value");
             Utils.myAssert(false);
         }
-        insertSharedSecrets(context);
+        insertSharedSecret(context);
     }
 }
