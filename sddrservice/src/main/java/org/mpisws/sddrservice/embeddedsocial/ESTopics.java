@@ -19,6 +19,7 @@ import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
+import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.IEncountersService;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.lib.Utils;
@@ -43,6 +44,8 @@ public class ESTopics {
     private final Context context;
     private final SSBridge ssBridge;
     private final Object lock = new Object();
+    public static final int NUM_TOPICS_TO_CREATE = 1;
+    public static int NUM_TOPICS_CREATED = 0;
 
     public ESTopics(Context context) {
         this.context = context;
@@ -156,6 +159,8 @@ public class ESTopics {
                     case DATA_ENDED:
                         process_topics(ta, topicFeedFetcher.getAllData());
                         break;
+                    case LAST_ATTEMPT_FAILED:
+                        Log.d(TAG,"Last attempt failed");
                     default:
                         topicFeedFetcher.requestMoreData();
                         break;
@@ -304,6 +309,7 @@ public class ESTopics {
                 }
             }
             WorkerService.getLauncher(context).launchService(ServiceAction.SYNC_DATA);
+
         } catch (SQLException e) {}
     }
 

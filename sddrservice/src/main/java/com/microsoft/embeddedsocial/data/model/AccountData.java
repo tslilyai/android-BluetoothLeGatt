@@ -16,12 +16,17 @@ import com.microsoft.embeddedsocial.server.model.view.ThirdPartyAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserProfileView;
 
+import org.mpisws.sddrservice.lib.Utils;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+
+import static org.mpisws.sddrservice.embeddedsocial.ESTopics.NUM_TOPICS_CREATED;
+import static org.mpisws.sddrservice.embeddedsocial.ESTopics.NUM_TOPICS_TO_CREATE;
 
 /**
  * Information about some user's account.
@@ -207,6 +212,24 @@ public class AccountData implements Parcelable {
 	public void removePendingTopic(String eid) {
 		Log.v(TAG, "Removing pending topic " + eid);
 		pendingTopics.remove(eid);
+        /*// TODO get rid of, just for topics test
+		NUM_TOPICS_CREATED++;
+        if (NUM_TOPICS_CREATED == NUM_TOPICS_TO_CREATE) {
+            NUM_TOPICS_CREATED = 0;
+            Log.d("TOPICS_TEST", System.currentTimeMillis() + ": Done creating topics!");
+            Log.d("TOPICS_TEST", System.currentTimeMillis() + ": Sleeping!");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Log.d("TOPICS_TEST", System.currentTimeMillis() + ": Spinning!");
+            String encrypted = "done with the world";
+            for (int i = 0; i < 10000; ++i) {
+                encrypted = Utils.encrypt(String.valueOf(System.currentTimeMillis()), encrypted);
+            }
+            Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SPINNING ENDED");
+        }*/
 	}
 
 

@@ -49,6 +49,7 @@ public class SDDR_Core implements Runnable {
     private Advertiser mAdvertiser;
     private Scanner mScanner;
     private Sleeper mSleeper;
+    protected static GattServerClient mGattServerClient;
 
     public boolean should_run;
     public int numNewEncounters;
@@ -85,13 +86,17 @@ public class SDDR_Core implements Runnable {
         new MyAdvertsBridge(mService).insertMyAdvert(mAdvert, mDHPubKey);
     }
     protected void startServerAndActivelyConnect() {
-        mScanner.startServer();
+        if (mGattServerClient == null)
+            mGattServerClient = new GattServerClient(bluetoothManager, mService);
+        mScanner.serverRunning = true;
         mAdvertiser.setConnectable(true);
+        mAdvertiser.resetAdvertiser();
         confirmEvents = new ConcurrentLinkedQueue();
     }
     protected void stopServerActiveConnections() {
-        mScanner.stopServer();
+        mScanner.serverRunning = false;
         mAdvertiser.setConnectable(false);
+        mGattServerClient = null;
         confirmEvents = null;
     }
 
@@ -100,7 +105,7 @@ public class SDDR_Core implements Runnable {
         this.bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
-        mScanner = new Scanner(bluetoothManager, mService);
+        mScanner = new Scanner(mService);
         mSleeper = new Sleeper(mService);
 
         // initialize the C radio class

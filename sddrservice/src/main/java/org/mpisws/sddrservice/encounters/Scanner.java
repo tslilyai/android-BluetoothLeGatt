@@ -19,7 +19,6 @@ package org.mpisws.sddrservice.encounters;
  */
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -41,10 +40,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
-import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
+import static org.mpisws.sddrservice.lib.Constants.SCAN_MODE;
 
 /**
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
@@ -52,18 +51,15 @@ import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 public class Scanner {
     private static final String TAG = "SDDR_API: " + Scanner.class.getSimpleName();
     private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothManager btManager;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
-    private boolean serverRunning;
-    private GattServerClient mGattServerClient;
+    private Set<String> uniqueDevices = new HashSet<>();
+    protected boolean serverRunning;
     private Context context;
-    private Set<byte[]> uniqueDevices = new HashSet<>();
 
-    public Scanner(BluetoothManager btManager, Context context) {
+    public Scanner(Context context) {
         this.serverRunning = false;
-        this.btManager = btManager;
         this.context = context;
     }
 
@@ -72,15 +68,6 @@ public class Scanner {
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mHandler = new Handler();
         Log.v(TAG, "Initialized Scanner");
-    }
-
-    public void startServer() {
-        this.mGattServerClient = new GattServerClient(btManager, context);
-        serverRunning = true;
-    }
-    public void stopServer() {
-        serverRunning = false;
-        this.mGattServerClient = null;
     }
 
     private class RunPostDiscovery implements Runnable {
@@ -92,6 +79,7 @@ public class Scanner {
 
             // sets the c_EncounterMsgs list in SDDR_Core
             SDDR_Native.c_postDiscovery();
+            // TODO number adverts --> scan duration
             done = true;
             synchronized (this) {
                 notifyAll();
@@ -105,7 +93,7 @@ public class Scanner {
         Log.v(TAG, "Prediscovery");
         SDDR_Native.c_preDiscovery();
         startScanning();
-        mHandler.postDelayed(RunPD, Constants.SCAN_PERIOD);
+        mHandler.postDelayed(RunPD, Constants.SCAN_DURATION);
         synchronized (RunPD) {
             if (!RunPD.done) {
                 try {
@@ -156,7 +144,7 @@ public class Scanner {
      */
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(SCAN_MODE_BALANCED);
+        builder.setScanMode(SCAN_MODE);
         return builder.build();
     }
 
@@ -193,25 +181,32 @@ public class Scanner {
                     System.arraycopy(datatail, 0, advert, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH, Constants.ADVERT_LENGTH);
 
                     int rssi = result.getRssi();
-                    byte[] devaddress = result.getDevice().getAddress().getBytes();
+                    String addr = result.getDevice().getAddress();
+                    byte[] devaddress = addr.getBytes();
                     Log.v(TAG, "Scan Result (SDDR): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi
-                            + " devAddr " + result.getDevice().getAddress());
+                            + " devAddr " + addr);
                     // if this is a new device
                     long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
 
-                    if (!uniqueDevices.contains(devaddress))
-                        uniqueDevices.add(devaddress);
-
-                    // only attempt to connect to the device if
+                   // only attempt to connect to the device if
                     // (1) you are running the GATT server for active connections and
                     // (2) if the device is a new one
-                    if (serverRunning && pkid != -1L) {
-                        mGattServerClient.connectToDevice(result.getDevice(), pkid, new Identifier(advert));
+                    if (pkid != -1L && serverRunning) {
+                        Handler mainHandler = new Handler(context.getMainLooper());
+                        // Connect to BLE device from mHandler
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                SDDR_Core.mGattServerClient.connectToDevice(result.getDevice(), pkid, new Identifier(advert));
+                            }
+                        });
                     }
-                    // TODO number adverts --> scan duration
+                    if (!uniqueDevices.contains(addr)) {
+                        uniqueDevices.add(addr);
+                    }
                 }
             }
         }
@@ -236,5 +231,4 @@ public class Scanner {
             Log.v(TAG, "Scanning failed: " + errorCode);
         }
     }
-
 }

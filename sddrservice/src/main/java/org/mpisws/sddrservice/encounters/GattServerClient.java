@@ -55,7 +55,8 @@ public class GattServerClient {
         devicesToConnect = new ConcurrentLinkedQueue<>();
         mGattMap = new ConcurrentHashMap<>();
         mGattServer = btmanager.openGattServer(mService, new GattServerCallback());
-        mGattServer.addService(createService());
+        if (mGattServer != null)
+            mGattServer.addService(createService());
     }
 
     private BluetoothGattService createService() {

@@ -2,7 +2,15 @@ package org.mpisws.sddrservice.lib;
 
 import android.os.ParcelUuid;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.IntSummaryStatistics;
+import java.util.Map;
 import java.util.UUID;
+
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_LATENCY;
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
 
 /**
  * 
@@ -33,7 +41,16 @@ public class Constants {
     /**
      * Scanning-related constants
      */
-    public static final long SCAN_PERIOD = 100;
+    private static final Map<Integer, Integer> SCAN_MODE_TO_DURATION;
+    static {
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(SCAN_MODE_LOW_POWER, 500);
+        map.put(SCAN_MODE_BALANCED, 2000);
+        map.put(SCAN_MODE_LOW_LATENCY, 5000);
+        SCAN_MODE_TO_DURATION= Collections.unmodifiableMap(map);
+    }
+    public static final int SCAN_MODE = SCAN_MODE_LOW_POWER;
+    public static final int SCAN_DURATION = SCAN_MODE_TO_DURATION.get(SCAN_MODE);
 
     /**
      * Other Constants

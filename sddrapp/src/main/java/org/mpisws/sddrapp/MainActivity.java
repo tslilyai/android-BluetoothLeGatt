@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,7 +24,11 @@ import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.EncountersService;
+import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.lib.Constants;
+import org.mpisws.sddrservice.lib.Utils;
+
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -69,18 +74,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                }
                break;
             case R.id.testESTopics:
-               encountersService.stopEncounters();
+                encountersService.startTestTopics(this);
+                PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+                PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ESTopics");
+                if (!wakeLock.isHeld()) {
+                    wakeLock.acquire();
+                    Log.d("TOPICS_TEST", "Acquired wakelock");
+                }
                if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
                     encountersService.signIn();
                }
                final Runnable runnableinactive = new Runnable() {
+                    Random ran = new Random(System.currentTimeMillis());
                     @Override
                     public void run() {
-                        final int NUM_TOPICS_TO_CREATE = 8;
-                        for (int i = 0; i < NUM_TOPICS_TO_CREATE; ++i) {
-                            Log.d(TAG, "trying to create encounter msging channel " + i);
-                            encountersService.createEncounterMsgingChannel(String.valueOf(System.currentTimeMillis()));
+                        /*Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SPINNING!");
+                        String encrypted = "hello world";
+                        for (int i = 0; i < 10000; ++i) {
+                            encrypted = Utils.encrypt(String.valueOf(System.currentTimeMillis()), encrypted);
+                        }
+                        Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SLEEPING!");
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }*/
+                        Log.d("TOPICS_TEST", System.currentTimeMillis() + ": CREATING " + ESTopics.NUM_TOPICS_TO_CREATE + " topics");
+                        for (int i = 0; i < ESTopics.NUM_TOPICS_TO_CREATE; ++i) {
+                            Log.d("TOPICS_TEST", "\tCreate channel named " + String.valueOf(Math.abs(ran.nextInt())));
+                            encountersService.createEncounterMsgingChannel(String.valueOf(Math.abs(ran.nextInt())));
                         }
                     }
                 };
@@ -91,10 +114,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 encountersService.setConfirmEncountersOverBT(true);
                 break;
             case R.id.testConfirmES:
-               if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
+                if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
                     encountersService.signIn();
-               }
+                }
                  final Runnable runnableactive = new Runnable() {
                     @Override
                     public void run() {

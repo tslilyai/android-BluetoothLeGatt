@@ -45,7 +45,7 @@ public class EncountersService implements IEncountersService {
     private static final String TAG = EncountersService.class.getSimpleName();
     private static final EncountersService instance = new EncountersService();
     public static final int BUFFERED_MESSAGES_THRESHOLD = 20;
-    /*
+   /*
         Set when the SDDR service is started. No API call other than start_service can be
         made when this boolean is false.
     */
@@ -64,6 +64,16 @@ public class EncountersService implements IEncountersService {
 
     public static EncountersService getInstance() {
         return instance;
+    }
+
+    @Override
+    public void startTestTopics(Context context) {
+        esUser = new ESUser(context);
+        esMsg = new ESTopics(context);
+        esNotifs = new ESNotifs();
+
+        this.context = context;
+        this.isRunning = true;
     }
 
     @Override
