@@ -56,7 +56,6 @@ public class SDDR_Core implements Runnable {
     public static Context appContext ;
     protected static GattServer gattServer;
     public static boolean confirmEncounters = false;
-    //private Sleeper sleeper;
 
     public boolean should_run;
     public int numNewEncounters;
@@ -64,7 +63,6 @@ public class SDDR_Core implements Runnable {
     SDDR_Core(SDDR_Core_Service service, Context appContext) {
         this.mService = service;
         this.appContext = appContext;
-        //sleeper = new Sleeper(mService);
         initialize();
     }
 
@@ -74,12 +72,6 @@ public class SDDR_Core implements Runnable {
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
         mScanner = new Scanner(mService);
-
-        // REMOVE ME
-        mAdvertiser.setConnectable(true);
-        confirmEvents = new ConcurrentLinkedQueue();
-        gattServer = new GattServer(bluetoothManager, appContext);
-        mScanner.serverRunning = true;
 
         // initialize the C radio class
         Log.v(TAG, "Initializing radio");
@@ -105,53 +97,22 @@ public class SDDR_Core implements Runnable {
     protected void startServerAndActivelyConnect() {
         if (gattServer == null)
             gattServer = new GattServer(bluetoothManager, appContext);
-        mScanner.serverRunning = true;
         mAdvertiser.setConnectable(true);
-        mAdvertiser.resetAdvertiser();
+        gattServer = new GattServer(bluetoothManager, appContext);
+        GattClient.getInstance().setContext(mService);
+        mScanner.serverRunning = true;
         confirmEvents = new ConcurrentLinkedQueue();
     }
+
     protected void stopServerActiveConnections() {
         mScanner.serverRunning = false;
         mAdvertiser.setConnectable(false);
-        //gattServer = null;
+        gattServer = null;
         confirmEvents = null;
     }
 
     public void run() {
         Log.v(TAG, "Running core");
-        /*Random ran = new Random(System.currentTimeMillis());
-        //while(true) {
-                sleeper.sleep(30000);
-                Log.d("TOPICS_TEST", System.currentTimeMillis() + ": VIBRATING!");
-                Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SLEEPING (10 seconds)");
-                for (int i = 0; i < 1000; i++)
-                    ack(BigInteger.valueOf(3), BigInteger.valueOf(3));
-                try
-                {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-                Log.d("TOPICS_TEST", System.currentTimeMillis() + ": CREATING " + ESTopics.NUM_TOPICS_TO_CREATE + " topics");
-                for (int i = 0; i < ESTopics.NUM_TOPICS_TO_CREATE; ++i)
-                {
-                    Log.d("TOPICS_TEST", "\tCreate channel named " + String.valueOf(Math.abs(ran.nextInt())));
-                    EncountersService.getInstance().createEncounterMsgingChannel(String.valueOf(Math.abs(ran.nextInt())));
-                }
-            //}
-        /*
-        };
-        for (int i = 0; i < 1000; i++)
-            handler.postDelayed(r, i*40000);
-        while(true) {
-            updateInformation();
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }*/
         updateInformation();
         mScanner.startScanning();
     }

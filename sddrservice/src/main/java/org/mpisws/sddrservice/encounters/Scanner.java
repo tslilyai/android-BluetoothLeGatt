@@ -169,14 +169,7 @@ public class Scanner {
                     // (1) you are running the GATT server for active connections and
                     // (2) if the device is a new one
                     if (serverRunning) {
-                        Handler mainHandler = new Handler(SDDR_Core.appContext.getMainLooper());
-                        // Connect to BLE device from mHandler
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                new GattClient(SDDR_Core.appContext).connectToDevice(result.getDevice(), pkid, new Identifier(advert));
-                            }
-                        });
+                        GattClient.getInstance().addDeviceToConnect(result.getDevice(), pkid, new Identifier(advert));
                     }
                 }
             }
@@ -191,6 +184,9 @@ public class Scanner {
             }
             SDDR_Native.c_postDiscovery();
             core.postScanProcessing();
+            if (serverRunning) {
+                GattClient.getInstance().connectDevices();
+            }
             Log.d(TAG, "cumulative unique devices: " + uniqueDevicesCtr.size());
             for (String addr : deviceAdverts.keySet()) {
                 Log.d(TAG, "\t " + addr + ", " + deviceAdverts.get(addr));

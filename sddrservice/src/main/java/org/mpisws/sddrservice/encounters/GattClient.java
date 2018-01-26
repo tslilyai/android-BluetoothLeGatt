@@ -15,6 +15,7 @@ import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.Utils;
 
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.mpisws.sddrservice.lib.Constants.CHARACTERISTIC_DHKEY_UUID;
 import static org.mpisws.sddrservice.lib.Constants.SERVICE_UUID;
@@ -24,15 +25,59 @@ import static org.mpisws.sddrservice.lib.Constants.SERVICE_UUID;
  */
 
 public class GattClient {
-    private static final String TAG = GattServer.class.getSimpleName();
+    private  final String TAG = GattServer.class.getSimpleName();
+    private static final GattClient instance = new GattClient();
+    private  ConcurrentLinkedQueue<DeviceData> devicesToConnect;
     private Identifier myDHKey;
     private Identifier advert;
     private long pkid;
     private BluetoothGatt mGatt;
     private Context context;
+    private  boolean isWorking;
 
-    public GattClient(Context context) {
+    private GattClient() {
+        isWorking = false;
+        devicesToConnect = new ConcurrentLinkedQueue<>();
+    }
+
+    public static GattClient getInstance() {
+        return instance;
+    }
+
+    public  class DeviceData {
+        BluetoothDevice dev;
+        long pkid;
+        Identifier advert;
+
+        DeviceData(BluetoothDevice dev, long pkid, Identifier ad) {
+            this.dev = dev;
+            this.pkid = pkid;
+            this.advert = ad;
+        }
+    }
+
+    public void setContext(Context context) {
         this.context = context;
+    }
+
+    public  void addDeviceToConnect(BluetoothDevice dev, long pkid, Identifier advert) {
+        devicesToConnect.add(new DeviceData(dev, pkid,advert));
+    }
+
+    public  void connectDevices() {
+        if (!isWorking) {
+            connectNextDevice();
+        }
+    }
+
+    public void connectNextDevice() {
+        DeviceData dev = devicesToConnect.poll();
+        if (dev != null) {
+            isWorking = true;
+            connectToDevice(dev.dev, dev.pkid, dev.advert);
+        } else {
+            isWorking = false;
+        }
     }
 
     public void connectToDevice(BluetoothDevice dev, Long pkid, Identifier advert) {
@@ -40,7 +85,7 @@ public class GattClient {
         this.advert = advert;
         this.pkid = pkid;
         String deviceAddress = dev.getAddress();
-        Log.v(TAG, "BT address to connect: " + deviceAddress);
+        Log.v(TAG, "Try to connect: " + deviceAddress);
         mGatt = dev.connectGatt(context, false, new GattClientCallback());
     }
 
@@ -51,7 +96,7 @@ public class GattClient {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 gatt.discoverServices();
                 Log.v(TAG, "Connected to device " + gatt.getDevice().getAddress());
-            } else  if (newState ==BluetoothProfile.STATE_DISCONNECTED) {
+            } else if (newState ==BluetoothProfile.STATE_DISCONNECTED) {
                 disconnectGattServer();
                 Log.v(TAG, "Unsuccessful connect to device " + status);
                 return;
@@ -59,9 +104,17 @@ public class GattClient {
         }
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            if (gatt.getServices().size() == 0) {
+                Log.d(TAG, "Zero services!");
+                disconnectGattServer();
+            }
             for (BluetoothGattService service : gatt.getServices()) {
-                if (service.getUuid().compareTo(SERVICE_UUID) == 0)
+                if (service.getUuid().compareTo(SERVICE_UUID) == 0) {
                     gatt.readCharacteristic(gatt.getService(SERVICE_UUID).getCharacteristic(CHARACTERISTIC_DHKEY_UUID));
+                } else {
+                    Log.d(TAG, "No service of the right type! ");
+                    disconnectGattServer();
+                }
             }
         }
 
@@ -84,7 +137,9 @@ public class GattClient {
                 Log.v(TAG, "Disconnecting device " + mGatt.getDevice().toString());
                 mGatt.disconnect();
                 mGatt.close();
+                mGatt = null;
             }
+            connectNextDevice();
         }
     }
 }
