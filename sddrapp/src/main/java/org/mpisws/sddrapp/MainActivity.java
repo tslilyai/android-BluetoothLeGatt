@@ -32,7 +32,6 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static EncountersService encountersService = EncountersService.getInstance();
-    private static GattServer mGattServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.signIn).setOnClickListener(this);
         findViewById(R.id.deleteAccount).setOnClickListener(this);
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mGattServer = new GattServer(bluetoothManager, this);
         encountersService.startTestEncountersES(this);
    }
 

@@ -51,7 +51,7 @@ public class GattClient {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 gatt.discoverServices();
                 Log.v(TAG, "Connected to device " + gatt.getDevice().getAddress());
-            } else  {
+            } else  if (newState ==BluetoothProfile.STATE_DISCONNECTED) {
                 disconnectGattServer();
                 Log.v(TAG, "Unsuccessful connect to device " + status);
                 return;

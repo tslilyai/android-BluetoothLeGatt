@@ -54,7 +54,7 @@ public class SDDR_Core implements Runnable {
     private long changeEpochTime;
     private static Context mService;
     public static Context appContext ;
-    //protected static GattServer gattServer;
+    protected static GattServer gattServer;
     public static boolean confirmEncounters = false;
     //private Sleeper sleeper;
 
@@ -68,22 +68,6 @@ public class SDDR_Core implements Runnable {
         initialize();
     }
 
-    public static void vibrate() {
-        // Get instance of Vibrator from current Context
-        Vibrator v = (Vibrator) mService.getSystemService(Context.VIBRATOR_SERVICE);
-        // This example will cause the phone to vibrate "SOS" in Morse Code
-        // In Morse Code, "s" = "dot-dot-dot", "o" = "dash-dash-dash"
-        // There are pauses to separate dots/dashes, letters, and words
-        // The following numbers represent millisecond lengths
-        int dot = 100;      // Length of a Morse Code "dot" in milliseconds
-        int short_gap = 100;    // Length of Gap Between dots/dashes
-        long[] pattern = {
-                0,  // Start immediately
-                short_gap, dot, short_gap, dot,    // s
-        };
-        v.vibrate(pattern, -1);
-    }
-
     private void initialize() {
         Log.v(TAG, "onCreate");
         this.bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -94,6 +78,8 @@ public class SDDR_Core implements Runnable {
         // REMOVE ME
         mAdvertiser.setConnectable(true);
         confirmEvents = new ConcurrentLinkedQueue();
+        gattServer = new GattServer(bluetoothManager, appContext);
+        mScanner.serverRunning = true;
 
         // initialize the C radio class
         Log.v(TAG, "Initializing radio");
@@ -117,8 +103,8 @@ public class SDDR_Core implements Runnable {
     }
 
     protected void startServerAndActivelyConnect() {
-        ////if (gattServer == null)
-            //gattServer = new GattServer(bluetoothManager, appContext);
+        if (gattServer == null)
+            gattServer = new GattServer(bluetoothManager, appContext);
         mScanner.serverRunning = true;
         mAdvertiser.setConnectable(true);
         mAdvertiser.resetAdvertiser();
@@ -137,7 +123,6 @@ public class SDDR_Core implements Runnable {
         //while(true) {
                 sleeper.sleep(30000);
                 Log.d("TOPICS_TEST", System.currentTimeMillis() + ": VIBRATING!");
-                vibrate();
                 Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SLEEPING (10 seconds)");
                 for (int i = 0; i < 1000; i++)
                     ack(BigInteger.valueOf(3), BigInteger.valueOf(3));
