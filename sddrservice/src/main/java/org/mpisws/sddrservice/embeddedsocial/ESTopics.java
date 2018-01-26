@@ -160,7 +160,8 @@ public class ESTopics {
                         process_topics(ta, topicFeedFetcher.getAllData());
                         break;
                     case LAST_ATTEMPT_FAILED:
-                        Log.d(TAG,"Last attempt failed");
+                        Log.d(TAG,"Last attempt failed " + topicFeedFetcher.getErrorCause());
+                        return;
                     default:
                         topicFeedFetcher.requestMoreData();
                         break;

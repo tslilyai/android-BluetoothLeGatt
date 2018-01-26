@@ -58,6 +58,7 @@ public class SignInHandler extends ActionHandler {
 
 	@Override
 	protected void handleAction(Action action, ServiceAction serviceAction, Intent intent) {
+		Log.d("SIGNIN", "Sign In Handler");
 		signinWithThirdParty(action, intent.getParcelableExtra(IntentExtras.THIRD_PARTY_ACCOUNT));
 		intent.removeExtra(IntentExtras.SOCIAL_NETWORK_ACCOUNT);
 	}
@@ -79,8 +80,10 @@ public class SignInHandler extends ActionHandler {
 			// set the user handle and attempt sign in
 			signInWithThirdPartyRequest.setRequestUserHandle(getUserProfileResponse.getUser().getHandle());
 			AuthenticationResponse signInResponse = authenticationService.signInWithThirdParty(signInWithThirdPartyRequest);
+			Log.d("SIGNIN", "Found my account");
 			handleSuccessfulResult(action, signInResponse);
 		} catch (NotFoundException e) {
+			Log.d("SIGNIN", "Creating account");
              CreateAccountData createAccountData = new CreateAccountData.Builder()
                     .setIdentityProvider(thirdPartyAccount.getAccountType())
                     .setThirdPartyAccessToken(thirdPartyAccount.getThirdPartyAccessToken())
@@ -90,6 +93,7 @@ public class SignInHandler extends ActionHandler {
            ActionsLauncher.createAccount(context, createAccountData);
 		} catch (Exception e) {
 			DebugLog.logException(e);
+			Log.d("SIGNIN", e.getMessage());
 			UserAccount.getInstance().onSignInWithThirdPartyFailed();
 		} finally {
 			thirdPartyAccount.clearTokens();

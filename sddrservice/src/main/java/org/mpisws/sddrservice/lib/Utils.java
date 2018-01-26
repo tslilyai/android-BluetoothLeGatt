@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
+import android.os.PowerManager;
+import android.os.Vibrator;
 import android.util.Base64;
 import android.util.Log;
 
@@ -21,6 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -219,6 +222,13 @@ public class Utils {
         arrayInputStream.close();
         gzipInputStream.close();
         return obj;
+    }
+
+    public static BigInteger ack(BigInteger m, BigInteger n) {
+        return m.equals(BigInteger.ZERO)
+                ? n.add(BigInteger.ONE)
+                : ack(m.subtract(BigInteger.ONE),
+                n.equals(BigInteger.ZERO) ? BigInteger.ONE : ack(m, n.subtract(BigInteger.ONE)));
     }
 
     public static String encrypt(String strToEncrypt, String secret) {

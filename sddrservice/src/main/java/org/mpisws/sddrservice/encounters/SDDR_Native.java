@@ -14,7 +14,6 @@ public class SDDR_Native {
     static { System.loadLibrary("c_SDDRRadio"); }
     static public native void c_mallocRadio();
     static public native void c_freeRadio();
-    static public native SDDR_Core.RadioAction c_getNextRadioAction();
     static public native byte[] c_getMyAdvert();
     static public native void c_changeEpoch();
     static public native byte[] c_getRandomAddr();

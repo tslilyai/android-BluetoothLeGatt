@@ -41,16 +41,8 @@ public class Constants {
     /**
      * Scanning-related constants
      */
-    private static final Map<Integer, Integer> SCAN_MODE_TO_DURATION;
-    static {
-        Map<Integer, Integer> map = new HashMap<>();
-        map.put(SCAN_MODE_LOW_POWER, 500);
-        map.put(SCAN_MODE_BALANCED, 2000);
-        map.put(SCAN_MODE_LOW_LATENCY, 5000);
-        SCAN_MODE_TO_DURATION= Collections.unmodifiableMap(map);
-    }
-    public static final int SCAN_MODE = SCAN_MODE_LOW_POWER;
-    public static final int SCAN_DURATION = SCAN_MODE_TO_DURATION.get(SCAN_MODE);
+    public static final long SCAN_BATCH_INTERVAL = 30000;
+    public static final long CHANGE_EPOCH_TIME = 15*60000;
 
     /**
      * Other Constants

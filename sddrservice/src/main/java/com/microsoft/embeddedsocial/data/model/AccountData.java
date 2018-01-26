@@ -5,19 +5,26 @@
 
 package com.microsoft.embeddedsocial.data.model;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PowerManager;
+import android.os.Vibrator;
 import android.util.Log;
 
 import com.microsoft.embeddedsocial.autorest.models.FollowerStatus;
 import com.microsoft.embeddedsocial.autorest.models.IdentityProvider;
+import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.image.ImageLocation;
 import com.microsoft.embeddedsocial.server.model.view.ThirdPartyAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserAccountView;
 import com.microsoft.embeddedsocial.server.model.view.UserProfileView;
 
+import org.mpisws.sddrservice.EncountersService;
+import org.mpisws.sddrservice.encounters.SDDR_Core;
 import org.mpisws.sddrservice.lib.Utils;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +34,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.mpisws.sddrservice.embeddedsocial.ESTopics.NUM_TOPICS_CREATED;
 import static org.mpisws.sddrservice.embeddedsocial.ESTopics.NUM_TOPICS_TO_CREATE;
+import static org.mpisws.sddrservice.lib.Utils.ack;
 
 /**
  * Information about some user's account.
@@ -212,22 +220,21 @@ public class AccountData implements Parcelable {
 	public void removePendingTopic(String eid) {
 		Log.v(TAG, "Removing pending topic " + eid);
 		pendingTopics.remove(eid);
-        /*// TODO get rid of, just for topics test
+        // TODO get rid of, just for topics test
+		/*
 		NUM_TOPICS_CREATED++;
         if (NUM_TOPICS_CREATED == NUM_TOPICS_TO_CREATE) {
             NUM_TOPICS_CREATED = 0;
             Log.d("TOPICS_TEST", System.currentTimeMillis() + ": Done creating topics!");
-            Log.d("TOPICS_TEST", System.currentTimeMillis() + ": Sleeping!");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Log.d("TOPICS_TEST", System.currentTimeMillis() + ": Spinning!");
-            String encrypted = "done with the world";
-            for (int i = 0; i < 10000; ++i) {
-                encrypted = Utils.encrypt(String.valueOf(System.currentTimeMillis()), encrypted);
-            }
+            for (int i = 0; i < 1000; i++)
+                ack(BigInteger.valueOf(3), BigInteger.valueOf(3));
+            Log.d("TOPICS_TEST", System.currentTimeMillis() + ": ACK!");
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			SDDR_Core.vibrate();
             Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SPINNING ENDED");
         }*/
 	}

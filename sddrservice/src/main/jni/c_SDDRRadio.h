@@ -84,11 +84,6 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1ma
 JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1freeRadio
   (JNIEnv *, jobject);
 
-/*
- * Class:     org_mpisws_sddrservice_encounters_SDDR_Native
- * Method:    c_getNextRadioAction
- * Signature: ()L
- */
 JNIEXPORT jobject JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getNextRadioAction
   (JNIEnv *, jobject);
 

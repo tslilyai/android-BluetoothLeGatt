@@ -21,11 +21,11 @@ public class Sleeper extends BroadcastReceiver {
     private static PowerManager.WakeLock wakeLock;
     private static AlarmManager alarmMgr;
     private static PowerManager powerMgr;
-    private SDDR_Core_Service sddr_service;
+    private Context sddr_service;
 
     public Sleeper() {}
 
-    public Sleeper(final SDDR_Core_Service sddr_service) {
+    public Sleeper(final Context sddr_service) {
         this.sddr_service = sddr_service;
         alarmMgr = (AlarmManager) sddr_service.getSystemService(Context.ALARM_SERVICE);
         powerMgr = (PowerManager) sddr_service.getSystemService(Context.POWER_SERVICE);
@@ -53,9 +53,6 @@ public class Sleeper extends BroadcastReceiver {
         // TODO block onReceive until this point
         semaphore.acquireUninterruptibly(); // Wait for alarm
         Log.v(TAG, "Sleep (" + sleepTime_ms + " ms) DONE");
-        if (sddr_service.was_destroyed) {
-            sddr_service.restart();
-        }
     }
 
     @Override

@@ -37,13 +37,13 @@ import org.mpisws.sddrservice.lib.Utils;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
-import static org.mpisws.sddrservice.lib.Constants.SCAN_MODE;
 
 /**
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
@@ -53,8 +53,9 @@ public class Scanner {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
-    private Handler mHandler;
-    private Set<String> uniqueDevices = new HashSet<>();
+    private SDDR_Core core;
+    private Set<String> uniqueDevicesCtr = new HashSet<>();
+    private Map<String, Integer> deviceAdverts = new HashMap<>();
     protected boolean serverRunning;
     private Context context;
 
@@ -63,47 +64,10 @@ public class Scanner {
         this.context = context;
     }
 
-    public void initialize(BluetoothAdapter btAdapter) {
+    public void initialize(BluetoothAdapter btAdapter, SDDR_Core core) {
         this.mBluetoothAdapter = btAdapter;
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        mHandler = new Handler();
-        Log.v(TAG, "Initialized Scanner");
-    }
-
-    private class RunPostDiscovery implements Runnable {
-        public boolean done = false;
-
-        public void run() {
-            stopScanning();
-            Log.v(TAG, "Post discovery");
-
-            // sets the c_EncounterMsgs list in SDDR_Core
-            SDDR_Native.c_postDiscovery();
-            // TODO number adverts --> scan duration
-            done = true;
-            synchronized (this) {
-                notifyAll();
-            }
-            done = false;
-        }
-    }
-    private final RunPostDiscovery RunPD = new RunPostDiscovery();
-
-    public void discoverEncounters() {
-        Log.v(TAG, "Prediscovery");
-        SDDR_Native.c_preDiscovery();
-        startScanning();
-        mHandler.postDelayed(RunPD, Constants.SCAN_DURATION);
-        synchronized (RunPD) {
-            if (!RunPD.done) {
-                try {
-                    RunPD.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Log.v(TAG, "Interrupted before PostDiscovery runnable completed");
-                }
-            }
-        }
+        this.core = core;
     }
 
     /**
@@ -126,8 +90,6 @@ public class Scanner {
    public void stopScanning() {
         Log.v(TAG, "Stopping Scanning");
         mBluetoothLeScanner.stopScan(mScanCallback);
-        Log.d(TAG, "Unique devices: " + uniqueDevices.size());
-        uniqueDevices.clear();
    }
 
 
@@ -144,7 +106,8 @@ public class Scanner {
      */
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(SCAN_MODE);
+        builder.setScanMode(SCAN_MODE_LOW_POWER);
+        builder.setReportDelay(Constants.SCAN_BATCH_INTERVAL);
         return builder.build();
     }
 
@@ -153,13 +116,25 @@ public class Scanner {
      */
     private class SDDRScanCallback extends ScanCallback {
         private void processResult(ScanResult result) {
-            Log.v(TAG, "Scan result processing");
-            ScanRecord record = result.getScanRecord();
+            String addr = result.getDevice().getAddress();
+            Log.v(TAG, "Scan result processing " + result.getDevice().getAddress());
+           ScanRecord record = result.getScanRecord();
             if (record == null) {
                 Log.v(TAG, "No scan record");
                 return;
             } else {
                 Map<ParcelUuid, byte[]> datamap = record.getServiceData();
+                if (datamap.keySet().size() == 0) {
+                    Log.d(TAG, "No data");
+                } else {
+                    uniqueDevicesCtr.add(addr);
+                    if (deviceAdverts.containsKey(addr)) {
+                        int count = deviceAdverts.get(addr);
+                        deviceAdverts.put(addr, count + 1);
+                    } else {
+                        deviceAdverts.put(addr, 1);
+                    }
+                }
                 for (ParcelUuid pu : datamap.keySet()) {
                     ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
                     bb.putLong(pu.getUuid().getMostSignificantBits());
@@ -171,7 +146,7 @@ public class Scanner {
                     int len = datatail.length + datahead.length;
                     Utils.myAssert(datahead.length == Constants.PUUID_LENGTH);
                     if (len != Constants.PUUID_LENGTH + Constants.ADVERT_LENGTH) {
-                        Log.v(TAG, "Scan Result (not SDDR: wrong advert length " + len + "!): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
+                        Log.v(TAG, "Scan Result (not SDDR: wrong advert length " + len + "!): Device: " + addr + ": " + result.getDevice().getName());
                         return;
                     }
                     byte[] ID = Arrays.copyOfRange(datahead, 0, Constants.ADDR_LENGTH);
@@ -181,9 +156,8 @@ public class Scanner {
                     System.arraycopy(datatail, 0, advert, Constants.PUUID_LENGTH-Constants.ADDR_LENGTH, Constants.ADVERT_LENGTH);
 
                     int rssi = result.getRssi();
-                    String addr = result.getDevice().getAddress();
                     byte[] devaddress = addr.getBytes();
-                    Log.v(TAG, "Scan Result (SDDR): Device: " + result.getDevice().getAddress() + ": " + result.getDevice().getName());
+                    Log.v(TAG, "Scan Result (SDDR): Device: " + addr + ": " + result.getDevice().getName());
                     Log.v(TAG, "Processing SDDR_API scanresult with data " + Utils.getHexString(datahead) + Utils.getHexString(datatail) + ":\n"
                             + "\tID " + Utils.getHexString(ID) + ", " +
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi
@@ -194,18 +168,15 @@ public class Scanner {
                    // only attempt to connect to the device if
                     // (1) you are running the GATT server for active connections and
                     // (2) if the device is a new one
-                    if (pkid != -1L && serverRunning) {
-                        Handler mainHandler = new Handler(context.getMainLooper());
+                    if (serverRunning) {
+                        Handler mainHandler = new Handler(SDDR_Core.appContext.getMainLooper());
                         // Connect to BLE device from mHandler
                         mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                SDDR_Core.mGattServerClient.connectToDevice(result.getDevice(), pkid, new Identifier(advert));
+                                new GattClient(SDDR_Core.appContext).connectToDevice(result.getDevice(), pkid, new Identifier(advert));
                             }
                         });
-                    }
-                    if (!uniqueDevices.contains(addr)) {
-                        uniqueDevices.add(addr);
                     }
                 }
             }
@@ -213,11 +184,18 @@ public class Scanner {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-
+            Log.d(TAG, results.size() + " Batch Results Found");
+            SDDR_Native.c_preDiscovery();
             for (ScanResult result : results) {
                 processResult(result);
             }
-
+            SDDR_Native.c_postDiscovery();
+            core.postScanProcessing();
+            Log.d(TAG, "cumulative unique devices: " + uniqueDevicesCtr.size());
+            for (String addr : deviceAdverts.keySet()) {
+                Log.d(TAG, "\t " + addr + ", " + deviceAdverts.get(addr));
+            }
+            deviceAdverts.clear();
         }
 
         @Override

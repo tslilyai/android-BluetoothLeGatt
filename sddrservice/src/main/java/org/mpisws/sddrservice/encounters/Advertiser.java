@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
+import static android.bluetooth.le.AdvertiseSettings.ADVERTISE_MODE_LOW_POWER;
 
 /**
  * Manages BLE Advertising.
@@ -115,7 +116,6 @@ public class Advertiser {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.setIncludeDeviceName(false);
         dataBuilder.setIncludeTxPowerLevel(false);
-
         dataBuilder.addServiceData(new ParcelUuid(mUUID), mAdData);
         return dataBuilder.build();
     }

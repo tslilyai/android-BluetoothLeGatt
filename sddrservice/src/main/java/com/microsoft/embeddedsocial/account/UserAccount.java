@@ -101,6 +101,7 @@ public class UserAccount {
 	 * Called when sign-in process failed.
 	 */
 	public void onSignInWithThirdPartyFailed() {
+		Log.d("SIGNIN", "Failed");
 		EventBus.post(new SignInWithThirdPartyFailedEvent());
 	}
 

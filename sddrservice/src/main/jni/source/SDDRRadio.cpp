@@ -10,9 +10,6 @@ SDDRRadio::SDDRRadio(size_t keySize, int adapterID, EbNHystPolicy hystPolicy, ui
      setMutex_(),
      recentDevices_(),
      idToRecentDevices_(),
-     nextDiscover_(getTimeMS() + 10000),
-     nextChangeEpoch_(getTimeMS() + EPOCH_INTERVAL),
-     timeDetectedNewDevice_(),
      deviceMap_(),
      dhExchange_(keySize),
      dhExchangeMutex_(),
@@ -45,36 +42,12 @@ void SDDRRadio::shiftAddr() {
     //sddraddr_ = sddraddr_.shiftWithPartial(partial, 0x20);
 }
 
-SDDRRadio::ActionInfo SDDRRadio::getNextAction()
-{
-  int64_t timeUntil = 0;
-  const uint64_t curTime = getTimeMS();
-
-  if(nextChangeEpoch_ < nextDiscover_)
-  {
-    if(nextChangeEpoch_ > curTime)
-    {
-      timeUntil = nextChangeEpoch_ - curTime;
-    }
-    return ActionInfo(Action::ChangeEpoch, timeUntil);
-  }
-  else
-  {
-    if(nextDiscover_ > curTime)
-    {
-      timeUntil = nextDiscover_ - curTime;
-    }
-    return ActionInfo(Action::Discover, timeUntil);
-  }
-}
-
 void SDDRRadio::changeEpoch()
 {
     lock_guard<mutex> dhExchangeLock(dhExchangeMutex_);
 
     // Generate a new secret for this epoch's DH exchanges
     dhExchange_.generateSecret();
-    nextChangeEpoch_ += EPOCH_INTERVAL;
     setAdvert();
 	shiftAddr();
 }
@@ -137,7 +110,6 @@ std::vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
       EncounterEvent event(EncounterEvent::UnconfirmedStarted, ndIt->second, ndIt->first);
       getDeviceAdvert(event, ndIt->first);
       encounters.push_back(event);
-      timeDetectedNewDevice_ = event.time;
     }
 
     for(auto discIt = discovered_.begin(); discIt != discovered_.end(); discIt++)
@@ -163,18 +135,6 @@ std::vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
         messages.push_back(encounterToMsg(*encIt)); 
     }
 
-    // stay in encounter-forming mode if the last time we saw a 
-    // new device or unconfirmed device was less 5 minutes ago
-    //const uint64_t curTime = getTimeMS();
-    //bool SCAN_ENCOUNTERS_DETECTED = curTime - timeDetectedNewDevice_ < TIME_IDLE_MODE;
-    //LOG_P(TAG, "Detected scan encounters? %d", SCAN_ENCOUNTERS_DETECTED);
-    //nextDiscover_ += SCAN_ENCOUNTERS_DETECTED 
-        //? SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001))
-        //: SCAN_INTERVAL_IDLE + (-1000 + (rand() % 2001));
-        
-    nextDiscover_ += SCAN_INTERVAL_ENCOUNTERS + (-1000 + (rand() % 2001));
-    LOG_P(TAG, "-- Updated nextDiscover to %lld", nextDiscover_);
- 
     LOG_P(TAG, "-- Sending %d encounters", messages.size());
     return messages;
 }

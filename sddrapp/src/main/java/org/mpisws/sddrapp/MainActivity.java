@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,15 +23,16 @@ import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.EncountersService;
-import org.mpisws.sddrservice.embeddedsocial.ESTopics;
+import org.mpisws.sddrservice.encounters.GattServer;
+import org.mpisws.sddrservice.encounters.SDDR_Core;
 import org.mpisws.sddrservice.lib.Constants;
-import org.mpisws.sddrservice.lib.Utils;
 
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static EncountersService encountersService = EncountersService.getInstance();
+    private static GattServer mGattServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +53,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.testConfirmActive).setOnClickListener(this);
         findViewById(R.id.signIn).setOnClickListener(this);
         findViewById(R.id.deleteAccount).setOnClickListener(this);
+        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mGattServer = new GattServer(bluetoothManager, this);
         encountersService.startTestEncountersES(this);
    }
+
 
     @Override
     public void onClick(View v) {
@@ -71,44 +74,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.v(TAG, "Not registered with Google yet");
                     GoogleNativeAuthenticator GNA = new GoogleNativeAuthenticator(GoogleNativeAuthenticator.AuthenticationMode.SIGN_IN_ONLY, this);
                     GNA.makeAuthRequest();
-               }
+               } else {
+                    Log.v(TAG, "SIGNEDIN already");
+                }
                break;
             case R.id.testESTopics:
                 encountersService.startTestTopics(this);
-                PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-                PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ESTopics");
-                if (!wakeLock.isHeld()) {
-                    wakeLock.acquire();
-                    Log.d("TOPICS_TEST", "Acquired wakelock");
-                }
-               if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
+                if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
                     encountersService.signIn();
-               }
-               final Runnable runnableinactive = new Runnable() {
+                }
+                Handler h = new Handler();
+                Runnable r = new Runnable() {
                     Random ran = new Random(System.currentTimeMillis());
                     @Override
                     public void run() {
-                        /*Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SPINNING!");
-                        String encrypted = "hello world";
-                        for (int i = 0; i < 10000; ++i) {
-                            encrypted = Utils.encrypt(String.valueOf(System.currentTimeMillis()), encrypted);
-                        }
-                        Log.d("TOPICS_TEST", System.currentTimeMillis() + ": SLEEPING!");
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }*/
-                        Log.d("TOPICS_TEST", System.currentTimeMillis() + ": CREATING " + ESTopics.NUM_TOPICS_TO_CREATE + " topics");
-                        for (int i = 0; i < ESTopics.NUM_TOPICS_TO_CREATE; ++i) {
-                            Log.d("TOPICS_TEST", "\tCreate channel named " + String.valueOf(Math.abs(ran.nextInt())));
-                            encountersService.createEncounterMsgingChannel(String.valueOf(Math.abs(ran.nextInt())));
+                        for (int i = 0; i < 1; i++) {
+                            int val = Math.abs(ran.nextInt());
+                            Log.d("TOPICS_TEST", "\tCreate channel named " + val);
+                            EncountersService.getInstance().createEncounterMsgingChannel(String.valueOf(val));
                         }
                     }
                 };
-                for (int i = 1; i < 1000; ++i)
-                    new Handler().postDelayed(runnableinactive, 20000*i);
+                if (encountersService.isSignedIn()) {
+                    for (int i = 0; i < 10000; i++) {
+                        h.postDelayed(r, i * 5000);
+                    }
+                }
                 break;
             case R.id.testConfirmActive:
                 encountersService.setConfirmEncountersOverBT(true);
@@ -117,17 +109,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (!encountersService.isSignedIn() && GoogleToken.getToken() != null) {
                     encountersService.registerGoogleUser(GoogleToken.getToken());
                     encountersService.signIn();
+                } else {
+                    Log.d(TAG, "Already signed in");
                 }
-                 final Runnable runnableactive = new Runnable() {
-                    @Override
-                    public void run() {
-                        encountersService.confirmEncountersOverES();
-                    }
-                };
-                for (int i = 0; i < 10; ++i) {
-                    Log.d(TAG, "Running confirm encounters");
-                    new Handler().postDelayed(runnableactive, i * 15*60*1000);
-                }
+                SDDR_Core.confirmEncounters = true;
                 break;
             default:
                 return;

@@ -3,14 +3,9 @@
 
 static struct jThingsCache {
     jfieldID fidc_RadioPtr;
-    jfieldID fidChangeEpoch;
-    jfieldID fidDiscover;
     jfieldID fidc_EncounterMsgs;
     jclass clsNative;
     jclass clsArray;
-    jclass clsAT;
-    jclass clsRA;
-    jmethodID constructorRA;
     jmethodID addArray;
 } jni_cache;
 
@@ -47,23 +42,16 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1ma
     SDDRRadio* radioPtr = setupRadio(configDefaults);
     LOG_P("c_encounters_SDDR", "-- set up radio pointer %p", radioPtr);
    
-    // initialize all the JNI IDs we will need
-    jni_cache.clsRA = (jclass) env->NewGlobalRef(env->FindClass("org/mpisws/sddrservice/encounters/SDDR_Core$RadioAction"));
-    jni_cache.clsAT = (jclass) env->NewGlobalRef(env->FindClass("org/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType"));
     jni_cache.clsArray = (jclass) env->NewGlobalRef(env->FindClass("java/util/ArrayList"));
     jni_cache.clsNative = (jclass) env->NewGlobalRef(env->FindClass("org/mpisws/sddrservice/encounters/SDDR_Native"));
-    if (!jni_cache.clsAT || !jni_cache.clsRA || !jni_cache.clsArray) {
+    if (!jni_cache.clsArray) {
         LOG_P("c_encounters_SDDR", "Class not found");
         assert(0);
     }
-    jni_cache.fidChangeEpoch = env->GetStaticFieldID(jni_cache.clsAT, "ChangeEpoch", "Lorg/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType;");
-    jni_cache.fidDiscover = env->GetStaticFieldID(jni_cache.clsAT, "Discover", "Lorg/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType;");
     jni_cache.fidc_EncounterMsgs = env->GetStaticFieldID(jni_cache.clsNative, "c_EncounterMsgs", "Ljava/util/ArrayList;");
 
-    jni_cache.constructorRA = env->GetMethodID(jni_cache.clsRA, "<init>", 
-                "(Lorg/mpisws/sddrservice/encounters/SDDR_Core$RadioAction$actionType;J)V");
     jni_cache.addArray = env->GetMethodID(jni_cache.clsArray, "add", "(Ljava/lang/Object;)Z");
-    if (!jni_cache.fidChangeEpoch || !jni_cache.fidDiscover || !jni_cache.addArray ||
+    if (!jni_cache.addArray ||
             !jni_cache.fidc_EncounterMsgs) {
         LOG_P("c_encounters_SDDR", "Method or FieldID not found");
         assert(0);
@@ -90,38 +78,6 @@ JNIEXPORT void JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1fr
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
     delete radioPtr;
     env->DeleteGlobalRef(jni_cache.clsArray);
-    env->DeleteGlobalRef(jni_cache.clsAT);
-    env->DeleteGlobalRef(jni_cache.clsRA);
-}
-
-/*
- * Class:     org_mpisws_sddrservice_encounters_SDDR_Native
- * Method:    c_getNextRadioAction
- * Signature: ()L
- */
-JNIEXPORT jobject JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1getNextRadioAction
-  (JNIEnv *env, jobject obj) {
-    SDDRRadio* radioPtr = getRadioPtr(env, obj);
-
-    jobject action_type;
-    SDDRRadio::ActionInfo ai = radioPtr->getNextAction();
-    switch(ai.action) {
-        case SDDRRadio::Action::ChangeEpoch:
-        {
-            LOG_P("c_encounters_SDDR", "got action ChangeEpoch");
-            action_type = env->GetStaticObjectField(jni_cache.clsAT, jni_cache.fidChangeEpoch);
-            break;
-        }
-        case SDDRRadio::Action::Discover:
-        {
-            LOG_P("c_encounters_SDDR", "got action Discover");
-            action_type = env->GetStaticObjectField(jni_cache.clsAT, jni_cache.fidDiscover);
-            break;
-        }
-    }
-
-    jlong duration = (jlong) ai.timeUntil;
-    return env->NewObject(jni_cache.clsRA, jni_cache.constructorRA, action_type, duration);
 }
 
 /*

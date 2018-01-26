@@ -52,12 +52,6 @@ public:
   std::string dhpubkey_;
   std::string advert_;
 
-private:
-  static const uint32_t EPOCH_INTERVAL = TIME_MIN_TO_MS(15);
-  static const uint64_t SCAN_INTERVAL_ENCOUNTERS = 120000; // ms
-  static const uint64_t SCAN_INTERVAL_IDLE = 30000; // ms
-  static const uint64_t TIME_IDLE_MODE = 300000; // ms
-
 protected:
   typedef std::list<EbNDevice *> RecentDeviceList;
   typedef std::unordered_map<DeviceID, RecentDeviceList::iterator> IDToRecentDeviceMap;
@@ -70,9 +64,6 @@ protected:
   std::mutex setMutex_;
   RecentDeviceList recentDevices_;
   IDToRecentDeviceMap idToRecentDevices_;
-  uint64_t nextDiscover_;
-  uint64_t nextChangeEpoch_;
-  uint64_t timeDetectedNewDevice_;
   // note that this doesn't prevent other devices from retroactively linking
   // against this one---this just allows this device to retroactively link
   // against any encountered device

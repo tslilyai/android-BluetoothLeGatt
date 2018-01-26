@@ -56,7 +56,7 @@ public class SDDR_Core_Service extends Service {
         Log.v(TAG, "Bluetooth and location permissions enabled");
         if (core == null) {
             Log.v(TAG, "Starting SDDR_API Core");
-            core = new SDDR_Core(this);
+            core = new SDDR_Core(this, getApplicationContext());
             Log.v(TAG, "Starting SDDR_API Core thread");
             thread = new Thread(core);
             thread.start();
@@ -110,7 +110,8 @@ public class SDDR_Core_Service extends Service {
     public void onDestroy() {
         Log.v(TAG, "Destroying service");
         if (core != null) {
-            core.should_run = false;
+            core.stopServerActiveConnections();
+            core.stop();
             core = null;
         }
         was_destroyed = true;

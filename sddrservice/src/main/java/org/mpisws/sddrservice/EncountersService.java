@@ -1,10 +1,8 @@
 package org.mpisws.sddrservice;
 
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.util.Pair;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.autorest.models.Reason;
@@ -12,17 +10,13 @@ import com.microsoft.embeddedsocial.base.GlobalObjectRegistry;
 import com.microsoft.embeddedsocial.server.EmbeddedSocialServiceProvider;
 
 import org.joda.time.DateTime;
-import org.mpisws.sddrservice.embeddedsocial.ESAdvertTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESTopics;
 import org.mpisws.sddrservice.embeddedsocial.ESTopics.Msg;
 import org.mpisws.sddrservice.embeddedsocial.ESNotifs;
 import org.mpisws.sddrservice.embeddedsocial.ESUser;
 import org.mpisws.sddrservice.encounterhistory.EncounterBridge;
 import org.mpisws.sddrservice.encounterhistory.MEncounter;
-import org.mpisws.sddrservice.encounterhistory.MyAdvertsBridge;
-import org.mpisws.sddrservice.encounterhistory.NewAdvertsBridge;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
-import org.mpisws.sddrservice.encounters.GattServerClient;
 import org.mpisws.sddrservice.encounters.SDDR_Core_Service;
 import org.mpisws.sddrservice.lib.Identifier;
 import org.mpisws.sddrservice.lib.time.TimeInterval;
@@ -91,13 +85,6 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void stopEncounters() {
-        Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
-        serviceIntent.putExtra("stop_sddr_service", 0);
-        context.startService(serviceIntent);
-    }
-
-    @Override
     public void startEncounterService(Context context) {
         Intent serviceIntent = new Intent(context, SDDR_Core_Service.class);
         serviceIntent.putExtra("@string.start_sddr_service", 0);
@@ -126,18 +113,7 @@ public class EncountersService implements IEncountersService {
         if (!shouldRunCommand(true)) {
             return;
         }
-        // create topics for adverts and post the DHPubKey on them if we haven't yet
-        List<Pair<Identifier, Identifier>> adverts = new MyAdvertsBridge(context).getMyUnpostedAdverts();
-        for (Pair<Identifier, Identifier> pair : adverts) {
-            Log.d(TAG, "Create topic for advert and dhpubkey " + pair.first.toString() + ", " + pair.second.toString());
-            ESAdvertTopics.postAdvertAndDHPubKey(context, pair.first, pair.second);
-        }
-        List<NewAdvertsBridge.NewAdvertData> advertsToConfirm = new NewAdvertsBridge(context).getMyUnconfirmedAdverts();
-        for (NewAdvertsBridge.NewAdvertData advert : advertsToConfirm) {
-            Log.d(TAG, "Confirm encounter " + advert.epkid);
-            ESAdvertTopics.tryToComputeSecret(context, advert.myDHKey, advert.epkid, advert.advert);
-        }
-    }
+   }
 
     @Override
     public List<String> getEncounters(Filter filter) {
