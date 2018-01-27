@@ -7,7 +7,6 @@ package org.mpisws.sddrservice.encounters;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.os.Vibrator;
 import android.util.Log;
 import android.util.Pair;
 
@@ -26,7 +25,6 @@ import org.mpisws.sddrservice.encounterhistory.NewAdvertsBridge;
 import org.mpisws.sddrservice.encounterhistory.RSSIEntry;
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
-import org.mpisws.sddrservice.lib.Sleeper;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -53,16 +51,15 @@ public class SDDR_Core implements Runnable {
     private Scanner mScanner;
     private long changeEpochTime;
     private static Context mService;
-    public static Context appContext ;
-    protected static GattServer gattServer;
     public static boolean confirmEncounters = false;
+    private boolean activeConnect = false;
+    private GattServer server;
 
     public boolean should_run;
     public int numNewEncounters;
 
-    SDDR_Core(SDDR_Core_Service service, Context appContext) {
+    SDDR_Core(SDDR_Core_Service service) {
         this.mService = service;
-        this.appContext = appContext;
         initialize();
     }
 
@@ -80,40 +77,52 @@ public class SDDR_Core implements Runnable {
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter, this);
 
+        // TODO GET RID OF LATER
+        startGATTServer();
+        activelyConnect();
+
         numNewEncounters = 0;
         changeEpochTime = System.currentTimeMillis() + Constants.CHANGE_EPOCH_TIME + 1000;
     }
 
-    private void updateInformation() {
+    private void startAdvertisingAndUpdateAdvert() {
         mDHPubKey = new Identifier(SDDR_Native.c_getMyDHPubKey());
         mDHKey = new Identifier(SDDR_Native.c_getMyDHKey());
         mAdvert = new Identifier(SDDR_Native.c_getMyAdvert());
         mAdvertiser.setAddr(SDDR_Native.c_getRandomAddr());
         mAdvertiser.setAdData(mAdvert.getBytes());
+        Log.d(TAG, "Resetting advertiser");
         mAdvertiser.resetAdvertiser();
+        //if (activeConnect) server.reset(bluetoothManager, mService);
         new MyAdvertsBridge(mService).insertMyAdvert(mAdvert, mDHPubKey);
     }
 
-    protected void startServerAndActivelyConnect() {
-        if (gattServer == null)
-            gattServer = new GattServer(bluetoothManager, appContext);
+    protected void startGATTServer() {
+        server = new GattServer(bluetoothManager, mService);
         mAdvertiser.setConnectable(true);
-        gattServer = new GattServer(bluetoothManager, appContext);
+    }
+
+    protected void activelyConnect() {
+        activeConnect = true;
+        GattClient.getInstance().stop();
         GattClient.getInstance().setContext(mService);
-        mScanner.serverRunning = true;
+        mScanner.activeConnections = true;
         confirmEvents = new ConcurrentLinkedQueue();
     }
 
     protected void stopServerActiveConnections() {
-        mScanner.serverRunning = false;
+        activeConnect = false;
         mAdvertiser.setConnectable(false);
-        gattServer = null;
+        mScanner.activeConnections = false;
+        server.stop();
+        GattClient.getInstance().stop();
         confirmEvents = null;
     }
 
     public void run() {
         Log.v(TAG, "Running core");
-        updateInformation();
+
+        startAdvertisingAndUpdateAdvert();
         mScanner.startScanning();
     }
 
@@ -121,6 +130,7 @@ public class SDDR_Core implements Runnable {
         SDDR_Native.c_freeRadio();
         mAdvertiser.stopAdvertising();
         mScanner.stopScanning();
+        stopServerActiveConnections();
     }
 
     public void postScanProcessing() {
@@ -128,10 +138,10 @@ public class SDDR_Core implements Runnable {
         if (changeEpochTime < System.currentTimeMillis()) {
             Log.d(TAG, "Changing EPOCH");
             SDDR_Native.c_changeEpoch();
-            updateInformation();
+            startAdvertisingAndUpdateAdvert();
             changeEpochTime += Constants.CHANGE_EPOCH_TIME;
 
-            if (confirmEncounters && EncountersService.getInstance().isSignedIn()) {
+            if (confirmEncounters && EncountersService.getInstance().isSignedIn() && !activeConnect) {
                 Log.d(TAG, "Confirming encounters");
                 // create topics for adverts and post the DHPubKey on them if we haven't yet
                 List<Pair<Identifier, Identifier>> adverts = new MyAdvertsBridge(mService).getMyUnpostedAdverts();
@@ -178,8 +188,11 @@ public class SDDR_Core implements Runnable {
             }
 
             final List<Identifier> adverts = new LinkedList<>();
-            for (com.google.protobuf.ByteString secret : advertsPB) {
-                adverts.add(new Identifier(secret.toByteArray()));
+            if (!activeConnect) {
+                // we don't have to track devices' adverts if we're trying to connect to them now
+                for (com.google.protobuf.ByteString secret : advertsPB) {
+                    adverts.add(new Identifier(secret.toByteArray()));
+                }
             }
 
             EncounterEvent encEvent = null;
@@ -215,12 +228,14 @@ public class SDDR_Core implements Runnable {
             EncountersService.getInstance().sendRepeatingBroadcastMessages();
             numNewEncounters = 0;
         }
+        /*
+        TODO
         if (confirmEvents != null) {
             ConfirmEncounterEvent ce = confirmEvents.poll();
                 while (ce != null) {
                 ce.broadcast(mService);
                 ce = confirmEvents.poll();
             }
-        }
+        }*/
     }
 }

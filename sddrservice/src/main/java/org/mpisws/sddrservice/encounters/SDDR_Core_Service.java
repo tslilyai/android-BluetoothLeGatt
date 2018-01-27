@@ -13,9 +13,6 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.mpisws.sddrservice.lib.Identifier;
-import org.mpisws.sddrservice.linkability.LinkabilityEntryMode;
-
 /**
  * Created by tslilyai on 10/27/17.
  */
@@ -56,7 +53,7 @@ public class SDDR_Core_Service extends Service {
         Log.v(TAG, "Bluetooth and location permissions enabled");
         if (core == null) {
             Log.v(TAG, "Starting SDDR_API Core");
-            core = new SDDR_Core(this, getApplicationContext());
+            core = new SDDR_Core(this);
             Log.v(TAG, "Starting SDDR_API Core thread");
             thread = new Thread(core);
             thread.start();
@@ -87,7 +84,8 @@ public class SDDR_Core_Service extends Service {
         {
             if (core != null && intent.getBooleanExtra("confirmation_active", false)) {
                 Log.d(TAG, "Starting server!");
-                core.startServerAndActivelyConnect();
+                core.startGATTServer();
+                core.activelyConnect();
             } else if (core != null) {
                 core.stopServerActiveConnections();
             }

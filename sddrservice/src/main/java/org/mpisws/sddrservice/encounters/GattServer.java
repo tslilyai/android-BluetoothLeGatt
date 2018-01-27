@@ -27,6 +27,8 @@ import static android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_NOTIFY;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ;
 import static android.bluetooth.BluetoothGattService.SERVICE_TYPE_PRIMARY;
+import static android.bluetooth.BluetoothProfile.STATE_CONNECTED;
+import static android.bluetooth.BluetoothProfile.STATE_DISCONNECTED;
 import static org.mpisws.sddrservice.lib.Constants.CHARACTERISTIC_DHKEY_UUID;
 import static org.mpisws.sddrservice.lib.Constants.SERVICE_UUID;
 
@@ -38,7 +40,22 @@ public class GattServer {
     private static final String TAG = GattServer.class.getSimpleName();
     private BluetoothGattServer mGattServer;
 
+    public void stop() {
+        if (mGattServer != null) {
+            mGattServer.close();
+        }
+        mGattServer = null;
+    }
+
     public GattServer(BluetoothManager btmanager, Context context) {
+        mGattServer = btmanager.openGattServer(context, new GattServerCallback());
+        if (mGattServer != null)
+            mGattServer.addService(createService());
+    }
+    public void reset(BluetoothManager btmanager, Context context) {
+        if (mGattServer != null) {
+            mGattServer.close();
+        }
         mGattServer = btmanager.openGattServer(context, new GattServerCallback());
         if (mGattServer != null)
             mGattServer.addService(createService());
@@ -46,7 +63,7 @@ public class GattServer {
 
     private BluetoothGattService createService() {
         BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID, SERVICE_TYPE_PRIMARY);
-        BluetoothGattCharacteristic DHkey = new BluetoothGattCharacteristic(CHARACTERISTIC_DHKEY_UUID, PROPERTY_READ | PROPERTY_NOTIFY, PERMISSION_READ);
+        BluetoothGattCharacteristic DHkey = new BluetoothGattCharacteristic(CHARACTERISTIC_DHKEY_UUID, PROPERTY_READ, PERMISSION_READ);
         service.addCharacteristic(DHkey);
         return service;
     }
@@ -62,7 +79,16 @@ public class GattServer {
                     Log.d(TAG, "Sending DH key " + SDDR_Core.mDHPubKey.toString() + " in response!");
                     mGattServer.sendResponse(device, requestId, GATT_SUCCESS, 0, value);
                 }
+            } else {
+                Log.d(TAG, "Wrong UUID");
             }
+        }
+        @Override
+        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+            if (newState == STATE_CONNECTED)
+                Log.d(TAG, device.getAddress() + ": connected to me!");
+            else if (newState == STATE_DISCONNECTED)
+                Log.d(TAG, device.getAddress() + ": disconnected to me!");
         }
     }
 }

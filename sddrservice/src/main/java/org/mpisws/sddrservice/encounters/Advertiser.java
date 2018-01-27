@@ -37,7 +37,7 @@ public class Advertiser {
 
     public void initialize(BluetoothAdapter btAdapter) {
         mBluetoothLeAdvertiser = btAdapter.getBluetoothLeAdvertiser();
-        connectable = false;
+        connectable = true;
         Log.v(TAG, "Initialized Advertiser");
     }
 

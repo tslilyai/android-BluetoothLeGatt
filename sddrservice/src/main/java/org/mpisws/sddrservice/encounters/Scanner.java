@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
+import static org.mpisws.sddrservice.lib.Constants.ACTIVE_CONNECT_INTERVAL;
+import static org.mpisws.sddrservice.lib.Constants.SCAN_BATCH_INTERVAL;
 
 /**
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
@@ -54,14 +56,18 @@ public class Scanner {
     private BluetoothLeScanner mBluetoothLeScanner;
     private ScanCallback mScanCallback;
     private SDDR_Core core;
-    private Set<String> uniqueDevicesCtr = new HashSet<>();
-    private Map<String, Integer> deviceAdverts = new HashMap<>();
-    protected boolean serverRunning;
+    private Set<String> uniqueDevicesCtr;
+    private Map<String, Integer> deviceAdverts;
+    protected boolean activeConnections;
     private Context context;
+    private Handler handler;
 
     public Scanner(Context context) {
-        this.serverRunning = false;
+        this.activeConnections = false;
         this.context = context;
+        this.handler = new Handler();
+        deviceAdverts = new HashMap<>();
+        uniqueDevicesCtr = new HashSet<>();
     }
 
     public void initialize(BluetoothAdapter btAdapter, SDDR_Core core) {
@@ -82,6 +88,14 @@ public class Scanner {
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
         }
         Log.v(TAG, "Starting Scanning");
+        if (activeConnections) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startScanning();
+                }
+            }, SCAN_BATCH_INTERVAL + ACTIVE_CONNECT_INTERVAL);
+        }
     }
 
     /**
@@ -118,12 +132,15 @@ public class Scanner {
         private void processResult(ScanResult result) {
             String addr = result.getDevice().getAddress();
             Log.v(TAG, "Scan result processing " + result.getDevice().getAddress());
-           ScanRecord record = result.getScanRecord();
+            ScanRecord record = result.getScanRecord();
             if (record == null) {
                 Log.v(TAG, "No scan record");
                 return;
             } else {
                 Map<ParcelUuid, byte[]> datamap = record.getServiceData();
+                if (datamap == null) {
+                    return;
+                }
                 if (datamap.keySet().size() == 0) {
                     Log.d(TAG, "No data");
                 } else {
@@ -165,10 +182,8 @@ public class Scanner {
                     // if this is a new device
                     long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
 
-                   // only attempt to connect to the device if
-                    // (1) you are running the GATT server for active connections and
-                    // (2) if the device is a new one
-                    if (serverRunning) {
+                    if (activeConnections) {
+                        // TODO keep list of devices connected in this epoch
                         GattClient.getInstance().addDeviceToConnect(result.getDevice(), pkid, new Identifier(advert));
                     }
                 }
@@ -184,7 +199,8 @@ public class Scanner {
             }
             SDDR_Native.c_postDiscovery();
             core.postScanProcessing();
-            if (serverRunning) {
+            if (activeConnections) {
+                stopScanning();
                 GattClient.getInstance().connectDevices();
             }
             Log.d(TAG, "cumulative unique devices: " + uniqueDevicesCtr.size());
