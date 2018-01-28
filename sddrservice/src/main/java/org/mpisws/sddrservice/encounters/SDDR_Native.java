@@ -22,7 +22,8 @@ public class SDDR_Native {
     static public native void c_postDiscovery();
     static public native byte[] c_getMyDHKey();
     static public native byte[] c_getMyDHPubKey();
-    static public native byte[] c_computeSecretKey(byte[] myDHKey, byte[] sha1OtherDHKey, byte[] otherDHKey);
+    static public native byte[] c_computeSecretKeyWithSHA(byte[] myDHKey, byte[] sha1OtherDHKey, byte[] otherDHKey);
+    static public native byte[] c_computeSecretKey(byte[] myDHKey, byte[] otherDHKey);
 
     static public long c_RadioPtr;
     static protected ArrayList<byte[]> c_EncounterMsgs = new ArrayList<>();

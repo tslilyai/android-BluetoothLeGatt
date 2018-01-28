@@ -83,7 +83,7 @@ public class ESAdvertTopics {
 
     private static void getKeyFromTopic(Context context, Identifier myDHKey, Identifier advert, long pkid, String dhPubKey) {
         Log.d(TAG, "Computing secret key with myDHKey " + myDHKey.toString() + " " + advert.toString() + " and " + dhPubKey);
-        byte[] secretKey = SDDR_Native.c_computeSecretKey(myDHKey.getBytes(), advert.getBytes(), Utils.hexStringToByteArray(dhPubKey));
+        byte[] secretKey = SDDR_Native.c_computeSecretKeyWithSHA(myDHKey.getBytes(), advert.getBytes(), Utils.hexStringToByteArray(dhPubKey));
         if (secretKey!= null) {
             Identifier secretKeyID = new Identifier(secretKey);
             Log.d(TAG, "Got secret key for advert " + advert.toString() + " " + secretKeyID.toString());

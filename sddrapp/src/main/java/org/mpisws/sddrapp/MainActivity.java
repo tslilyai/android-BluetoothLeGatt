@@ -23,7 +23,6 @@ import org.mpi_sws.sddrapp.R;
 import org.mpisws.sddrapp.googleauth.GoogleNativeAuthenticator;
 import org.mpisws.sddrapp.googleauth.GoogleToken;
 import org.mpisws.sddrservice.EncountersService;
-import org.mpisws.sddrservice.encounters.GattServer;
 import org.mpisws.sddrservice.encounters.SDDR_Core;
 import org.mpisws.sddrservice.lib.Constants;
 

@@ -29,6 +29,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
+import android.util.Pair;
 
 import org.mpisws.sddrservice.lib.Constants;
 import org.mpisws.sddrservice.lib.Identifier;
@@ -87,11 +88,13 @@ public class Scanner {
         } else {
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
         }
+
         Log.v(TAG, "Starting Scanning");
         if (activeConnections) {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    GattServerClient.getInstance().dropConnections();
                     startScanning();
                 }
             }, SCAN_BATCH_INTERVAL + ACTIVE_CONNECT_INTERVAL);
@@ -184,30 +187,56 @@ public class Scanner {
 
                     if (activeConnections) {
                         // TODO keep list of devices connected in this epoch
-                        GattClient.getInstance().addDeviceToConnect(result.getDevice(), pkid, new Identifier(advert));
+                        GattServerClient.getInstance().connectToDevice(result.getDevice(), pkid, new Identifier(advert));
                     }
                 }
             }
         }
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
+
             super.onBatchScanResults(results);
             Log.d(TAG, results.size() + " Batch Results Found");
+
+            if (activeConnections) {
+                stopScanning();
+            }
+
             SDDR_Native.c_preDiscovery();
             for (ScanResult result : results) {
                 processResult(result);
             }
+
+            if (activeConnections) {
+                Pair<Identifier, Identifier> sddrAddrAndDHPubKey;
+                while ((sddrAddrAndDHPubKey = GattServerClient.getInstance().receivedSDDRAddrsAndDHPubKeys.poll()) != null) {
+                    // this adds the encountered devices to our list of discvoered so that we add them to the
+                    // database / update them in postDiscovery
+                    long pkid = SDDR_Native.c_processScanResult(sddrAddrAndDHPubKey.first.getBytes(), 0, null, null);
+                    GattServerClient.getInstance().getSSForPKIDWithDHKey(pkid, sddrAddrAndDHPubKey.second);
+                }
+            }
+
             SDDR_Native.c_postDiscovery();
             core.postScanProcessing();
-            if (activeConnections) {
-                stopScanning();
-                GattClient.getInstance().connectDevices();
-            }
+
             Log.d(TAG, "cumulative unique devices: " + uniqueDevicesCtr.size());
             for (String addr : deviceAdverts.keySet()) {
                 Log.d(TAG, "\t " + addr + ", " + deviceAdverts.get(addr));
             }
             deviceAdverts.clear();
+
+            /*
+            // XXX JUST FOR ES TOPICS TEST
+            Log.d(TAG, "MAKING MSGING CHANNEL");
+            for (int i = 0 ; i < 10; i++) {
+                EncountersService.getInstance().createEncounterMsgingChannel(String.valueOf(Math.abs(new Random().nextLong())));
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }*/
         }
 
         @Override

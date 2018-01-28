@@ -53,7 +53,6 @@ public class SDDR_Core implements Runnable {
     private static Context mService;
     public static boolean confirmEncounters = false;
     private boolean activeConnect = false;
-    private GattServer server;
 
     public boolean should_run;
     public int numNewEncounters;
@@ -76,10 +75,7 @@ public class SDDR_Core implements Runnable {
 
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter, this);
-
-        // TODO GET RID OF LATER
         startGATTServer();
-        activelyConnect();
 
         numNewEncounters = 0;
         changeEpochTime = System.currentTimeMillis() + Constants.CHANGE_EPOCH_TIME + 1000;
@@ -91,31 +87,26 @@ public class SDDR_Core implements Runnable {
         mAdvert = new Identifier(SDDR_Native.c_getMyAdvert());
         mAdvertiser.setAddr(SDDR_Native.c_getRandomAddr());
         mAdvertiser.setAdData(mAdvert.getBytes());
-        Log.d(TAG, "Resetting advertiser");
         mAdvertiser.resetAdvertiser();
-        //if (activeConnect) server.reset(bluetoothManager, mService);
         new MyAdvertsBridge(mService).insertMyAdvert(mAdvert, mDHPubKey);
     }
 
-    protected void startGATTServer() {
-        server = new GattServer(bluetoothManager, mService);
+    private void startGATTServer() {
+        GattServerClient.getInstance().initialize(bluetoothManager, mService);
         mAdvertiser.setConnectable(true);
     }
 
     protected void activelyConnect() {
         activeConnect = true;
-        GattClient.getInstance().stop();
-        GattClient.getInstance().setContext(mService);
         mScanner.activeConnections = true;
         confirmEvents = new ConcurrentLinkedQueue();
     }
 
     protected void stopServerActiveConnections() {
         activeConnect = false;
-        mAdvertiser.setConnectable(false);
         mScanner.activeConnections = false;
-        server.stop();
-        GattClient.getInstance().stop();
+        mAdvertiser.setConnectable(false);
+        GattServerClient.getInstance().dropConnections();
         confirmEvents = null;
     }
 

@@ -32,12 +32,12 @@ public class Advertiser {
     private AdvertiseSettings mAdvertiseSettings;
     private UUID mUUID;
     private boolean connectable;
-    private byte[] mAddr = new byte[Constants.PUUID_LENGTH];
-    private byte[] mAdData = new byte[Constants.ADVERT_LENGTH];
+    public static byte[] mAddr = new byte[Constants.PUUID_LENGTH];
+    public static byte[] mAdData = new byte[Constants.ADVERT_LENGTH];
 
     public void initialize(BluetoothAdapter btAdapter) {
         mBluetoothLeAdvertiser = btAdapter.getBluetoothLeAdvertiser();
-        connectable = true;
+        connectable = false;
         Log.v(TAG, "Initialized Advertiser");
     }
 

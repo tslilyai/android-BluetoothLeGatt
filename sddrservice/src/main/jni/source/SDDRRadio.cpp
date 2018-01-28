@@ -64,7 +64,6 @@ void SDDRRadio::preDiscovery()
 
 long SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string advert, Address dev_addr)
 {
-    bool newlyFound = false;
     LOG_P(TAG, "Processing scan response with Addr %s, rssi %d, and data %s", sddrAddr.toString().c_str() , rssi, advert.c_str());
     
     if (!sddrAddr.verifyChecksum()) {
@@ -80,7 +79,6 @@ long SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string a
 
       device = new EbNDevice(generateDeviceID(), sddrAddr);
       deviceMap_.add(sddrAddr, device);
-      newlyFound = true;
 
       LOG_D("ENCOUNTERS_TEST", "-- Discovered new SDDR device (ID %ld, Address %s)", 
               device->getID(), device->getAddress().toString().c_str());
@@ -91,7 +89,7 @@ long SDDRRadio::processScanResponse(Address sddrAddr, int8_t rssi, std::string a
     LOG_P(TAG, "-- Discovered device %d", device->getID());
     addRecentDevice(device);
     device->addAdvert(advert);
-	return newlyFound ? sddrStartTimestamp + device->getID() : -1;
+	return sddrStartTimestamp + device->getID(); 
 }
 
 std::vector<std::string> SDDRRadio::postDiscoveryGetEncounters()
@@ -297,17 +295,19 @@ void SDDRRadio::getDeviceAdvert(EncounterEvent &event, DeviceID id)
 
 std::string SDDRRadio::computeSecretKey(std::string myDHKey, std::string SHA1DHKey, std::string otherDHKey) {
 
-    LOG_D("c_SDDR", "OtherDHKey length is %d", otherDHKey.length());
   	size_t messageSize = dhExchange_.getPublicSize();
   	vector<uint8_t> message(messageSize, 0);
 
   	memcpy(message.data(), otherDHKey.c_str(), messageSize);
-  	unsigned char hash[SHA_DIGEST_LENGTH]; // == 20
-  	SHA1(message.data(), messageSize, hash);
-    std::string hashStr = std::string((const char*) hash, SHA_DIGEST_LENGTH);
-    if (hashStr.compare(SHA1DHKey) != 0) {
-        LOG_D("c_SDDR", "UhOh.... hash is %s, otherDHKey is %s", hashStr.c_str(), SHA1DHKey.c_str());
-        return std::string("");
+
+    if (SHA1DHKey.length() != 0) {
+        unsigned char hash[SHA_DIGEST_LENGTH]; // == 20
+        SHA1(message.data(), messageSize, hash);
+        std::string hashStr = std::string((const char*) hash, SHA_DIGEST_LENGTH);
+        if (hashStr.compare(SHA1DHKey) != 0) {
+            LOG_D("c_SDDR", "UhOh.... hash is %s, otherDHKey is %s", hashStr.c_str(), SHA1DHKey.c_str());
+            return std::string("");
+        }
     }
     char dest[keySize_ / 8];
     ECDH::computeSharedSecret(
