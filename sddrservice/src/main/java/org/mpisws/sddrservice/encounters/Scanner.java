@@ -194,7 +194,6 @@ public class Scanner {
         }
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
-
             super.onBatchScanResults(results);
             Log.d(TAG, results.size() + " Batch Results Found");
 
@@ -225,18 +224,6 @@ public class Scanner {
                 Log.d(TAG, "\t " + addr + ", " + deviceAdverts.get(addr));
             }
             deviceAdverts.clear();
-
-            /*
-            // XXX JUST FOR ES TOPICS TEST
-            Log.d(TAG, "MAKING MSGING CHANNEL");
-            for (int i = 0 ; i < 10; i++) {
-                EncountersService.getInstance().createEncounterMsgingChannel(String.valueOf(Math.abs(new Random().nextLong())));
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }*/
         }
 
         @Override

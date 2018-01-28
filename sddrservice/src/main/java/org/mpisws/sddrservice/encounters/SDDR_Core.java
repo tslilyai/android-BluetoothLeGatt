@@ -29,6 +29,7 @@ import org.mpisws.sddrservice.lib.Identifier;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -75,7 +76,6 @@ public class SDDR_Core implements Runnable {
 
         mAdvertiser.initialize(mBluetoothAdapter);
         mScanner.initialize(mBluetoothAdapter, this);
-        startGATTServer();
 
         numNewEncounters = 0;
         changeEpochTime = System.currentTimeMillis() + Constants.CHANGE_EPOCH_TIME + 1000;
@@ -99,6 +99,8 @@ public class SDDR_Core implements Runnable {
     protected void activelyConnect() {
         activeConnect = true;
         mScanner.activeConnections = true;
+        mScanner.startScanning();
+        mAdvertiser.stopAdvertising();
         confirmEvents = new ConcurrentLinkedQueue();
     }
 
@@ -113,8 +115,9 @@ public class SDDR_Core implements Runnable {
     public void run() {
         Log.v(TAG, "Running core");
 
+        startGATTServer();
         startAdvertisingAndUpdateAdvert();
-        mScanner.startScanning();
+        //mScanner.startScanning();
     }
 
     public void stop(){
@@ -133,7 +136,18 @@ public class SDDR_Core implements Runnable {
             changeEpochTime += Constants.CHANGE_EPOCH_TIME;
 
             if (confirmEncounters && EncountersService.getInstance().isSignedIn() && !activeConnect) {
-                Log.d(TAG, "Confirming encounters");
+                // XXX JUST FOR ES TOPICS TEST
+                Log.d(TAG, "MAKING MSGING CHANNEL");
+                for (int i = 0 ; i < 20; i++) {
+                    EncountersService.getInstance().createEncounterMsgingChannel(String.valueOf(Math.abs(new Random().nextLong())));
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                /*Log.d(TAG, "Confirming encounters");
                 // create topics for adverts and post the DHPubKey on them if we haven't yet
                 List<Pair<Identifier, Identifier>> adverts = new MyAdvertsBridge(mService).getMyUnpostedAdverts();
                 for (Pair<Identifier, Identifier> pair : adverts) {
@@ -144,7 +158,7 @@ public class SDDR_Core implements Runnable {
                 for (NewAdvertsBridge.NewAdvertData advert : advertsToConfirm) {
                     Log.d(TAG, "Confirm encounter " + advert.epkid);
                     ESAdvertTopics.tryToComputeSecret(mService, advert.myDHKey, advert.epkid, advert.advert);
-                }
+                }*/
             }
         }
     }
