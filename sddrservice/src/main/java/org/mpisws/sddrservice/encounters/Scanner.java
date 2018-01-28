@@ -59,13 +59,11 @@ public class Scanner {
     private SDDR_Core core;
     private Set<String> uniqueDevicesCtr;
     private Map<String, Integer> deviceAdverts;
-    protected boolean activeConnections;
-    private Context context;
+    private boolean activeConnections;
     private Handler handler;
 
-    public Scanner(Context context) {
+    public Scanner() {
         this.activeConnections = false;
-        this.context = context;
         this.handler = new Handler();
         deviceAdverts = new HashMap<>();
         uniqueDevicesCtr = new HashSet<>();
@@ -75,6 +73,39 @@ public class Scanner {
         this.mBluetoothAdapter = btAdapter;
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         this.core = core;
+    }
+
+    public void startScanningActive(long activeScanInterval) {
+        // stop everything
+        stopScanning();
+        GattServerClient.getInstance().dropConnections();
+        uniqueDevicesCtr.clear();
+
+        // set things up for this active scan
+        SDDR_Native.c_preDiscovery();
+        activeConnections = true;
+        startScanning();
+
+        // this determines how long the active connections / scanning will go on for
+        handler.postDelayed(() -> {
+            activeConnections=false;
+            GattServerClient.getInstance().dropConnections();
+            stopScanning();
+
+            // process all the dh pub keys we got
+            Pair<Identifier, Identifier> sddrAddrAndDHPubKey;
+            while ((sddrAddrAndDHPubKey = GattServerClient.getInstance().receivedSDDRAddrsAndDHPubKeys.poll()) != null) {
+                // this adds the encountered devices to our list of discvoered so that we add them to the
+                // database / update them in postDiscovery
+                long pkid = SDDR_Native.c_processScanResult(sddrAddrAndDHPubKey.first.getBytes(), 0, null, null);
+                GattServerClient.getInstance().getSSForPKIDWithDHKey(pkid, sddrAddrAndDHPubKey.second);
+            }
+            SDDR_Native.c_postDiscovery();
+            core.postScanProcessing();
+
+            // start normal batch scanning again
+            startScanning();
+        }, activeScanInterval);
     }
 
     /**
@@ -88,17 +119,7 @@ public class Scanner {
         } else {
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
         }
-
         Log.v(TAG, "Starting Scanning");
-        if (activeConnections) {
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    GattServerClient.getInstance().dropConnections();
-                    startScanning();
-                }
-            }, SCAN_BATCH_INTERVAL + ACTIVE_CONNECT_INTERVAL);
-        }
     }
 
     /**
@@ -108,7 +129,6 @@ public class Scanner {
         Log.v(TAG, "Stopping Scanning");
         mBluetoothLeScanner.stopScan(mScanCallback);
    }
-
 
     /**
      * Filter our scans so we only discover SDDR_API devices
@@ -124,7 +144,8 @@ public class Scanner {
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
         builder.setScanMode(SCAN_MODE_LOW_POWER);
-        builder.setReportDelay(Constants.SCAN_BATCH_INTERVAL);
+        if (!activeConnections)
+            builder.setReportDelay(Constants.SCAN_BATCH_INTERVAL);
         return builder.build();
     }
 
@@ -147,7 +168,6 @@ public class Scanner {
                 if (datamap.keySet().size() == 0) {
                     Log.d(TAG, "No data");
                 } else {
-                    uniqueDevicesCtr.add(addr);
                     if (deviceAdverts.containsKey(addr)) {
                         int count = deviceAdverts.get(addr);
                         deviceAdverts.put(addr, count + 1);
@@ -186,8 +206,11 @@ public class Scanner {
                     long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
 
                     if (activeConnections) {
-                        // TODO keep list of devices connected in this epoch
-                        GattServerClient.getInstance().connectToDevice(result.getDevice(), pkid, new Identifier(advert));
+                        if (!uniqueDevicesCtr.contains(devaddress)) {
+                            uniqueDevicesCtr.add(addr);
+                            // TODO keep list of devices connected in this epoch
+                            GattServerClient.getInstance().connectToDevice(result.getDevice(), pkid, new Identifier(advert));
+                        }
                     }
                 }
             }
@@ -197,23 +220,9 @@ public class Scanner {
             super.onBatchScanResults(results);
             Log.d(TAG, results.size() + " Batch Results Found");
 
-            if (activeConnections) {
-                stopScanning();
-            }
-
             SDDR_Native.c_preDiscovery();
             for (ScanResult result : results) {
                 processResult(result);
-            }
-
-            if (activeConnections) {
-                Pair<Identifier, Identifier> sddrAddrAndDHPubKey;
-                while ((sddrAddrAndDHPubKey = GattServerClient.getInstance().receivedSDDRAddrsAndDHPubKeys.poll()) != null) {
-                    // this adds the encountered devices to our list of discvoered so that we add them to the
-                    // database / update them in postDiscovery
-                    long pkid = SDDR_Native.c_processScanResult(sddrAddrAndDHPubKey.first.getBytes(), 0, null, null);
-                    GattServerClient.getInstance().getSSForPKIDWithDHKey(pkid, sddrAddrAndDHPubKey.second);
-                }
             }
 
             SDDR_Native.c_postDiscovery();

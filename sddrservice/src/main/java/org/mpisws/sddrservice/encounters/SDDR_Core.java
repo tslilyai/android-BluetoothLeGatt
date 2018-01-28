@@ -7,6 +7,8 @@ package org.mpisws.sddrservice.encounters;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Pair;
 
@@ -52,6 +54,7 @@ public class SDDR_Core implements Runnable {
     private Scanner mScanner;
     private long changeEpochTime;
     private static Context mService;
+    private Context appContext;
     public static boolean confirmEncounters = false;
     private boolean activeConnect = false;
 
@@ -68,7 +71,7 @@ public class SDDR_Core implements Runnable {
         this.bluetoothManager = (BluetoothManager) mService.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         mAdvertiser = new Advertiser();
-        mScanner = new Scanner(mService);
+        mScanner = new Scanner();
 
         // initialize the C radio class
         Log.v(TAG, "Initializing radio");
@@ -96,17 +99,19 @@ public class SDDR_Core implements Runnable {
         mAdvertiser.setConnectable(true);
     }
 
-    protected void activelyConnect() {
+    private void activelyConnect() {
         activeConnect = true;
-        mScanner.activeConnections = true;
-        mScanner.startScanning();
-        mAdvertiser.stopAdvertising();
+        mScanner.startScanningActive(10000);
         confirmEvents = new ConcurrentLinkedQueue();
+    }
+
+    protected void setActiveConnect(boolean conn, Context appcontext) {
+        activeConnect = conn;
+        this.appContext = appcontext;
     }
 
     protected void stopServerActiveConnections() {
         activeConnect = false;
-        mScanner.activeConnections = false;
         mAdvertiser.setConnectable(false);
         GattServerClient.getInstance().dropConnections();
         confirmEvents = null;
@@ -117,7 +122,7 @@ public class SDDR_Core implements Runnable {
 
         startGATTServer();
         startAdvertisingAndUpdateAdvert();
-        //mScanner.startScanning();
+        mScanner.startScanning();
     }
 
     public void stop(){
@@ -135,17 +140,20 @@ public class SDDR_Core implements Runnable {
             startAdvertisingAndUpdateAdvert();
             changeEpochTime += Constants.CHANGE_EPOCH_TIME;
 
+            if (activeConnect) {
+                new Handler(appContext.getMainLooper()).post(() -> activelyConnect());
+            }
             if (confirmEncounters && EncountersService.getInstance().isSignedIn() && !activeConnect) {
-                // XXX JUST FOR ES TOPICS TEST
+                /*// XXX JUST FOR ES TOPICS TEST
                 Log.d(TAG, "MAKING MSGING CHANNEL");
                 for (int i = 0 ; i < 20; i++) {
                     EncountersService.getInstance().createEncounterMsgingChannel(String.valueOf(Math.abs(new Random().nextLong())));
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }
+                }*/
 
                 /*Log.d(TAG, "Confirming encounters");
                 // create topics for adverts and post the DHPubKey on them if we haven't yet

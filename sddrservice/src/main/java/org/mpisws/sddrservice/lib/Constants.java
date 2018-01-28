@@ -32,7 +32,7 @@ public class Constants {
     /**
      * Advertising-related constants
      */
-    public static final int DHPUBKEY_LENGTH = 58;
+    public static final int DHPUBKEY_LENGTH = 29;
     public static final int TOTAL_LENGTH = 31;
     public static final int PUUID_LENGTH = 16;
     public static final int ADDR_LENGTH = 4;
@@ -41,9 +41,9 @@ public class Constants {
     /**
      * Scanning-related constants
      */
-    public static final long ACTIVE_CONNECT_INTERVAL = 120000;
-    public static final long SCAN_BATCH_INTERVAL = 120000;
-    public static final long CHANGE_EPOCH_TIME = 15*60000;
+    public static final long ACTIVE_CONNECT_INTERVAL = 10000;
+    public static final long SCAN_BATCH_INTERVAL = 2*60000;
+    public static final long CHANGE_EPOCH_TIME = 4*60000;
 
     /**
      * Other Constants

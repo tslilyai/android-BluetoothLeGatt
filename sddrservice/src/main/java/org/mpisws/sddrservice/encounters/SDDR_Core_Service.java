@@ -84,8 +84,7 @@ public class SDDR_Core_Service extends Service {
         {
             if (core != null && intent.getBooleanExtra("confirmation_active", false)) {
                 Log.d(TAG, "Starting server!");
-                //core.startGATTServer();
-                core.activelyConnect();
+                core.setActiveConnect(true, getApplicationContext());
             } else if (core != null) {
                 core.stopServerActiveConnections();
             }
@@ -113,6 +112,7 @@ public class SDDR_Core_Service extends Service {
             core = null;
         }
         was_destroyed = true;
+        restart();
     }
 
     /**

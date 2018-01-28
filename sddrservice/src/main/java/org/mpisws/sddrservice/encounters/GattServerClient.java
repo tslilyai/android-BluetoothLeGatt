@@ -76,6 +76,16 @@ public class GattServerClient extends BluetoothGattServerCallback {
         }
     }
 
+    @Override
+    public void onConnectionStateChange(BluetoothDevice dev, int status, int newState) {
+        if (newState == BluetoothProfile.STATE_CONNECTED) {
+            Log.v(TAG, "SERVER Connected to device " + dev.getAddress());
+        } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+            Log.v(TAG, "SERVER Disconnected from device " + dev.getAddress() + " (" + status + ")");
+        }
+    }
+
+
     public void connectToDevice(BluetoothDevice dev, Long pkid, Identifier advert) {
         String deviceAddress = dev.getAddress();
         Log.v(TAG, "BT address to connect: " + deviceAddress);
@@ -142,6 +152,7 @@ public class GattServerClient extends BluetoothGattServerCallback {
             // peerAddr makes sure this is from an SDDR device
             Identifier peerAddr = new Identifier(Arrays.copyOf(value, ADDR_LENGTH));
             receivedSDDRAddrsAndDHPubKeys.add(new Pair(peerAddr, peerDHPubKey));
+            Log.d(TAG, "Someone wrote their key down for me :) " + peerAddr.toString() + " " + peerDHPubKey.toString());
 
             mGattServer.sendResponse(device, requestId, GATT_SUCCESS, 0, null);
         }
@@ -200,13 +211,14 @@ public class GattServerClient extends BluetoothGattServerCallback {
             bleHandler.post(() -> {
                 byte[] data = characteristic.getValue();
                 if (data != null) {
-                    Identifier peerDHPubKey = new Identifier(Arrays.copyOf(data, Constants.DHPUBKEY_LENGTH));
+                    Identifier peerDHPubKey = new Identifier(Arrays.copyOf(data, DHPUBKEY_LENGTH));
                     onPeerDHKeyReceived(pkid, advert, peerDHPubKey, true);
                 }
 
                 // Step 2: Write our DHKEY value to the remote peer (wait for onCharacteristicWrite)
                 byte[] addrAndDHKey = new byte[ADDR_LENGTH + DHPUBKEY_LENGTH];
                 System.arraycopy(mAddr, 0, addrAndDHKey, 0, ADDR_LENGTH);
+                Log.d(TAG, "My dh pub key is " + SDDR_Core.mDHPubKey.toString() + " len "+  SDDR_Core.mDHPubKey.getBytes().length);
                 System.arraycopy(SDDR_Core.mDHPubKey.getBytes(), 0, addrAndDHKey, ADDR_LENGTH, DHPUBKEY_LENGTH);
 
                 characteristic.setValue(addrAndDHKey);
@@ -218,6 +230,7 @@ public class GattServerClient extends BluetoothGattServerCallback {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             // Step 3: Disconnect since we are done the protocol (wait for N/A)
             // (It is also possible the write failed, but we would disconnect anyway)
+            Log.d(TAG, "Wrote my DHKey!");
             bleHandler.obtainMessage(MSG_WRITE_DONE, gatt).sendToTarget();
         }
 
@@ -254,7 +267,11 @@ public class GattServerClient extends BluetoothGattServerCallback {
                             // Step 1: Read the DHKEY value from the remote peer (wait for onCharacteristicRead)
                             // TODO: Potentially need to wait until all devices report that services were discovered?
                             // (See bold text in 2nd answer of https://stackoverflow.com/questions/21237093/)
-                            gatt.readCharacteristic(service.getCharacteristic(CHARACTERISTIC_DHKEY_UUID));
+                            if (service.getCharacteristic(CHARACTERISTIC_DHKEY_UUID) == null) {
+                                disconnect(gatt);
+                            } else {
+                                gatt.readCharacteristic(service.getCharacteristic(CHARACTERISTIC_DHKEY_UUID));
+                            }
                         }
                     }
                     break;
