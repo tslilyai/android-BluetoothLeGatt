@@ -24,7 +24,7 @@ public class Constants {
             .fromString("9fbc9d38-49fa-4063-bf59-b87b808ad211");
     public static final UUID CHARACTERISTIC_DHKEY_UUID = UUID
             .fromString("b3eede1a-5e06-4c85-a0e7-a844407befa2");
-    public static final UUID DESCRIPTOR_CONFIG_UUID = UUID
+    public static final UUID CHARACTERISTIC_MESSAGE_UUID = UUID
             .fromString("82cbd8c1-fb1a-4c3d-86f5-bfe72367586e");
     public static final int REQUEST_ENABLE_BT = 1;
     public static final int REQUEST_ACCESS_FINE_LOCATION = 2;
@@ -43,7 +43,7 @@ public class Constants {
      */
     public static final long ACTIVE_CONNECT_INTERVAL = 10000;
     public static final long SCAN_BATCH_INTERVAL = 2*60000;
-    public static final long CHANGE_EPOCH_TIME = 4*60000;
+    public static final long CHANGE_EPOCH_TIME = 5*60000;
 
     /**
      * Other Constants

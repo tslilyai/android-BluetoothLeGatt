@@ -25,7 +25,6 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.content.Context;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -45,8 +44,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
-import static org.mpisws.sddrservice.lib.Constants.ACTIVE_CONNECT_INTERVAL;
-import static org.mpisws.sddrservice.lib.Constants.SCAN_BATCH_INTERVAL;
 
 /**
  * Scans for Bluetooth Low Energy Advertisements matching a filter and displays them to the user.
