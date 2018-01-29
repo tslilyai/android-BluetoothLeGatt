@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.microsoft.embeddedsocial.account.UserAccount;
 import com.microsoft.embeddedsocial.autorest.models.ContentType;
-import com.microsoft.embeddedsocial.autorest.models.PublisherType;
 import com.microsoft.embeddedsocial.autorest.models.Reason;
 import com.microsoft.embeddedsocial.data.model.DiscussionItem;
 import com.microsoft.embeddedsocial.data.storage.PostStorage;
@@ -19,7 +18,6 @@ import com.microsoft.embeddedsocial.server.model.view.TopicView;
 import com.microsoft.embeddedsocial.service.ServiceAction;
 import com.microsoft.embeddedsocial.service.WorkerService;
 
-import org.mpisws.sddrservice.EncountersService;
 import org.mpisws.sddrservice.IEncountersService;
 import org.mpisws.sddrservice.encounterhistory.SSBridge;
 import org.mpisws.sddrservice.lib.Utils;
@@ -96,11 +94,11 @@ public class ESTopics {
         private long createdTime;
         private String handle;
         private String msg;
-        private IEncountersService.ForwardingFilter filter;
+        private IEncountersService.ForwardingEncounterFilter filter;
         private String eid;
         private boolean fromMe;
 
-        public Msg(ContentType typ, long createdTime, String handle, String msg, IEncountersService.ForwardingFilter filter, String eid, boolean fromMe) {
+        public Msg(ContentType typ, long createdTime, String handle, String msg, IEncountersService.ForwardingEncounterFilter filter, String eid, boolean fromMe) {
             this.handle = handle;
             this.typ = typ;
             this.createdTime = createdTime;
@@ -123,7 +121,7 @@ public class ESTopics {
         public String getCursor() {
             return handle;
         }
-        public IEncountersService.ForwardingFilter getFilter() { return filter; }
+        public IEncountersService.ForwardingEncounterFilter getFilter() { return filter; }
     }
 
     public interface GetMessagesCallback {
@@ -345,8 +343,8 @@ public class ESTopics {
                                         Log.v(TAG, "Found reply comment");
                                         continue;
                                     }
-                                    IEncountersService.ForwardingFilter filter = null;
-                                    if (decrypted_msg.contains(IEncountersService.Filter.FILTER_END_STR)) {
+                                    IEncountersService.ForwardingEncounterFilter filter = null;
+                                    if (decrypted_msg.contains(IEncountersService.EncounterFilter.FILTER_END_STR)) {
                                         filter = getMsgFilter(decrypted_msg);
                                     }
                                     comments.add(new Msg(
@@ -383,15 +381,15 @@ public class ESTopics {
         }
     }
 
-    public IEncountersService.ForwardingFilter getMsgFilter(String msg) {
-        String[] msg_parts = msg.split(IEncountersService.Filter.FILTER_END_STR);
+    public IEncountersService.ForwardingEncounterFilter getMsgFilter(String msg) {
+        String[] msg_parts = msg.split(IEncountersService.EncounterFilter.FILTER_END_STR);
         if (msg_parts.length != 2) {
             Log.d(TAG, "Length: " + msg_parts.length + " " + msg_parts[0]);
         }
-        return IEncountersService.ForwardingFilter.fromString(msg_parts[0]);
+        return IEncountersService.ForwardingEncounterFilter.fromString(msg_parts[0]);
     }
     private String getMsgOfFilterMsg(String msg) {
-        String[] msg_parts = msg.split(IEncountersService.Filter.FILTER_END_STR);
+        String[] msg_parts = msg.split(IEncountersService.EncounterFilter.FILTER_END_STR);
         return (msg_parts.length != 2) ? "" :  msg_parts[1];
     }
 }

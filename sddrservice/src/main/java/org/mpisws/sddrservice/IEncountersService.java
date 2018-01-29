@@ -25,7 +25,7 @@ import java.util.List;
 public interface IEncountersService {
     static final int MSG_STORAGE_LIMIT = 10000;
 
-    class Filter {
+    class EncounterFilter {
         public static final String FILTER_END_STR = "ENDFLTR";
         protected static final String DELIMITER = " ## ";
         private TimeInterval timeInterval;
@@ -35,33 +35,33 @@ public interface IEncountersService {
         private long overlapTime;
         private List<String> matches;
 
-        public Filter() {
+        public EncounterFilter() {
             timeInterval = null;
             matches = null;
             longitude = -1;
             latitude = -1;
             radius = 0;
             overlapTime = 0;
-        };
-        public Filter setTimeInterval(long startTimeInMillis, long endTimeInMillis) {
+        }
+        public EncounterFilter setTimeInterval(long startTimeInMillis, long endTimeInMillis) {
             timeInterval = new TimeInterval(startTimeInMillis, endTimeInMillis);
             return this;
         }
-        public Filter setOverlapTime(long timeMs) {
+        public EncounterFilter setOverlapTime(long timeMs) {
             overlapTime = timeMs;
             return this;
         }
-        public Filter setCircularRegion(double longitude, double latitude, float radius) {
+        public EncounterFilter setCircularRegion(double longitude, double latitude, float radius) {
             this.longitude = longitude;
             this.latitude = latitude;
             this.radius = radius;
             return this;
         }
-        public Filter setMatches(List<String> matches) {
+        public EncounterFilter setMatches(List<String> matches) {
             this.matches = matches;
             return this;
         }
-        public Filter setTimeInterval(TimeInterval timeInterval) {
+        public EncounterFilter setTimeInterval(TimeInterval timeInterval) {
             this.timeInterval = timeInterval;
             return this;
         }
@@ -94,7 +94,7 @@ public interface IEncountersService {
         }
 
     }
-    class ForwardingFilter extends Filter {
+    class ForwardingEncounterFilter extends EncounterFilter {
         static private final int EXPLOSION_LIMIT = 10000;
         private boolean isRepeating;
         private int numHops;
@@ -102,33 +102,33 @@ public interface IEncountersService {
         private long createdMs;
         private long lifetimeMs;
 
-        public ForwardingFilter() {
+        public ForwardingEncounterFilter() {
             super();
             numHops = 1;
             fanoutLimit = -1;
             createdMs = DateTime.now().getMillis();
         }
 
-        public ForwardingFilter setIsRepeating(boolean flag) {
+        public ForwardingEncounterFilter setIsRepeating(boolean flag) {
             isRepeating = flag;
             return this;
         }
-        public ForwardingFilter setNumHopsLimit(int limit) {
+        public ForwardingEncounterFilter setNumHopsLimit(int limit) {
             numHops = limit;
             fanoutLimit = limit >= 0 && Math.pow(Math.exp(limit), numHops) < EXPLOSION_LIMIT
                     ? limit : fanoutLimit;
              return this;
         }
-        public ForwardingFilter setFanoutLimit(int limit) {
+        public ForwardingEncounterFilter setFanoutLimit(int limit) {
             fanoutLimit = limit >= 0 && Math.pow(Math.exp(limit), numHops) < EXPLOSION_LIMIT
                     ? limit : fanoutLimit;
             return this;
         }
-        public ForwardingFilter setLifetimeTimeMs(long duration) {
+        public ForwardingEncounterFilter setLifetimeTimeMs(long duration) {
             this.lifetimeMs = duration;
             return this;
         }
-        private ForwardingFilter setCreatedTimeMs(long time) {
+        private ForwardingEncounterFilter setCreatedTimeMs(long time) {
             this.createdMs = time;
             return this;
         }
@@ -158,8 +158,8 @@ public interface IEncountersService {
             return str + DELIMITER + TextUtils.join(DELIMITER, strs);
         }
 
-        public static ForwardingFilter fromString(String str) {
-            ForwardingFilter f = new ForwardingFilter();
+        public static ForwardingEncounterFilter fromString(String str) {
+            ForwardingEncounterFilter f = new ForwardingEncounterFilter();
             String[] strs = str.split(DELIMITER);
             f.setTimeInterval(TimeInterval.fromString(strs[0]))
                 .setMatches(Arrays.asList(strs[1].split(", ")))
@@ -206,10 +206,10 @@ public interface IEncountersService {
     /**
      * Retrieves all encounters that satisfy the constraints of the filter.
      *
-     * @param filter a filter consisting of a time frame, required linkable identifier matches, and location; if this is null, all encounters are retrieved
+     * @param encounterFilter a filter consisting of a time frame, required linkable identifier matches, and location; if this is null, all encounters are retrieved
      * @return a list of String, each of which corresponds to the name of an encounter
      */
-    public List<String> getEncounters(EncountersService.Filter filter);
+    public List<String> getEncounters(EncounterFilter encounterFilter);
 
 
     /**
@@ -343,7 +343,7 @@ public interface IEncountersService {
      *               of encounters to which the message should be forwarded, as well as whether the
      *               message should be repeatedly send
      */
-    public void sendBroadcastMsg(String msg, EncountersService.ForwardingFilter filter);
+    public void sendBroadcastMsg(String msg, ForwardingEncounterFilter filter);
 
     /**
      * Processes a message to see if it should be broadcasted

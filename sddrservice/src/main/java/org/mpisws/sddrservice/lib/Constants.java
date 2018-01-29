@@ -43,7 +43,7 @@ public class Constants {
      */
     public static final long ACTIVE_CONNECT_INTERVAL = 10000;
     public static final long SCAN_BATCH_INTERVAL = 2*60000;
-    public static final long CHANGE_EPOCH_TIME = 5*60000;
+    public static final long CHANGE_EPOCH_TIME = 4*60000;
 
     /**
      * Other Constants

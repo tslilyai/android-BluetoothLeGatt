@@ -116,7 +116,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native
  * Signature: ([BI[B)V
  */
 JNIEXPORT jlong JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1processScanResult
-  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert, jbyteArray jdevaddr) {
+  (JNIEnv *env, jobject obj, jbyteArray jaddr, jint jrssi, jbyteArray jadvert) {
     SDDRRadio* radioPtr = getRadioPtr(env, obj);
 
     int addr_len = env->GetArrayLength(jaddr);
@@ -124,16 +124,16 @@ JNIEXPORT jlong JNICALL Java_org_mpisws_sddrservice_encounters_SDDR_1Native_c_1p
     env->GetByteArrayRegion(jaddr, 0, addr_len, reinterpret_cast<jbyte*>(addr));
     assert(addr_len / 8 == ADDR_LEN);
     Address myAddr(ADDR_LEN, (uint8_t*)addr);
-    
-    int dev_addr_len = env->GetArrayLength(jdevaddr);
-    char* dev_addr = new char[dev_addr_len];
-    env->GetByteArrayRegion(jdevaddr, 0, dev_addr_len, reinterpret_cast<jbyte*>(dev_addr));
-    Address devAddr(dev_addr_len, (uint8_t*)dev_addr);
-    
-    int advert_len = env->GetArrayLength(jadvert);
-    char* advert = new char[advert_len];
-    env->GetByteArrayRegion(jadvert, 0, advert_len, reinterpret_cast<jbyte*>(advert));
-    return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(advert, SHA_DIGEST_LENGTH), devAddr);
+  
+    if (jadvert != NULL) {
+        int advert_len = env->GetArrayLength(jadvert);
+        char* advert = new char[advert_len];
+        env->GetByteArrayRegion(jadvert, 0, advert_len, reinterpret_cast<jbyte*>(advert));
+        return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(advert, SHA_DIGEST_LENGTH));
+    } else {
+        // we're confirming an encounter via BLE
+        return radioPtr->processScanResponse(myAddr, (int)jrssi, std::string(""));
+    }
 }
 
 /*

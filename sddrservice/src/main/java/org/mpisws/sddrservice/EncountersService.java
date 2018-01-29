@@ -29,7 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static org.mpisws.sddrservice.IEncountersService.Filter.FILTER_END_STR;
+import static org.mpisws.sddrservice.IEncountersService.EncounterFilter.FILTER_END_STR;
 
 /**
  * Created by tslilyai on 11/6/17.
@@ -116,11 +116,11 @@ public class EncountersService implements IEncountersService {
    }
 
     @Override
-    public List<String> getEncounters(Filter filter) {
+    public List<String> getEncounters(EncounterFilter encounterFilter) {
         if (!shouldRunCommand(true)) return null;
 
         /* TODO this can be made more efficient? */
-        List<MEncounter> encounters = new EncounterBridge(context).getEncountersFiltered(filter);
+        List<MEncounter> encounters = new EncounterBridge(context).getEncountersFiltered(encounterFilter);
         List<String> encounterIds = new LinkedList<>();
         for (MEncounter e : encounters) {
             List<Identifier> receivedEids = e.getEncounterIDs(context);
@@ -236,7 +236,7 @@ public class EncountersService implements IEncountersService {
     }
 
     @Override
-    public void sendBroadcastMsg(String msg, EncountersService.ForwardingFilter filter) {
+    public void sendBroadcastMsg(String msg, ForwardingEncounterFilter filter) {
         if (!shouldRunCommand(true)) return;
         if (filter != null && filter.getNumHops() > 0) {
             String filterstr = filter.toString();
@@ -261,9 +261,11 @@ public class EncountersService implements IEncountersService {
     public void processMessageForBroadcasts(Msg msg) {
         if (!msg.isFromMe() && msg.getFilter() != null) {
             Log.d("ESACTIVE_TEST", "Msg: " + msg.getEid() + " " + msg.getMsg() + " " + DateTime.now().getMillis());
+
             long pkid = new SSBridge(context).getEncounterPKIDByEncounterID(msg.getEid());
             EncounterBridge bridge = new EncounterBridge(context);
             MEncounter encounter = bridge.getItemByPKID(pkid);
+
             if (bridge.isEncounterValid(msg.getFilter(), encounter)) {
                 Log.v(TAG, "Processing msg for broadcasts");
                 boolean shouldSend = msg.getFilter().getNumHops() > 0 && storeBroadcastMessage(msg);
@@ -277,7 +279,7 @@ public class EncountersService implements IEncountersService {
     public void sendRepeatingBroadcastMessages() {
         for (Iterator<Msg> i = repeatingMsgs.iterator(); i.hasNext();) {
             Msg msg = i.next();
-            ForwardingFilter filter = msg.getFilter();
+            ForwardingEncounterFilter filter = msg.getFilter();
             if (filter.isAlive(DateTime.now().getMillis())) {
                 // decrease number of hops before encoding filter
                 filter.setNumHopsLimit(filter.getNumHops()-1);
@@ -340,7 +342,6 @@ public class EncountersService implements IEncountersService {
              }
          }
     }
-
 
     private boolean shouldRunCommand(boolean should_be_signed_in) {
         return (isRunning &&

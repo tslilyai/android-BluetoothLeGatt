@@ -94,7 +94,7 @@ public class Scanner {
             while ((sddrAddrAndDHPubKey = GattServerClient.getInstance().receivedSDDRAddrsAndDHPubKeys.poll()) != null) {
                 // this adds the encountered devices to our list of discvoered so that we add them to the
                 // database / update them in postDiscovery
-                long pkid = SDDR_Native.c_processScanResult(sddrAddrAndDHPubKey.first.getBytes(), 0, null, null);
+                long pkid = SDDR_Native.c_processScanResult(sddrAddrAndDHPubKey.first.getBytes(), 0, null);
                 GattServerClient.getInstance().getSSForPKIDWithDHKey(pkid, sddrAddrAndDHPubKey.second);
             }
             SDDR_Native.c_postDiscovery();
@@ -200,7 +200,7 @@ public class Scanner {
                             "advert " + Utils.getHexString(advert) + ", rssi " + rssi
                             + " devAddr " + addr);
                     // if this is a new device
-                    long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert, devaddress);
+                    long pkid = SDDR_Native.c_processScanResult(ID, rssi, advert);
 
                     if (activeConnections) {
                         if (!uniqueDevicesCtr.contains(devaddress)) {

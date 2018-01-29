@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.util.Log;
 
-import org.mpisws.sddrservice.EncountersService;
+import org.mpisws.sddrservice.IEncountersService;
 import org.mpisws.sddrservice.dbplatform.AbstractBridge;
 import org.mpisws.sddrservice.dbplatform.JavaItemFilter;
 import org.mpisws.sddrservice.dbplatform.PersistenceModel;
@@ -103,16 +103,16 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
                 conduitID, PEncounters.extractCurrentWirelessAddress(cursor));
     }
 
-    public boolean isEncounterValid(EncountersService.Filter filter, MEncounter encounter) {
+    public boolean isEncounterValid(IEncountersService.EncounterFilter encounterFilter, MEncounter encounter) {
         boolean isNeeded = true;
 
         isNeeded &= encounter.isConfirmed();
 
-        if (filter.getTimeInterval() != null) {
-            isNeeded &= encounter.getTimeInterval().overlapsWith(filter.getTimeInterval());
+        if (encounterFilter.getTimeInterval() != null) {
+            isNeeded &= encounter.getTimeInterval().overlapsWith(encounterFilter.getTimeInterval());
         }
 
-        if (filter.getLatitude() != -1 && filter.getLongitude() != -1) {
+        if (encounterFilter.getLatitude() != -1 && encounterFilter.getLongitude() != -1) {
             List<LocationBridge.LocationStamp> locationStamps = new ArrayList<>();
             List<Identifier> eids = encounter.getEncounterIDs(context);
             SSBridge bridge = new SSBridge(context);
@@ -123,18 +123,18 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
                 LocationBridge.LocationStamp locationStamp = locbridge.getLocationByEncounterPKID(pkid);
                 Location.distanceBetween(
                         locationStamp.latitude, locationStamp.longitude,
-                        filter.getLatitude(), filter.getLongitude(),
+                        encounterFilter.getLatitude(), encounterFilter.getLongitude(),
                         results);
-                if (results[0] <= filter.getRadius()) {
+                if (results[0] <= encounterFilter.getRadius()) {
                     locationStamps.add(locationStamp);
                 }
             }
             long lengthOverlap = locationStamps.isEmpty() ? 0 :
                     locationStamps.get(locationStamps.size() - 1).timestamp - locationStamps.get(0).timestamp;
-            isNeeded &= lengthOverlap >= filter.getOverlapTime();
+            isNeeded &= lengthOverlap >= encounterFilter.getOverlapTime();
         }
-        if (filter.getMatches() != null) {
-            isNeeded &= encounter.getCommonIDs().containsAll(filter.getMatches());
+        if (encounterFilter.getMatches() != null) {
+            isNeeded &= encounter.getCommonIDs().containsAll(encounterFilter.getMatches());
         }
         return isNeeded;
     }
@@ -143,12 +143,12 @@ public class EncounterBridge extends AbstractBridge<MEncounter> {
      * Gets all encounters that overlap with the requested filtered results. Not efficient since it's filtering the results after
      * retrieving them.
      */
-    public List<MEncounter> getEncountersFiltered(final EncountersService.Filter filter) {
-        if (filter == null) {
+    public List<MEncounter> getEncountersFiltered(final IEncountersService.EncounterFilter encounterFilter) {
+        if (encounterFilter == null) {
             return getAllItems();
         }
         final JavaItemFilter<MEncounter> dbfilter = encounter -> {
-            return isEncounterValid(filter, encounter);
+            return isEncounterValid(encounterFilter, encounter);
         };
         return getFilteredItems(dbfilter);
     }
