@@ -56,7 +56,6 @@ public class GattServerClient extends BluetoothGattServerCallback {
     private Context mService;
     private static GattServerClient instance = new GattServerClient();
     public static ConcurrentLinkedQueue<Pair<Identifier, Identifier>> receivedSDDRAddrsAndDHPubKeys = new ConcurrentLinkedQueue();
-    private static ConcurrentHashMap<String, byte[]> receivedPartialDHPubKeys = new ConcurrentHashMap();
 
     public static GattServerClient getInstance() {
         return instance;
@@ -65,7 +64,6 @@ public class GattServerClient extends BluetoothGattServerCallback {
     private GattServerClient() {
         mActiveGatt = new HashMap<>();
         mFutureGatt = new ArrayDeque();
-        mFutureGattForMsging = new ArrayDeque();
     };
 
     private static final int MAX_CONCURRENT_GATT = 7; // TODO: Find where this was specified in Android framework
@@ -169,26 +167,14 @@ public class GattServerClient extends BluetoothGattServerCallback {
                                              boolean preparedWrite, boolean responseNeeded,
                                              int offset, byte[] value) {
         if (CHARACTERISTIC_DHKEY_UUID.equals(characteristic.getUuid())) {
-            if (receivedPartialDHPubKeys.contains(device.getAddress())) {
-                byte[] partialDHKey = receivedPartialDHPubKeys.get(device.getAddress());
-                byte[] peerDHKey = new byte[DHPUBKEY_LENGTH];
-                System.arraycopy(partialDHKey, ADDR_LENGTH, peerDHKey, 0, CHARMSG_LEN-ADDR_LENGTH);
-                System.arraycopy(value, 0, peerDHKey, CHARMSG_LEN, DHPUBKEY_LENGTH-CHARMSG_LEN-ADDR_LENGTH);
-
-                Identifier peerDHPubKeyID = new Identifier(Arrays.copyOf(peerDHKey, DHPUBKEY_LENGTH));
-                Identifier peerAddr = new Identifier(Arrays.copyOf(partialDHKey, ADDR_LENGTH));
-
-                Log.d(TAG, "Someone wrote their key down for me :) " + peerAddr.toString() + " " + peerDHPubKeyID.toString());
-                receivedSDDRAddrsAndDHPubKeys.add(new Pair(peerAddr, peerDHPubKeyID));
-                receivedPartialDHPubKeys.remove(device.getAddress());
-            } else {
-                byte[] partial = Arrays.copyOf(value, CHARMSG_LEN);
-                receivedPartialDHPubKeys.put(device.getAddress(), partial);
-            }
+            Identifier peerAddr = new Identifier(Arrays.copyOf(value, ADDR_LENGTH));
+            Identifier peerDHPubKey = new Identifier(Arrays.copyOfRange(value, ADDR_LENGTH, DHPUBKEY_LENGTH));
+            Log.d(TAG, "Someone wrote their key down for me :) " + peerAddr.toString() + " " + peerDHPubKey.toString());
+            receivedSDDRAddrsAndDHPubKeys.add(new Pair(peerAddr, peerDHPubKey));
+            mGattServer.sendResponse(device, requestId, GATT_SUCCESS, 0, null);
         } else if (CHARACTERISTIC_MESSAGE_UUID.equals(characteristic.getUuid())) {
             Log.d(TAG, "Received message " + value.toString());
         }
-        mGattServer.sendResponse(device, requestId, GATT_SUCCESS, 0, null);
     }
 
     // TODO: Should perform our actions from callbacks in a Handler thread potentially
@@ -222,12 +208,20 @@ public class GattServerClient extends BluetoothGattServerCallback {
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.v(TAG, "Connected to device " + dev.getAddress());
-                // Step 0: Discover the services to look for the SDDR service (wait for onServicesDiscovered)
-                bleHandler.obtainMessage(MSG_DISCOVER_SERVICES, gatt).sendToTarget();
+                // Step -1: Change the MTU so we can send everything
+                bleHandler.post(() -> gatt.requestMtu(ADDR_LENGTH+DHPUBKEY_LENGTH+10));
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.v(TAG, "Disconnected from device " + dev.getAddress() + " (" + status + ")");
                 close(gatt);
             }
+        }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int newState) {
+            super.onMtuChanged(gatt, mtu, newState);
+            Log.d(TAG, "Mtu changed to " + mtu);
+            // Step 0: Discover the services to look for the SDDR service (wait for onServicesDiscovered)
+            bleHandler.obtainMessage(MSG_DISCOVER_SERVICES, gatt).sendToTarget();
         }
 
         @Override
@@ -264,21 +258,10 @@ public class GattServerClient extends BluetoothGattServerCallback {
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            if (numWritesDone == 0) {
-                // Step 3: Write down as much of our key as we can
-                Log.d(TAG, "Wrote half my DHKey!");
-                numWritesDone++;
-                bleHandler.post(() -> {
-                    characteristic.setValue(Arrays.copyOfRange(addrAndDHKey, CHARMSG_LEN, ADDR_LENGTH+DHPUBKEY_LENGTH));
-                    gatt.writeCharacteristic(characteristic);
-                });
-            } else {
-                // Step 4: Disconnect since we are done the protocol (wait for N/A)
-                // (It is also possible the write failed, but we would disconnect anyway)
-                Log.d(TAG, "Wrote all my DHKey!");
-                bleHandler.obtainMessage(MSG_WRITE_DONE, gatt).sendToTarget();
-            }
-
+            Log.d(TAG, "Wrote all my DHKey!");
+            bleHandler.obtainMessage(MSG_WRITE_DONE, gatt).sendToTarget();
+            // Step 3: Disconnect since we are done the protocol (wait for N/A)
+            // (It is also possible the write failed, but we would disconnect anyway)
         }
 
         private void disconnect(BluetoothGatt gatt) {
@@ -354,12 +337,20 @@ public class GattServerClient extends BluetoothGattServerCallback {
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.v(TAG, "Connected to device " + dev.getAddress());
-                // Step 0: Discover the services to look for the SDDR service (wait for onServicesDiscovered)
-                bleHandler.obtainMessage(MSG_DISCOVER_SERVICES, gatt).sendToTarget();
+                // Step -1: Discover the services to look for the SDDR service (wait for onServicesDiscovered)
+                bleHandler.post(() -> gatt.requestMtu(msg.length() + 10));
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.v(TAG, "Disconnected from device " + dev.getAddress() + " (" + status + ")");
                 close(gatt);
             }
+        }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int newState) {
+            super.onMtuChanged(gatt, mtu, newState);
+            Log.d(TAG, "Mtu changed to " + mtu);
+            // Step 0: Discover the services to look for the SDDR service (wait for onServicesDiscovered)
+            bleHandler.obtainMessage(MSG_DISCOVER_SERVICES, gatt).sendToTarget();
         }
 
         @Override
